@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sarcástica Store · Sistema Operativo</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f1e8df;
+  --black:#000;
+  --rosa:#e1c4c1;
+  --borde:#cca99d;
+  --gris:#50504f;
+  --verde:#3B6D11;
+  --azul:#185FA5;
+  --naranja:#854F0B;
+  --rojo:#A32D2D;
+}
+body{
+  font-family:'Poppins',sans-serif;
+  background:var(--bg);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.login-wrap{
+  width:100%;
+  max-width:400px;
+}
+.brand{
+  text-align:center;
+  margin-bottom:40px;
+}
+.brand-name{
+  font-size:28px;
+  font-weight:800;
+  color:var(--black);
+  letter-spacing:-0.5px;
+  line-height:1;
+}
+.brand-name span{
+  color:var(--borde);
+}
+.brand-sub{
+  font-size:11px;
+  font-weight:500;
+  color:var(--gris);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  margin-top:6px;
+}
+.card{
+  background:#fff;
+  border-radius:16px;
+  border:1px solid var(--borde);
+  padding:36px 32px;
+}
+.card-title{
+  font-size:18px;
+  font-weight:700;
+  color:var(--black);
+  margin-bottom:4px;
+}
+.card-sub{
+  font-size:13px;
+  color:var(--gris);
+  margin-bottom:28px;
+}
+.field{
+  margin-bottom:18px;
+}
+.field label{
+  display:block;
+  font-size:12px;
+  font-weight:600;
+  color:var(--gris);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  margin-bottom:6px;
+}
+.field input{
+  width:100%;
+  padding:11px 14px;
+  border:1.5px solid var(--borde);
+  border-radius:8px;
+  font-family:'Poppins',sans-serif;
+  font-size:14px;
+  color:var(--black);
+  background:#fff;
+  outline:none;
+  transition:border-color .2s;
+}
+.field input:focus{
+  border-color:var(--black);
+}
+.btn-login{
+  width:100%;
+  padding:13px;
+  background:var(--black);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-family:'Poppins',sans-serif;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  margin-top:8px;
+  transition:opacity .2s;
+  letter-spacing:.02em;
+}
+.btn-login:hover{opacity:.85;}
+.btn-login:disabled{opacity:.5;cursor:not-allowed;}
+.error-msg{
+  background:#FCEBEB;
+  border:1px solid var(--rojo);
+  color:var(--rojo);
+  border-radius:8px;
+  padding:10px 14px;
+  font-size:13px;
+  margin-top:14px;
+  display:none;
+}
+.loading-dot{
+  display:inline-block;
+  animation:dots 1.2s infinite;
+}
+@keyframes dots{0%,100%{opacity:0;}50%{opacity:1;}}
+.powered{
+  text-align:center;
+  margin-top:28px;
+  font-size:11px;
+  color:var(--borde);
+  letter-spacing:.04em;
+}
+.powered strong{color:var(--gris);}
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+  <div class="brand">
+    <div class="brand-name">SARCÁSTICA<span>·</span>STORE</div>
+    <div class="brand-sub">Sistema Operativo</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Iniciar sesión</div>
+    <div class="card-sub">Ingresa con tu cuenta asignada</div>
+
+    <div class="field">
+      <label>Correo</label>
+      <input type="email" id="email" placeholder="tu@correo.com" autocomplete="email"/>
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+
+    <button class="btn-login" id="btnLogin" onclick="login()">Ingresar</button>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <div class="powered">powered by <strong>Etrazia</strong></div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD5PAuTgNJed6ywyM3lTsN-VWtGfNprj_E",
+  authDomain: "sarcastica-app.firebaseapp.com",
+  projectId: "sarcastica-app",
+  storageBucket: "sarcastica-app.firebasestorage.app",
+  messagingSenderId: "629938299355",
+  appId: "1:629938299355:web:c6d0d64902164504a347fe"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const ROLE_REDIRECT = {
+  directora:   'dashboard.html',
+  operaciones: 'pedidos.html',
+  ventas:      'pedidos.html',
+  produccion:  'produccion.html',
+};
+
+window.login = async function() {
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const btn      = document.getElementById('btnLogin');
+  const err      = document.getElementById('errorMsg');
+
+  err.style.display = 'none';
+
+  if (!email || !password) {
+    showError('Ingresa tu correo y contraseña.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Ingresando';
+
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const uid  = cred.user.uid;
+
+    const snap = await getDoc(doc(db, 'usuarios', uid));
+    if (!snap.exists()) throw new Error('Sin perfil asignado.');
+
+    const rol = snap.data().rol;
+    const destino = ROLE_REDIRECT[rol] || 'pedidos.html';
+    window.location.href = destino;
+
+  } catch(e) {
+    let msg = 'Error al ingresar. Intenta de nuevo.';
+    if (e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found') {
+      msg = 'Correo o contraseña incorrectos.';
+    } else if (e.code === 'auth/too-many-requests') {
+      msg = 'Demasiados intentos. Espera un momento.';
+    } else if (e.message === 'Sin perfil asignado.') {
+      msg = 'Tu cuenta no tiene perfil asignado. Contacta a tu administrador.';
+    }
+    showError(msg);
+    btn.disabled = false;
+    btn.textContent = 'Ingresar';
+  }
+};
+
+function showError(msg) {
+  const err = document.getElementById('errorMsg');
+  err.textContent = msg;
+  err.style.display = 'block';
+}
+
+// Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') window.login();
+});
+</script>
+</body>
+</html>
