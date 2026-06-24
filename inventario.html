@@ -3,42 +3,63 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Inventario · Sarcástica OS</title>
+<title>Inventario &middot; Sarc&#225;stica OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<style>
+<style id="nav-css">
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{--bg:#f1e8df;--black:#000;--rosa:#e1c4c1;--borde:#cca99d;--gris:#50504f;--verde:#3B6D11;--rojo:#A32D2D;--naranja:#854F0B;}
-body{font-family:'Poppins',sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
+:root{--bg:#f1e8df;--black:#000;--rosa:#e1c4c1;--borde:#cca99d;--gris:#50504f;--verde:#3B6D11;--azul:#185FA5;--naranja:#854F0B;--rojo:#A32D2D;}
+#app-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:#000;display:flex;align-items:center;padding:0 20px;height:52px;gap:4px;border-bottom:2px solid #e1c4c1;font-family:"Poppins",sans-serif;}
+#app-nav .nav-logo{display:flex;align-items:center;margin-right:20px;flex-shrink:0;text-decoration:none;}
+#app-nav .nav-divider{width:1px;height:20px;background:#333;margin-right:8px;}
+#app-nav .nav-items{display:flex;gap:2px;flex:1;overflow-x:auto;}
+#app-nav .nav-items::-webkit-scrollbar{display:none;}
+#app-nav a.nav-link{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#888;text-decoration:none;white-space:nowrap;transition:background .15s,color .15s;}
+#app-nav a.nav-link:hover{background:#111;color:#f1e8df;}
+#app-nav a.nav-link.active{background:#e1c4c1;color:#000;font-weight:600;}
+#app-nav .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+#app-nav .nav-powered{font-size:10px;color:#444;letter-spacing:.04em;}
+#app-nav .nav-powered strong{color:#cca99d;}
+#app-nav .nav-rol{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.06em;}
+#app-nav .btn-salir{background:none;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:"Poppins",sans-serif;font-size:11px;transition:border-color .15s,color .15s;}
+#app-nav .btn-salir:hover{border-color:#e1c4c1;color:#f1e8df;}
+body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
+</style>
+<style>
 .page{max-width:1100px;margin:0 auto;padding:32px 24px;}
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;}
-.page-title{font-size:22px;font-weight:800;}
-.btn-primary{background:var(--black);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
-.tabla-wrap{background:#fff;border:1.5px solid var(--borde);border-radius:12px;overflow:hidden;}
-.tabla{width:100%;border-collapse:collapse;}
-.tabla th{padding:12px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;background:#faf5f0;border-bottom:1px solid var(--borde);}
-.tabla td{padding:14px 16px;font-size:13px;border-bottom:1px solid #f0e8e0;vertical-align:middle;}
-.tabla tr:last-child td{border-bottom:none;}
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
-.badge-ok{background:#e8f5e0;color:var(--verde);}
-.badge-warn{background:#faeeda;color:var(--naranja);}
-.badge-low{background:#fcebeb;color:var(--rojo);}
-.empty{text-align:center;padding:60px 0;color:var(--borde);}
-.empty-icon{font-size:36px;margin-bottom:8px;}
+.page-title{font-size:22px;font-weight:800;margin-bottom:28px;}
 .coming{background:#fff;border:1.5px dashed var(--borde);border-radius:12px;padding:60px;text-align:center;color:var(--borde);}
 .coming h3{font-size:16px;font-weight:700;color:var(--gris);margin-bottom:8px;}
 .coming p{font-size:13px;}
 </style>
 </head>
 <body>
-<div class="page">
-  <div class="page-header">
-    <div class="page-title">Inventario de insumos</div>
-    <button class="btn-primary">+ Ingresar insumo</button>
+<nav id="app-nav">
+  <a href="dashboard.html" class="nav-logo">
+    <svg viewBox="0 0 200 36" xmlns="http://www.w3.org/2000/svg" height="20"><text x="0" y="29" font-family="Georgia,serif" font-size="29" font-weight="400" fill="#ffffff" letter-spacing="-0.5">sarc&#225;stica.</text></svg>
+  </a>
+  <div class="nav-divider"></div>
+  <div class="nav-items">
+    <a href="dashboard.html"  class="nav-link" data-page="dashboard">Dashboard</a>
+    <a href="pedidos.html"    class="nav-link" data-page="pedidos">Pedidos</a>
+    <a href="inventario.html" class="nav-link" data-page="inventario">Inventario</a>
+    <a href="produccion.html" class="nav-link" data-page="produccion">Producci&#243;n</a>
+    <a href="empaque.html"    class="nav-link" data-page="empaque">Empaque</a>
+    <a href="ruta.html"       class="nav-link" data-page="ruta">Ruta</a>
+    <a href="clientes.html"   class="nav-link" data-page="clientes">Clientes</a>
+    <a href="mermas.html"     class="nav-link" data-page="mermas">Mermas</a>
   </div>
+  <div class="nav-right">
+    <span class="nav-powered">powered by <strong>Etrazia</strong></span>
+    <span class="nav-rol" id="nav-rol"></span>
+    <button class="btn-salir" id="btn-salir">Salir</button>
+  </div>
+</nav>
+<div class="page">
+  <div class="page-title">Inventario</div>
   <div class="coming">
     <div style="font-size:40px;margin-bottom:12px;">📦</div>
-    <h3>Módulo de Inventario</h3>
-    <p>Disponible en Día 2 del desarrollo.<br>Gestión de insumos crudos, stock de seguridad y abastecimiento.</p>
+    <h3>M&#243;dulo de Inventario</h3>
+    <p>Disponible en D&#237;a 2 del desarrollo.</p>
   </div>
 </div>
 <script type="module">
