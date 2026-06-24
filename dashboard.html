@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard · Sarcástica OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#f1e8df;--black:#000;--rosa:#e1c4c1;--borde:#cca99d;--gris:#50504f;--verde:#3B6D11;--azul:#185FA5;--naranja:#854F0B;--rojo:#A32D2D;}
+body{font-family:'Poppins',sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
+.page{max-width:1200px;margin:0 auto;padding:32px 24px;}
+.page-header{margin-bottom:32px;}
+.page-title{font-size:22px;font-weight:800;color:var(--black);}
+.page-sub{font-size:13px;color:var(--gris);margin-top:4px;}
+
+/* Estaciones */
+.estaciones{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:32px;}
+.estacion-card{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:16px 12px;text-align:center;}
+.estacion-card .num{font-size:28px;font-weight:800;color:var(--black);}
+.estacion-card .label{font-size:11px;color:var(--gris);margin-top:4px;font-weight:500;}
+.estacion-card .dot{width:8px;height:8px;border-radius:50%;margin:8px auto 0;}
+.dot-ok{background:var(--verde);}
+.dot-warn{background:var(--naranja);}
+.dot-alert{background:var(--rojo);}
+
+/* Bloques */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.block{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:24px;}
+.block-title{font-size:14px;font-weight:700;color:var(--black);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--borde);}
+.coming-soon{text-align:center;padding:40px 0;color:var(--borde);font-size:13px;}
+.coming-soon .icon{font-size:32px;margin-bottom:8px;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-verde{background:#e8f5e0;color:var(--verde);}
+.badge-naranja{background:#faeeda;color:var(--naranja);}
+.badge-rojo{background:#fcebeb;color:var(--rojo);}
+.badge-azul{background:#e0eaf8;color:var(--azul);}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">Dashboard operativo</div>
+    <div class="page-sub" id="fechaHoy"></div>
+  </div>
+
+  <!-- Estaciones -->
+  <div class="estaciones">
+    <div class="estacion-card">
+      <div class="num" id="cnt-inventario">—</div>
+      <div class="label">Inventario</div>
+      <div class="dot dot-ok" id="dot-inventario"></div>
+    </div>
+    <div class="estacion-card">
+      <div class="num" id="cnt-pendiente">—</div>
+      <div class="label">Validar pago</div>
+      <div class="dot dot-ok" id="dot-pendiente"></div>
+    </div>
+    <div class="estacion-card">
+      <div class="num" id="cnt-produccion">—</div>
+      <div class="label">Producción</div>
+      <div class="dot dot-ok" id="dot-produccion"></div>
+    </div>
+    <div class="estacion-card">
+      <div class="num" id="cnt-empaque">—</div>
+      <div class="label">Empaque</div>
+      <div class="dot dot-ok" id="dot-empaque"></div>
+    </div>
+    <div class="estacion-card">
+      <div class="num" id="cnt-ruta">—</div>
+      <div class="label">En ruta</div>
+      <div class="dot dot-ok" id="dot-ruta"></div>
+    </div>
+    <div class="estacion-card">
+      <div class="num" id="cnt-entregado">—</div>
+      <div class="label">Entregados hoy</div>
+      <div class="dot dot-ok" id="dot-entregado"></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="block">
+      <div class="block-title">⚠️ Alertas de inventario</div>
+      <div class="coming-soon" id="alertas-inv">
+        <div class="icon">📦</div>
+        Cargando alertas...
+      </div>
+    </div>
+    <div class="block">
+      <div class="block-title">🚚 Despachos de mañana</div>
+      <div class="coming-soon" id="despachos-manana">
+        <div class="icon">📫</div>
+        Cargando despachos...
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initPage, db } from './nav.js';
+import { collection, query, where, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const EMPRESA = 'sarcastica';
+
+const user = await initPage(['directora']);
+
+// Fecha
+const hoy = new Date();
+document.getElementById('fechaHoy').textContent =
+  hoy.toLocaleDateString('es-PE', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+// Contadores en tiempo real
+const estados = [
+  { estado:'pendiente_validacion', id:'cnt-pendiente', dot:'dot-pendiente' },
+  { estado:'en_produccion',        id:'cnt-produccion', dot:'dot-produccion' },
+  { estado:'en_empaque',           id:'cnt-empaque',    dot:'dot-empaque' },
+  { estado:'en_ruta',              id:'cnt-ruta',       dot:'dot-ruta' },
+];
+
+estados.forEach(({ estado, id, dot }) => {
+  const q = query(
+    collection(db, `empresas/${EMPRESA}/pedidos`),
+    where('estado', '==', estado)
+  );
+  onSnapshot(q, snap => {
+    const n = snap.size;
+    document.getElementById(id).textContent = n;
+    const dotEl = document.getElementById(dot);
+    dotEl.className = 'dot ' + (n > 5 ? 'dot-alert' : n > 2 ? 'dot-warn' : 'dot-ok');
+  });
+});
+
+// Entregados hoy
+const hoyStr = hoy.toISOString().split('T')[0];
+const qEntregados = query(
+  collection(db, `empresas/${EMPRESA}/pedidos`),
+  where('estado', '==', 'entregado'),
+  where('fechaEntrega', '==', hoyStr)
+);
+onSnapshot(qEntregados, snap => {
+  document.getElementById('cnt-entregado').textContent = snap.size;
+});
+
+// Alertas de inventario (stock bajo seguridad)
+const snapInv = await getDocs(collection(db, `empresas/${EMPRESA}/inventario_crudos`));
+const alertas = [];
+snapInv.forEach(d => {
+  const data = d.data();
+  if ((data.disponible || 0) <= (data.stock_seguridad || 0)) {
+    alertas.push(data);
+  }
+});
+
+const alertasEl = document.getElementById('alertas-inv');
+if (alertas.length === 0) {
+  alertasEl.innerHTML = '<div class="coming-soon"><div class="icon">✅</div>Sin alertas de inventario</div>';
+} else {
+  alertasEl.innerHTML = alertas.map(a => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--borde);">
+      <span style="font-size:13px;font-weight:500;">${a.nombre}</span>
+      <span class="badge badge-rojo">Stock bajo: ${a.disponible} ${a.unidad}</span>
+    </div>
+  `).join('');
+}
+
+// Despachos de mañana
+const manana = new Date(hoy); manana.setDate(manana.getDate() + 1);
+const mananaStr = manana.toISOString().split('T')[0];
+const qManana = query(
+  collection(db, `empresas/${EMPRESA}/pedidos`),
+  where('estado', '==', 'empaquetado'),
+  where('fechaEntrega', '==', mananaStr)
+);
+onSnapshot(qManana, snap => {
+  const el = document.getElementById('despachos-manana');
+  if (snap.empty) {
+    el.innerHTML = '<div class="coming-soon"><div class="icon">📫</div>Sin despachos programados</div>';
+    return;
+  }
+  el.innerHTML = snap.docs.map(d => {
+    const p = d.data();
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--borde);">
+        <div>
+          <div style="font-size:13px;font-weight:600;">${p.cliente_nombre || '—'}</div>
+          <div style="font-size:11px;color:var(--gris);">${p.conductor || 'Sin asignar'}</div>
+        </div>
+        <span class="badge badge-verde">Listo</span>
+      </div>
+    `;
+  }).join('');
+});
+</script>
+</body>
+</html>
