@@ -137,17 +137,17 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
   <div class="metricas">
     <div class="metrica">
       <div class="ml">Pendientes</div>
-      <div class="mv" style="color:var(--naranja)" id="m-pend">—</div>
+      <div class="mv" style="color:var(--naranja)" id="m-pend">0</div>
       <div class="ms">esperando revisión</div>
     </div>
     <div class="metrica">
       <div class="ml">A producción</div>
-      <div class="mv" style="color:var(--verde)" id="m-apro">—</div>
+      <div class="mv" style="color:var(--verde)" id="m-apro">0</div>
       <div class="ms">aprobados hoy</div>
     </div>
     <div class="metrica">
       <div class="ml">Rechazados</div>
-      <div class="mv" style="color:var(--rojo)" id="m-rech">—</div>
+      <div class="mv" style="color:var(--rojo)" id="m-rech">0</div>
       <div class="ms">reserva liberada</div>
     </div>
   </div>
@@ -183,12 +183,8 @@ const col = collection(db,`empresas/${EMPRESA}/pedidos`);
 onSnapshot(query(col,where('estado','==','pendiente_validacion')), s => {
   document.getElementById('m-pend').textContent = s.size;
 });
-onSnapshot(query(col,where('estado','==','en_produccion'),where('fechaValidacion','>=',hoyStr)), s => {
+onSnapshot(query(col,where('estado','==','en_produccion')), s => {
   document.getElementById('m-apro').textContent = s.size;
-}).catch(() => {
-  onSnapshot(query(col,where('estado','==','en_produccion')), s => {
-    document.getElementById('m-apro').textContent = s.size;
-  });
 });
 onSnapshot(query(col,where('estado','==','cancelado')), s => {
   document.getElementById('m-rech').textContent = s.size;
@@ -199,7 +195,7 @@ let unsubLista = null;
 
 function cargar() {
   if (unsubLista) unsubLista();
-  const q = query(col, where('estado','==',filtroActual), orderBy('creadoEn','desc'));
+  const q = query(col, where('estado','==',filtroActual));
   unsubLista = onSnapshot(q, async snap => {
     const lista = document.getElementById('listaPedidos');
     if (snap.empty) {
