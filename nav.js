@@ -22,71 +22,52 @@ const ROL_LINKS = {
   directora:   ['inventario','pedidos','validar','produccion','empaque','ruta','clientes'],
 };
 
-// Aplica lo visual INMEDIATAMENTE desde localStorage (sin esperar Firebase)
-function applyNavInstant() {
-  const cached = localStorage.getItem('sc_user');
-  if (!cached) return;
-  const u = JSON.parse(cached);
-
-  // Nombre
-  const el = document.getElementById('nav-rol');
-  if (el) el.textContent = u.nombre;
-
-  // Rol en body → activa hamburguesa via CSS
-  document.body.classList.add('rol-' + u.rol);
-
-  // Ocultar links que el rol no ve
-  const links = ROL_LINKS[u.rol] || [];
-  document.querySelectorAll('.nav-link').forEach(a => {
-    if (!links.includes(a.dataset.page)) a.style.display = 'none';
-  });
-}
-
-// Llamar SINCRÓNICAMENTE antes de que el DOM termine de pintar
-applyNavInstant();
+// Aplicar nombre y ocultar links desde localStorage ANTES del render
+(function applyInstant() {
+  try {
+    const u = JSON.parse(localStorage.getItem('sc_user') || '{}');
+    if (!u.rol) return;
+    const el = document.getElementById('nav-rol');
+    if (el) el.textContent = u.nombre || '';
+    const links = ROL_LINKS[u.rol] || [];
+    document.querySelectorAll('.nav-link').forEach(a => {
+      if (!links.includes(a.dataset.page)) a.style.display = 'none';
+    });
+    // Ocultar hamburguesa si no es directora
+    if (u.rol !== 'directora') {
+      const btn = document.getElementById('nav-menu-btn');
+      if (btn) btn.style.display = 'none';
+    }
+  } catch(e) {}
+})();
 
 export async function initPage(allowedRoles = null) {
+  // Dropdown click — no depende de auth
+  const menuBtn = document.getElementById('nav-menu-btn');
+  const menuDrop = document.getElementById('nav-menu-dropdown');
+  if (menuBtn && menuDrop) {
+    menuBtn.onclick = (e) => { e.stopPropagation(); menuDrop.classList.toggle('open'); };
+    document.addEventListener('click', () => menuDrop.classList.remove('open'));
+  }
+
   return new Promise((resolve) => {
     onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        localStorage.removeItem('sc_user');
-        window.location.href = 'index.html';
-        return;
-      }
+      if (!user) { localStorage.removeItem('sc_user'); window.location.href = 'index.html'; return; }
 
-      let userData;
-      const cached = localStorage.getItem('sc_user');
-
-      if (cached) {
-        userData = JSON.parse(cached);
-      } else {
+      let userData = JSON.parse(localStorage.getItem('sc_user') || 'null');
+      if (!userData || userData.uid !== user.uid) {
         const snap = await getDoc(doc(db, 'usuarios', user.uid));
         if (!snap.exists()) { window.location.href = 'index.html'; return; }
         userData = { uid: user.uid, email: user.email, ...snap.data() };
         localStorage.setItem('sc_user', JSON.stringify(userData));
       }
 
-      if (allowedRoles && !allowedRoles.includes(userData.rol)) {
-        window.location.href = 'index.html'; return;
-      }
+      if (allowedRoles && !allowedRoles.includes(userData.rol)) { window.location.href = 'index.html'; return; }
 
-      // Logout
       const btnSalir = document.getElementById('btn-salir');
-      if (btnSalir) {
-        btnSalir.onclick = async () => {
-          localStorage.removeItem('sc_user');
-          await signOut(auth);
-          window.location.href = 'index.html';
-        };
-      }
-
-      // Hamburguesa dropdown
-      const menuBtn = document.getElementById('nav-menu-btn');
-      const menuDrop = document.getElementById('nav-menu-dropdown');
-      if (menuBtn && menuDrop) {
-        menuBtn.onclick = (e) => { e.stopPropagation(); menuDrop.classList.toggle('open'); };
-        document.addEventListener('click', () => menuDrop.classList.remove('open'));
-      }
+      if (btnSalir) btnSalir.onclick = async () => {
+        localStorage.removeItem('sc_user'); await signOut(auth); window.location.href = 'index.html';
+      };
 
       resolve(userData);
     });
