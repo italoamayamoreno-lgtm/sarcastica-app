@@ -218,8 +218,14 @@ window.login = async function() {
     const snap = await getDoc(doc(db, 'usuarios', uid));
     if (!snap.exists()) throw new Error('Sin perfil asignado.');
 
-    const rol = snap.data().rol;
-    const destino = ROLE_REDIRECT[rol] || 'pedidos.html';
+    const data = snap.data();
+    localStorage.setItem('sc_user', JSON.stringify({
+      uid: cred.user.uid,
+      email: cred.user.email,
+      nombre: data.nombre || cred.user.email.split('@')[0],
+      rol: data.rol,
+    }));
+    const destino = ROLE_REDIRECT[data.rol] || 'pedidos.html';
     window.location.href = destino;
 
   } catch(e) {
