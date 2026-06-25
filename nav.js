@@ -15,11 +15,32 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db   = getFirestore(app);
 
+// Links visibles por rol — en orden del proceso
 const NAV_LINKS = {
-  directora:   ['dashboard','pedidos','inventario','produccion','empaque','ruta','clientes','mermas'],
-  operaciones: ['pedidos','inventario','produccion','empaque','ruta','clientes','mermas'],
-  ventas:      ['pedidos','inventario','clientes'],
-  produccion:  ['produccion','mermas'],
+  ventas:      ['inventario','pedidos','clientes'],
+  produccion:  ['produccion'],
+  operaciones: ['inventario','pedidos','validar','produccion','empaque','ruta','clientes'],
+  directora:   ['inventario','pedidos','validar','produccion','empaque','ruta','clientes'],
+};
+
+const NAV_LABELS = {
+  inventario: 'Inventario',
+  pedidos:    'Pedidos',
+  validar:    'Validar Pagos',
+  produccion: 'Producción',
+  empaque:    'Empaque',
+  ruta:       'Ruta',
+  clientes:   'CRM Clientes',
+};
+
+const NAV_HREFS = {
+  inventario: 'inventario.html',
+  pedidos:    'pedidos.html',
+  validar:    'validar.html',
+  produccion: 'produccion.html',
+  empaque:    'empaque.html',
+  ruta:       'ruta.html',
+  clientes:   'clientes.html',
 };
 
 export async function initPage(allowedRoles = null) {
@@ -36,9 +57,10 @@ export async function initPage(allowedRoles = null) {
         window.location.href = 'index.html'; return;
       }
 
-      const current = location.pathname.split('/').pop().replace('.html','') || 'dashboard';
+      const current = location.pathname.split('/').pop().replace('.html','') || 'inventario';
       const links = NAV_LINKS[userData.rol] || [];
 
+      // Activar/ocultar links
       document.querySelectorAll('.nav-link').forEach(a => {
         const p = a.dataset.page;
         if (!links.includes(p)) {
@@ -48,15 +70,28 @@ export async function initPage(allowedRoles = null) {
         }
       });
 
+      // Rol label
       const rolEl = document.getElementById('nav-rol');
-      if (rolEl) rolEl.textContent = userData.rol;
+      if (rolEl) rolEl.textContent = userData.nombre || userData.email.split('@')[0];
 
+      // Salir
       const btnSalir = document.getElementById('btn-salir');
       if (btnSalir) {
-        btnSalir.onclick = async () => {
-          await signOut(auth);
-          window.location.href = 'index.html';
-        };
+        btnSalir.onclick = async () => { await signOut(auth); window.location.href = 'index.html'; };
+      }
+
+      // Menú hamburguesa solo para directora
+      if (userData.rol === 'directora') {
+        const menuBtn = document.getElementById('nav-menu-btn');
+        const menuDropdown = document.getElementById('nav-menu-dropdown');
+        if (menuBtn && menuDropdown) {
+          menuBtn.style.display = 'flex';
+          menuBtn.onclick = (e) => {
+            e.stopPropagation();
+            menuDropdown.classList.toggle('open');
+          };
+          document.addEventListener('click', () => menuDropdown.classList.remove('open'));
+        }
       }
 
       resolve(userData);
