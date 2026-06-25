@@ -99,23 +99,33 @@ body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(
 <body>
 
 <nav id="app-nav">
-  <a href="dashboard.html" class="nav-logo">
+  <a href="inventario.html" class="nav-logo">
     <svg viewBox="0 0 200 36" xmlns="http://www.w3.org/2000/svg" height="20"><text x="0" y="29" font-family="Georgia,serif" font-size="29" font-weight="400" fill="#ffffff" letter-spacing="-0.5">sarcástica.</text></svg>
   </a>
   <div class="nav-divider"></div>
   <div class="nav-items">
-    <a href="dashboard.html"  class="nav-link" data-page="dashboard">Dashboard</a>
-    <a href="pedidos.html"    class="nav-link" data-page="pedidos">Pedidos</a>
     <a href="inventario.html" class="nav-link" data-page="inventario">Inventario</a>
+    <a href="pedidos.html"    class="nav-link" data-page="pedidos">Pedidos</a>
+    <a href="validar.html"    class="nav-link" data-page="validar">Validar Pagos</a>
     <a href="produccion.html" class="nav-link" data-page="produccion">Producción</a>
     <a href="empaque.html"    class="nav-link" data-page="empaque">Empaque</a>
     <a href="ruta.html"       class="nav-link" data-page="ruta">Ruta</a>
-    <a href="clientes.html"   class="nav-link" data-page="clientes">Clientes</a>
-    <a href="mermas.html"     class="nav-link" data-page="mermas">Mermas</a>
+    <a href="clientes.html"   class="nav-link" data-page="clientes">CRM</a>
   </div>
   <div class="nav-right">
     <span class="nav-powered">powered by <strong>Etrazia</strong></span>
-    <span class="nav-rol" id="nav-rol"></span>
+    <span class="nav-user-name" id="nav-rol"></span>
+    <div class="nav-user-wrap">
+      <button id="nav-menu-btn" aria-label="Menú de Ana">
+        <span></span><span></span><span></span>
+      </button>
+      <div id="nav-menu-dropdown">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="clientes.html">CRM Clientes</a>
+        <div class="menu-div"></div>
+        <a href="configuracion.html">Configuración</a>
+      </div>
+    </div>
     <button class="btn-salir" id="btn-salir">Salir</button>
   </div>
 </nav>
