@@ -5,115 +5,81 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Dashboard · Sarcástica OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<style id="nav-css">
+<style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#f1e8df;--black:#000;--rosa:#e1c4c1;--borde:#cca99d;--gris:#50504f;--verde:#3B6D11;--azul:#185FA5;--naranja:#854F0B;--rojo:#A32D2D;}
 #app-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:#000;display:flex;align-items:center;padding:0 20px;height:52px;gap:4px;border-bottom:2px solid #e1c4c1;font-family:"Poppins",sans-serif;}
-#app-nav .nav-logo{display:flex;align-items:center;gap:10px;margin-right:20px;flex-shrink:0;text-decoration:none;}
-#app-nav .nav-divider{width:1px;height:20px;background:#333;margin-right:8px;}
+#app-nav .nav-logo{display:flex;align-items:center;margin-right:16px;flex-shrink:0;text-decoration:none;}
+#app-nav .nav-divider{width:1px;height:20px;background:#333;margin-right:8px;flex-shrink:0;}
 #app-nav .nav-items{display:flex;gap:2px;flex:1;overflow-x:auto;}
 #app-nav .nav-items::-webkit-scrollbar{display:none;}
 #app-nav a.nav-link{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#888;text-decoration:none;white-space:nowrap;transition:background .15s,color .15s;}
 #app-nav a.nav-link:hover{background:#111;color:#f1e8df;}
 #app-nav a.nav-link.active{background:#e1c4c1;color:#000;font-weight:600;}
-#app-nav .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-shrink:0;}
-#app-nav .nav-powered{font-size:10px;color:#444;letter-spacing:.04em;}
+#app-nav .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+#app-nav .nav-powered{font-size:10px;color:#444;letter-spacing:.04em;white-space:nowrap;}
 #app-nav .nav-powered strong{color:#cca99d;}
-#app-nav .nav-rol{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.06em;}
-#app-nav .btn-salir{background:none;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:"Poppins",sans-serif;font-size:11px;transition:border-color .15s,color .15s;}
+#app-nav .nav-user-name{font-size:11px;color:#666;white-space:nowrap;}
+#app-nav .btn-salir{background:none;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:"Poppins",sans-serif;font-size:11px;white-space:nowrap;}
 #app-nav .btn-salir:hover{border-color:#e1c4c1;color:#f1e8df;}
+#nav-menu-btn{display:none;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#e1c4c1;cursor:pointer;border:none;flex-direction:column;gap:4px;padding:6px;position:relative;}
+#nav-menu-btn span{display:block;width:14px;height:1.5px;background:#000;border-radius:2px;}
+#nav-menu-dropdown{display:none;position:absolute;top:44px;right:0;background:#fff;border:1.5px solid var(--borde);border-radius:10px;min-width:180px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:300;}
+#nav-menu-dropdown.open{display:block;}
+#nav-menu-dropdown a{display:block;padding:11px 16px;font-size:13px;color:var(--black);text-decoration:none;font-family:"Poppins",sans-serif;}
+#nav-menu-dropdown a:hover{background:var(--bg);}
+#nav-menu-dropdown .menu-div{height:1px;background:var(--borde);margin:4px 0;}
+.nav-user-wrap{position:relative;}
 body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
+</style>
+<style>
+.page{max-width:1100px;margin:0 auto;padding:28px 24px;}
+.page-title{font-size:20px;font-weight:800;margin-bottom:24px;}
+.coming{background:#fff;border:1.5px dashed var(--borde);border-radius:12px;padding:60px;text-align:center;color:var(--borde);}
+.coming h3{font-size:15px;font-weight:700;color:var(--gris);margin-bottom:8px;}
+.coming p{font-size:13px;}
 </style>
 </head>
 <body>
-
 <nav id="app-nav">
-  <a href="dashboard.html" class="nav-logo">
+  <a href="inventario.html" class="nav-logo">
     <svg viewBox="0 0 200 36" xmlns="http://www.w3.org/2000/svg" height="20"><text x="0" y="29" font-family="Georgia,serif" font-size="29" font-weight="400" fill="#ffffff" letter-spacing="-0.5">sarcástica.</text></svg>
   </a>
   <div class="nav-divider"></div>
   <div class="nav-items">
-    <a href="dashboard.html"  class="nav-link" data-page="dashboard">Dashboard</a>
-    <a href="pedidos.html"    class="nav-link" data-page="pedidos">Pedidos</a>
     <a href="inventario.html" class="nav-link" data-page="inventario">Inventario</a>
+    <a href="pedidos.html"    class="nav-link" data-page="pedidos">Pedidos</a>
+    <a href="validar.html"    class="nav-link" data-page="validar">Validar Pagos</a>
     <a href="produccion.html" class="nav-link" data-page="produccion">Producción</a>
     <a href="empaque.html"    class="nav-link" data-page="empaque">Empaque</a>
     <a href="ruta.html"       class="nav-link" data-page="ruta">Ruta</a>
-    <a href="clientes.html"   class="nav-link" data-page="clientes">Clientes</a>
-    <a href="mermas.html"     class="nav-link" data-page="mermas">Mermas</a>
+    <a href="clientes.html"   class="nav-link" data-page="clientes">CRM</a>
   </div>
   <div class="nav-right">
     <span class="nav-powered">powered by <strong>Etrazia</strong></span>
-    <span class="nav-rol" id="nav-rol"></span>
+    <span class="nav-user-name" id="nav-rol"></span>
+    <div class="nav-user-wrap">
+      <button id="nav-menu-btn" aria-label="Menú de Ana">
+        <span></span><span></span><span></span>
+      </button>
+      <div id="nav-menu-dropdown">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="clientes.html">CRM Clientes</a>
+        <div class="menu-div"></div>
+        <a href="configuracion.html">Configuración</a>
+      </div>
+    </div>
     <button class="btn-salir" id="btn-salir">Salir</button>
   </div>
 </nav>
-
-
-<style>
-.page{max-width:1200px;margin:0 auto;padding:32px 24px;}
-.page-header{margin-bottom:32px;}
-.page-title{font-size:22px;font-weight:800;color:var(--black);}
-.page-sub{font-size:13px;color:var(--gris);margin-top:4px;}
-.estaciones{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:32px;}
-.estacion-card{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:16px 12px;text-align:center;}
-.estacion-card .num{font-size:28px;font-weight:800;color:var(--black);}
-.estacion-card .label{font-size:11px;color:var(--gris);margin-top:4px;font-weight:500;}
-.estacion-card .dot{width:8px;height:8px;border-radius:50%;margin:8px auto 0;}
-.dot-ok{background:var(--verde);}.dot-warn{background:var(--naranja);}.dot-alert{background:var(--rojo);}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
-.block{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:24px;}
-.block-title{font-size:14px;font-weight:700;color:var(--black);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--borde);}
-.empty-block{text-align:center;padding:40px 0;color:var(--borde);font-size:13px;}
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
-.badge-verde{background:#e8f5e0;color:var(--verde);}.badge-rojo{background:#fcebeb;color:var(--rojo);}
-</style>
 <div class="page">
-  <div class="page-header">
-    <div class="page-title">Dashboard operativo</div>
-    <div class="page-sub" id="fechaHoy"></div>
-  </div>
-  <div class="estaciones">
-    <div class="estacion-card"><div class="num" id="cnt-pendiente">—</div><div class="label">Por validar</div><div class="dot dot-ok" id="dot-pendiente"></div></div>
-    <div class="estacion-card"><div class="num" id="cnt-produccion">—</div><div class="label">Producción</div><div class="dot dot-ok" id="dot-produccion"></div></div>
-    <div class="estacion-card"><div class="num" id="cnt-empaque">—</div><div class="label">Empaque</div><div class="dot dot-ok" id="dot-empaque"></div></div>
-    <div class="estacion-card"><div class="num" id="cnt-empaquetado">—</div><div class="label">Empaquetado</div><div class="dot dot-ok" id="dot-empaquetado"></div></div>
-    <div class="estacion-card"><div class="num" id="cnt-ruta">—</div><div class="label">En ruta</div><div class="dot dot-ok" id="dot-ruta"></div></div>
-    <div class="estacion-card"><div class="num" id="cnt-entregado">—</div><div class="label">Entregados hoy</div><div class="dot dot-ok"></div></div>
-  </div>
-  <div class="grid-2">
-    <div class="block"><div class="block-title">⚠️ Alertas de inventario</div><div class="empty-block" id="alertas-inv">Cargando...</div></div>
-    <div class="block"><div class="block-title">🚚 Despachos de mañana</div><div class="empty-block" id="despachos-manana">Cargando...</div></div>
+  <div class="page-title">Dashboard</div>
+  <div class="coming">
+    <div style="font-size:36px;margin-bottom:12px;">⚫</div>
+    <h3>Módulo de Dashboard</h3>
+    <p>En construcción — Día 5 del desarrollo.</p>
   </div>
 </div>
-<script type="module">
-import { db } from "./nav.js";
-import { collection, query, where, orderBy, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-const E="sarcastica";
-const hoy=new Date();
-document.getElementById("fechaHoy").textContent=hoy.toLocaleDateString("es-PE",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
-[["pendiente_validacion","cnt-pendiente","dot-pendiente"],["en_produccion","cnt-produccion","dot-produccion"],["en_empaque","cnt-empaque","dot-empaque"],["empaquetado","cnt-empaquetado","dot-empaquetado"],["en_ruta","cnt-ruta","dot-ruta"]].forEach(([estado,id,dot])=>{
-  onSnapshot(query(collection(db,`empresas/${E}/pedidos`),where("estado","==",estado)),snap=>{
-    const n=snap.size;
-    document.getElementById(id).textContent=n;
-    if(dot){const d=document.getElementById(dot);d.className="dot "+(n>5?"dot-alert":n>2?"dot-warn":"dot-ok");}
-  });
-});
-const hoyStr=hoy.toISOString().split("T")[0];
-onSnapshot(query(collection(db,`empresas/${E}/pedidos`),where("estado","==","entregado"),where("fechaEntrega","==",hoyStr)),snap=>{document.getElementById("cnt-entregado").textContent=snap.size;});
-getDocs(collection(db,`empresas/${E}/inventario_crudos`)).then(snap=>{
-  const alertas=[];snap.forEach(d=>{const data=d.data();if((data.disponible||0)<=(data.stock_seguridad||0))alertas.push(data);});
-  const el=document.getElementById("alertas-inv");
-  el.innerHTML=alertas.length===0?"✅ Sin alertas de inventario":alertas.map(a=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--borde);font-size:13px;"><span>${a.nombre}</span><span class="badge badge-rojo">Stock bajo: ${a.disponible} ${a.unidad||""}</span></div>`).join("");
-});
-const manana=new Date(hoy);manana.setDate(manana.getDate()+1);
-const mananaStr=manana.toISOString().split("T")[0];
-onSnapshot(query(collection(db,`empresas/${E}/pedidos`),where("estado","==","empaquetado"),where("fechaEntrega","==",mananaStr)),snap=>{
-  const el=document.getElementById("despachos-manana");
-  el.innerHTML=snap.empty?"📫 Sin despachos programados":snap.docs.map(d=>{const p=d.data();return`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--borde);font-size:13px;"><div><div style="font-weight:600;">${p.cliente_nombre||"—"}</div><div style="font-size:11px;color:var(--gris);">${p.conductor||"Sin asignar"}</div></div><span class="badge badge-verde">Listo</span></div>`;}).join("");
-});
-</script>
-
 <script type="module">
 import { initPage } from './nav.js';
 await initPage(['directora']);
