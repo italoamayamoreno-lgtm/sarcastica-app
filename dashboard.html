@@ -31,12 +31,48 @@
 #nav-menu-dropdown a:hover{background:var(--bg);}
 #nav-menu-dropdown .menu-sep{height:1px;background:var(--borde);margin:4px 0;}
 body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
+
 .page{max-width:1100px;margin:0 auto;padding:28px 24px;}
-.page-title{font-size:20px;font-weight:800;margin-bottom:24px;}
-.coming{background:#fff;border:1.5px dashed var(--borde);border-radius:12px;padding:60px;text-align:center;}
-.coming-icon{font-size:36px;margin-bottom:12px;}
-.coming h3{font-size:15px;font-weight:700;color:var(--gris);margin-bottom:8px;}
-.coming p{font-size:13px;color:var(--borde);}
+.page-header{margin-bottom:24px;}
+.page-title{font-size:20px;font-weight:800;}
+.page-sub{font-size:12px;color:var(--gris);margin-top:3px;}
+
+.bloque-title{font-size:13px;font-weight:700;color:var(--black);margin-bottom:12px;padding-left:10px;border-left:3px solid var(--black);}
+.bloque-title.manana{border-left-color:var(--borde);}
+
+/* MÉTRICAS */
+.metricas-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;}
+.metricas-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.metrica{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:14px 16px;}
+.metrica.cuello{border-color:var(--naranja);background:#fdfaf5;}
+.metrica.listo{border-color:var(--verde);background:#f8fff5;}
+.metrica .ml{font-size:10px;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;font-weight:500;margin-bottom:4px;}
+.metrica .mv{font-size:26px;font-weight:800;line-height:1;}
+
+/* ALERTAS */
+.alerta{border-radius:8px;padding:10px 14px;font-size:12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:8px;}
+.alerta-warn{background:#faeeda;border:1px solid #e8c99a;color:var(--naranja);}
+.alerta-danger{background:#fcebeb;border:1px solid #f0c0c0;color:var(--rojo);}
+.alerta-ok{background:#e8f5e0;border:1px solid #b8dcb8;color:var(--verde);}
+.alerta-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.alerta-text{flex:1;}
+.alerta-text strong{display:block;font-weight:600;margin-bottom:1px;}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.block{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:18px;}
+.block-title{font-size:12px;font-weight:700;color:var(--black);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--borde);}
+
+/* DESPACHOS */
+.despacho-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f0e8e0;font-size:12px;}
+.despacho-row:last-child{border-bottom:none;}
+.despacho-nombre{font-weight:600;}
+.despacho-sub{font-size:11px;color:var(--gris);margin-top:1px;}
+.badge{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;}
+.badge-olva{background:#e0eaf8;color:var(--azul);}
+.badge-lima{background:#e8f5e0;color:var(--verde);}
+
+.seccion{margin-bottom:28px;}
+.empty-msg{font-size:12px;color:var(--borde);text-align:center;padding:20px 0;}
 </style>
 </head>
 <body>
@@ -47,12 +83,12 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
   <div class="nav-divider"></div>
   <div class="nav-items">
     <a href="inventario.html" class="nav-link" data-page="inventario">Inventario</a>
-    <a href="pedidos.html" class="nav-link" data-page="pedidos">Pedidos</a>
-    <a href="validar.html" class="nav-link" data-page="validar">Validar Pagos</a>
+    <a href="pedidos.html"    class="nav-link" data-page="pedidos">Pedidos</a>
+    <a href="validar.html"    class="nav-link" data-page="validar">Validar Pagos</a>
     <a href="produccion.html" class="nav-link" data-page="produccion">Producción</a>
-    <a href="empaque.html" class="nav-link" data-page="empaque">Empaque</a>
-    <a href="ruta.html" class="nav-link" data-page="ruta">Ruta</a>
-    <a href="clientes.html" class="nav-link" data-page="clientes">CRM</a>
+    <a href="empaque.html"    class="nav-link" data-page="empaque">Empaque</a>
+    <a href="ruta.html"       class="nav-link" data-page="ruta">Ruta</a>
+    <a href="clientes.html"   class="nav-link" data-page="clientes">CRM</a>
   </div>
   <div class="nav-right">
     <span class="nav-powered">powered by <strong>Etrazia</strong></span>
@@ -69,17 +105,180 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
     <button class="btn-salir" id="btn-salir">Salir</button>
   </div>
 </nav>
+
 <div class="page">
-  <div class="page-title">Dashboard</div>
-  <div class="coming">
-    <div class="coming-icon">📊</div>
-    <h3>Módulo de Dashboard</h3>
-    <p>En construcción &mdash; Día 5 del desarrollo.</p>
+  <div class="page-header">
+    <div class="page-title">Dashboard</div>
+    <div class="page-sub" id="pageSub"></div>
+  </div>
+
+  <!-- BLOQUE 1: HOY -->
+  <div class="seccion">
+    <div class="bloque-title" id="tituloHoy">Operación de hoy</div>
+    <div class="metricas-5">
+      <div class="metrica"><div class="ml">Registrados</div><div class="mv" id="m-reg">0</div></div>
+      <div class="metrica"><div class="ml">Por validar</div><div class="mv" style="color:var(--naranja)" id="m-val">0</div></div>
+      <div class="metrica" id="m-prod-card"><div class="ml">Producción</div><div class="mv" style="color:var(--azul)" id="m-prod">0</div></div>
+      <div class="metrica"><div class="ml">Empaque</div><div class="mv" style="color:var(--azul)" id="m-emp">0</div></div>
+      <div class="metrica listo"><div class="ml">Entregados</div><div class="mv" style="color:var(--verde)" id="m-ent">0</div></div>
+    </div>
+
+    <div id="alertaCuello"></div>
+
+    <div class="grid-2">
+      <div class="block">
+        <div class="block-title">⚠ Alertas de inventario</div>
+        <div id="alertasInv"><div class="empty-msg">Cargando...</div></div>
+      </div>
+      <div class="block">
+        <div class="block-title">🔴 Incidencias del día</div>
+        <div id="incidencias"><div class="empty-msg">Cargando...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLOQUE 2: MAÑANA -->
+  <div class="seccion">
+    <div class="bloque-title manana" id="tituloManana">Despachos de mañana</div>
+    <div class="metricas-4">
+      <div class="metrica"><div class="ml">Para despachar</div><div class="mv" id="m-desp">0</div></div>
+      <div class="metrica"><div class="ml">Lima</div><div class="mv" style="color:var(--azul)" id="m-lima">0</div></div>
+      <div class="metrica"><div class="ml">Olva Courier</div><div class="mv" style="color:var(--naranja)" id="m-olva">0</div></div>
+      <div class="metrica"><div class="ml">Ruta armada</div><div class="mv" id="m-ruta">—</div></div>
+    </div>
+    <div class="block">
+      <div class="block-title">Pedidos listos para despacho</div>
+      <div id="listaDespachos"><div class="empty-msg">Cargando...</div></div>
+    </div>
   </div>
 </div>
+
 <script type="module">
-import { initPage } from './nav.js';
+import { initPage, db } from './nav.js';
+import {
+  collection, query, where, onSnapshot, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const EMPRESA = 'sarcastica';
 await initPage(['directora']);
+
+const hoy = new Date();
+const hoyStr = hoy.toISOString().split('T')[0];
+const manana = new Date(hoy); manana.setDate(manana.getDate()+1);
+const mananaStr = manana.toISOString().split('T')[0];
+
+document.getElementById('pageSub').textContent = hoy.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+document.getElementById('tituloHoy').textContent = `Operación de hoy — ${hoy.toLocaleDateString('es-PE',{day:'numeric',month:'short'})}`;
+document.getElementById('tituloManana').textContent = `Despachos de mañana — ${manana.toLocaleDateString('es-PE',{day:'numeric',month:'short'})}`;
+
+const col = collection(db,`empresas/${EMPRESA}/pedidos`);
+
+// Contadores por estado
+const estados = [
+  ['pendiente_validacion','m-val'],['en_produccion','m-prod'],
+  ['en_empaque','m-emp'],['entregado','m-ent'],
+];
+estados.forEach(([estado,id]) => {
+  onSnapshot(query(col,where('estado','==',estado)), snap => {
+    document.getElementById(id).textContent = snap.size;
+    // Cuello de botella
+    if (estado === 'en_produccion') actualizarCuello(snap.size);
+  });
+});
+
+// Total registrados hoy
+onSnapshot(col, snap => {
+  document.getElementById('m-reg').textContent = snap.size;
+});
+
+let maxEstacion = {nombre:'', count:0};
+function actualizarCuello(prodCount) {
+  // Simple: si producción > 5 es cuello de botella
+  const alertaEl = document.getElementById('alertaCuello');
+  if (prodCount > 5) {
+    alertaEl.innerHTML = `<div class="alerta alerta-warn"><span class="alerta-icon">⚠</span><div class="alerta-text"><strong>Cuello de botella: Producción</strong>${prodCount} pedidos en proceso. Considera reforzar el equipo.</div></div>`;
+  } else if (prodCount > 0) {
+    alertaEl.innerHTML = `<div class="alerta alerta-ok"><span class="alerta-icon">✓</span><div class="alerta-text">Flujo operativo normal · ${prodCount} pedidos en producción</div></div>`;
+  } else {
+    alertaEl.innerHTML = '';
+  }
+}
+
+// Alertas de inventario
+getDocs(collection(db,`empresas/${EMPRESA}/inventario_crudos`)).then(snap => {
+  const el = document.getElementById('alertasInv');
+  const alertas = [];
+  snap.forEach(d => {
+    const p = d.data();
+    if ((p.disponible||0) === 0) alertas.push({...p, nivel:'danger'});
+    else if ((p.disponible||0) <= (p.stock_seguridad||0)) alertas.push({...p, nivel:'warn'});
+  });
+  if (!alertas.length) {
+    el.innerHTML = '<div class="alerta alerta-ok"><span class="alerta-icon">✓</span><div class="alerta-text">Todo el inventario sobre mínimo</div></div>';
+    return;
+  }
+  el.innerHTML = alertas.map(p => `
+    <div class="alerta ${p.nivel==='danger'?'alerta-danger':'alerta-warn'}">
+      <span class="alerta-icon">${p.nivel==='danger'?'✕':'⚠'}</span>
+      <div class="alerta-text">
+        <strong>${p.nombre||'—'}</strong>
+        ${p.nivel==='danger'?'Sin stock disponible':`Solo ${p.disponible} unidades (mínimo: ${p.stock_seguridad})`}
+      </div>
+    </div>`).join('');
+});
+
+// Incidencias del día (mermas + rechazos)
+onSnapshot(query(
+  collection(db,`empresas/${EMPRESA}/movimientos`),
+  where('tipo','==','merma'),
+  where('fecha','==',hoyStr)
+), snapMermas => {
+  onSnapshot(query(col,where('estado','==','cancelado')), snapRechazos => {
+    const el = document.getElementById('incidencias');
+    const items = [];
+    snapMermas.forEach(d => {
+      const m = d.data();
+      items.push({tipo:'Merma',desc:`${m.productoNombre||'—'} · ${m.causa||'—'}`,quien:m.registradoPor||'—'});
+    });
+    snapRechazos.forEach(d => {
+      const p = d.data();
+      items.push({tipo:'Rechazo',desc:`Pedido ${d.id.slice(-5).toUpperCase()} · ${p.motivoRechazo||'—'}`,quien:p.rechazadoPor||'—'});
+    });
+    if (!items.length) { el.innerHTML = '<div class="empty-msg">Sin incidencias hoy</div>'; return; }
+    el.innerHTML = items.map(i => `
+      <div class="alerta ${i.tipo==='Merma'?'alerta-warn':'alerta-danger'}">
+        <span class="alerta-icon">${i.tipo==='Merma'?'⚠':'✕'}</span>
+        <div class="alerta-text"><strong>${i.tipo}</strong>${i.desc} · ${i.quien}</div>
+      </div>`).join('');
+  });
+});
+
+// Despachos de mañana
+onSnapshot(query(col,where('estado','==','empaquetado'),where('fechaEntrega','==',mananaStr)), snap => {
+  const lima = snap.docs.filter(d => (d.data().provincia||'').toLowerCase().includes('lima')).length;
+  const olva = snap.size - lima;
+  const rutaArmada = snap.docs.some(d => d.data().conductor);
+
+  document.getElementById('m-desp').textContent = snap.size;
+  document.getElementById('m-lima').textContent = lima;
+  document.getElementById('m-olva').textContent = olva;
+  document.getElementById('m-ruta').textContent = rutaArmada ? '✓ Sí' : 'No';
+  document.getElementById('m-ruta').style.color = rutaArmada ? 'var(--verde)' : 'var(--rojo)';
+
+  const el = document.getElementById('listaDespachos');
+  if (snap.empty) { el.innerHTML = '<div class="empty-msg">Sin despachos programados para mañana</div>'; return; }
+  el.innerHTML = snap.docs.map(d => {
+    const p = d.data();
+    const esOlva = !(p.provincia||'').toLowerCase().includes('lima');
+    return `<div class="despacho-row">
+      <div>
+        <div class="despacho-nombre">${p.cliente_nombre||'—'}</div>
+        <div class="despacho-sub">${p.direccion||[p.distrito,p.provincia].filter(Boolean).join(', ')||'Sin dirección'} · ${p.conductor||'Sin conductor asignado'}</div>
+      </div>
+      <span class="badge ${esOlva?'badge-olva':'badge-lima'}">${esOlva?'Olva':'Lima'}</span>
+    </div>`;
+  }).join('');
+});
 </script>
 </body>
 </html>
