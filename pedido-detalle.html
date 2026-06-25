@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Detalle de Pedido · Sarcástica OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#f1e8df;--black:#000;--rosa:#e1c4c1;--borde:#cca99d;--gris:#50504f;--verde:#3B6D11;--azul:#185FA5;--naranja:#854F0B;--rojo:#A32D2D;}
+#app-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:#000;display:flex;align-items:center;padding:0 20px;height:52px;border-bottom:2px solid #e1c4c1;font-family:"Poppins",sans-serif;}
+#app-nav .nav-logo{display:flex;align-items:center;margin-right:16px;flex-shrink:0;text-decoration:none;}
+#app-nav .nav-divider{width:1px;height:20px;background:#333;margin-right:8px;flex-shrink:0;}
+#app-nav .nav-items{display:flex;gap:2px;flex:1;overflow-x:auto;}
+#app-nav .nav-items::-webkit-scrollbar{display:none;}
+#app-nav a.nav-link{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#888;text-decoration:none;white-space:nowrap;transition:background .15s,color .15s;}
+#app-nav a.nav-link:hover{background:#111;color:#f1e8df;}
+#app-nav a.nav-link.active{background:#e1c4c1;color:#000;font-weight:600;}
+#app-nav .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+#app-nav .nav-powered{font-size:10px;color:#444;letter-spacing:.04em;white-space:nowrap;}
+#app-nav .nav-powered strong{color:#cca99d;}
+#app-nav .nav-username{font-size:11px;color:#888;white-space:nowrap;}
+#app-nav .btn-salir{background:none;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:"Poppins",sans-serif;font-size:11px;white-space:nowrap;}
+#app-nav .btn-salir:hover{border-color:#e1c4c1;color:#f1e8df;}
+.nav-user-wrap{position:relative;}
+#nav-menu-btn{display:flex;width:28px;height:28px;border-radius:50%;background:#e1c4c1;border:none;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;flex-shrink:0;}
+#nav-menu-btn span{display:block;width:12px;height:1.5px;background:#000;border-radius:2px;}
+#nav-menu-dropdown{display:none;position:absolute;top:38px;right:0;background:#fff;border:1.5px solid var(--borde);border-radius:10px;min-width:180px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:500;}
+#nav-menu-dropdown.open{display:block;}
+#nav-menu-dropdown a{display:block;padding:11px 16px;font-size:13px;color:var(--black);text-decoration:none;font-family:"Poppins",sans-serif;white-space:nowrap;}
+#nav-menu-dropdown a:hover{background:var(--bg);}
+#nav-menu-dropdown .menu-sep{height:1px;background:var(--borde);margin:4px 0;}
+body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
+
+.page{max-width:800px;margin:0 auto;padding:28px 24px;}
+
+/* CABECERA */
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--gris);text-decoration:none;margin-bottom:20px;font-weight:500;}
+.back-link:hover{color:var(--black);}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;}
+.pedido-id{font-size:12px;font-weight:600;color:var(--gris);margin-bottom:4px;}
+.page-title{font-size:20px;font-weight:800;}
+.page-sub{font-size:12px;color:var(--gris);margin-top:3px;}
+.badge{display:inline-flex;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;}
+.badge-pend{background:#faeeda;color:var(--naranja);}
+.badge-prod{background:#e0eaf8;color:var(--azul);}
+.badge-emp{background:#f0e0f8;color:#6B21A8;}
+.badge-ruta{background:#e8f5e0;color:var(--verde);}
+.badge-ok{background:#e8f5e0;color:var(--verde);}
+.badge-cancel{background:#fcebeb;color:var(--rojo);}
+
+/* BLOQUES */
+.block{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:20px;margin-bottom:16px;}
+.block-title{font-size:13px;font-weight:700;color:var(--black);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--borde);}
+
+/* INFO CLIENTE */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.info-grid.g3{grid-template-columns:1fr 1fr 1fr;}
+.info-field .label{font-size:10px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;}
+.info-field .value{font-size:13px;color:var(--black);font-weight:500;}
+
+/* ITEMS */
+.item-card{background:var(--bg);border-radius:8px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.item-card.bloqueado{opacity:.75;}
+.item-left .item-nombre{font-size:13px;font-weight:600;}
+.item-left .item-diseno{font-size:11px;color:var(--gris);margin-top:2px;}
+.item-left .item-precio{font-size:12px;font-weight:700;color:var(--black);margin-top:4px;}
+.item-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.item-estado{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.estado-pendiente{background:#faeeda;color:var(--naranja);}
+.estado-produccion{background:#e0eaf8;color:var(--azul);}
+.estado-listo{background:#e8f5e0;color:var(--verde);}
+.estado-empaquetado{background:#f0e0f8;color:#6B21A8;}
+.btn-eliminar{background:none;border:none;font-size:11px;color:var(--rojo);cursor:pointer;font-family:"Poppins",sans-serif;padding:0;font-weight:500;}
+.btn-eliminar:hover{text-decoration:underline;}
+
+/* TOTAL */
+.total-row{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid var(--borde);margin-top:4px;}
+.total-label{font-size:13px;color:var(--gris);}
+.total-monto{font-size:18px;font-weight:800;}
+
+/* FORM AGREGAR ITEM */
+.add-item-toggle{border:1.5px dashed var(--borde);border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--borde);cursor:pointer;background:none;width:100%;font-family:"Poppins",sans-serif;margin-top:8px;transition:all .15s;}
+.add-item-toggle:hover{border-color:var(--black);color:var(--black);}
+.add-item-form{display:none;background:var(--bg);border:1px solid var(--borde);border-radius:10px;padding:14px;margin-top:10px;}
+.add-item-form.open{display:block;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;}
+.field{display:flex;flex-direction:column;gap:3px;}
+.field label{font-size:10px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.04em;}
+.field input,.field select{background:#fff;border:1px solid var(--borde);border-radius:6px;padding:7px 10px;font-family:"Poppins",sans-serif;font-size:12px;color:var(--black);outline:none;transition:border-color .15s;width:100%;}
+.field input:focus,.field select:focus{border-color:var(--black);}
+.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px;}
+.btn-cancelar-form{background:#fff;border:1.5px solid var(--borde);color:var(--gris);padding:8px 14px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;cursor:pointer;}
+.btn-guardar-item{background:var(--black);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-guardar-item:disabled{opacity:.4;cursor:not-allowed;}
+
+/* REPROGRAMAR FECHA */
+.reprog-box{background:#faeeda;border:1px solid #e8c99a;border-radius:8px;padding:12px;margin-top:10px;display:none;}
+.reprog-box.open{display:block;}
+.reprog-box .reprog-title{font-size:12px;font-weight:600;color:var(--naranja);margin-bottom:8px;}
+.reprog-box .reprog-sub{font-size:11px;color:var(--naranja);margin-bottom:10px;}
+
+/* OBSERVACION */
+.obs-box{background:#faeeda;border-radius:6px;padding:8px 12px;font-size:12px;color:var(--naranja);margin-top:8px;}
+</style>
+</head>
+<body>
+
+<nav id="app-nav">
+  <a href="inventario.html" class="nav-logo">
+    <svg viewBox="0 0 200 36" xmlns="http://www.w3.org/2000/svg" height="20"><text x="0" y="29" font-family="Georgia,serif" font-size="29" font-weight="400" fill="#ffffff" letter-spacing="-0.5">sarcástica.</text></svg>
+  </a>
+  <div class="nav-divider"></div>
+  <div class="nav-items">
+    <a href="inventario.html" class="nav-link" data-page="inventario">Inventario</a>
+    <a href="pedidos.html"    class="nav-link active" data-page="pedidos">Pedidos</a>
+    <a href="validar.html"    class="nav-link" data-page="validar">Validar Pagos</a>
+    <a href="produccion.html" class="nav-link" data-page="produccion">Producción</a>
+    <a href="empaque.html"    class="nav-link" data-page="empaque">Empaque</a>
+    <a href="ruta.html"       class="nav-link" data-page="ruta">Ruta</a>
+    <a href="clientes.html"   class="nav-link" data-page="clientes">CRM</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-powered">powered by <strong>Etrazia</strong></span>
+    <span class="nav-username" id="nav-rol"></span>
+    <div class="nav-user-wrap">
+      <button id="nav-menu-btn"><span></span><span></span><span></span></button>
+      <div id="nav-menu-dropdown">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="clientes.html">CRM Clientes</a>
+        <div class="menu-sep"></div>
+        <a href="configuracion.html">Configuración</a>
+      </div>
+    </div>
+    <button class="btn-salir" id="btn-salir">Salir</button>
+  </div>
+</nav>
+
+<div class="page">
+  <a href="pedidos.html" class="back-link">← Volver a Pedidos</a>
+
+  <div id="contenido"><p style="color:var(--gris);font-size:13px;">Cargando pedido...</p></div>
+</div>
+
+<script type="module">
+import { initPage, db } from './nav.js';
+import {
+  doc, getDoc, getDocs, updateDoc, addDoc, deleteDoc,
+  collection, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const EMPRESA = 'sarcastica';
+const user = await initPage(['directora','operaciones','ventas']);
+
+const params = new URLSearchParams(location.search);
+const pedidoId = params.get('id');
+if (!pedidoId) { document.getElementById('contenido').innerHTML = '<p>Pedido no encontrado.</p>'; throw new Error('no id'); }
+
+const canEdit = ['directora','operaciones','ventas'].includes(user.rol);
+
+let pedido = null;
+let items  = [];
+let productos = [];
+
+const ESTADO_LABEL = {
+  pendiente_validacion: ['badge-pend','Por validar'],
+  en_produccion:        ['badge-prod','En producción'],
+  en_empaque:           ['badge-emp','Empaque'],
+  empaquetado:          ['badge-emp','Empaquetado'],
+  en_ruta:              ['badge-ruta','En ruta'],
+  entregado:            ['badge-ok','Entregado'],
+  cancelado:            ['badge-cancel','Cancelado'],
+};
+const ITEM_ESTADO = {
+  pendiente:     ['estado-pendiente','Pendiente'],
+  produccion:    ['estado-produccion','En producción'],
+  listo_empaque: ['estado-listo','Listo ✓'],
+  empaquetado:   ['estado-empaquetado','Empaquetado'],
+};
+const CANAL_LABEL = {WhatsApp:'WhatsApp',Instagram:'Instagram',Web:'Web Shopify'};
+
+async function cargarProductos() {
+  const snap = await getDocs(collection(db,`empresas/${EMPRESA}/inventario_crudos`));
+  productos = [];
+  snap.forEach(d => productos.push({id:d.id,...d.data()}));
+}
+
+async function cargar() {
+  const snap = await getDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pedidoId));
+  if (!snap.exists()) { document.getElementById('contenido').innerHTML = '<p>Pedido no encontrado.</p>'; return; }
+  pedido = snap.data();
+
+  const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pedidoId}/items`));
+  items = [];
+  itemsSnap.forEach(d => items.push({id:d.id,...d.data()}));
+
+  render();
+}
+
+function render() {
+  const [badgeClass, badgeLabel] = ESTADO_LABEL[pedido.estado] || ['','—'];
+  const total = items.reduce((s,i) => s+(i.precio||0), 0);
+
+  // Items html
+  const itemsHtml = items.map(item => {
+    const editable = item.estado === 'pendiente';
+    const [eClass, eLabel] = ITEM_ESTADO[item.estado] || ['','—'];
+    const delBtn = (canEdit && editable)
+      ? `<button class="btn-eliminar" onclick="eliminarItem('${item.id}')">✕ Eliminar</button>`
+      : '';
+    return `<div class="item-card${!editable?' bloqueado':''}" id="item-card-${item.id}">
+      <div class="item-left">
+        <div class="item-nombre">${item.productoNombre||'—'}${item.variante?' · '+item.variante:''}</div>
+        <div class="item-diseno">${item.diseno||'—'}</div>
+        <div class="item-precio">S/ ${(item.precio||0).toFixed(2)}</div>
+      </div>
+      <div class="item-right">
+        <span class="item-estado ${eClass}">${eLabel}</span>
+        ${delBtn}
+      </div>
+    </div>`;
+  }).join('');
+
+  const addFormHtml = canEdit ? `
+    <button class="add-item-toggle" id="btnToggleAdd" onclick="toggleAddForm()">+ Agregar ítem al pedido</button>
+    <div class="add-item-form" id="addItemForm">
+      <div class="g3">
+        <div class="field"><label>Categoría</label>
+          <select id="new-cat" onchange="onNewCatChange()">
+            <option value="">Seleccionar</option>
+          </select>
+        </div>
+        <div class="field"><label>Producto</label>
+          <select id="new-prod"><option value="">— elige categoría —</option></select>
+        </div>
+        <div class="field"><label>Variante</label>
+          <input type="text" id="new-variante" placeholder="Ej: Blanco 350ml"/>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="field"><label>Diseño / detalle</label>
+          <input type="text" id="new-diseno" placeholder="Lo que pide la clienta"/>
+        </div>
+        <div class="field"><label>Precio unitario (S/)</label>
+          <input type="number" id="new-precio" placeholder="0.00" step="0.01" min="0"/>
+        </div>
+      </div>
+      <div class="reprog-box" id="reprogBox">
+        <div class="reprog-title">⚠ ¿Necesitas reprogramar la entrega?</div>
+        <div class="reprog-sub">Si el nuevo ítem no puede estar listo para la fecha actual (${pedido.fechaEntrega}), elige una nueva fecha. Solo cambia la fecha — los ítems ya en producción no se tocan.</div>
+        <div class="field">
+          <label>Nueva fecha de entrega</label>
+          <input type="date" id="new-fecha" min="${new Date().toISOString().split('T')[0]}"/>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancelar-form" onclick="toggleAddForm()">Cancelar</button>
+        <button class="btn-guardar-item" id="btnGuardarItem" onclick="guardarItem()">Guardar ítem</button>
+      </div>
+    </div>` : '';
+
+  const obsHtml = pedido.observacion
+    ? `<div class="obs-box">📝 Observación: <strong>${pedido.observacion}</strong></div>` : '';
+
+  document.getElementById('contenido').innerHTML = `
+    <div class="page-header">
+      <div>
+        <div class="pedido-id">#${pedidoId.slice(-5).toUpperCase()}</div>
+        <div class="page-title">${pedido.cliente_nombre||'—'}</div>
+        <div class="page-sub">${CANAL_LABEL[pedido.canal]||pedido.canal||'—'} · ${pedido.medioPago||'—'} · Registrado por ${pedido.vendedor||'—'}</div>
+      </div>
+      <span class="badge ${badgeClass}">${badgeLabel}</span>
+    </div>
+
+    <!-- DATOS DEL CLIENTE -->
+    <div class="block">
+      <div class="block-title">Datos de la clienta</div>
+      <div class="info-grid g3">
+        <div class="info-field"><div class="label">DNI</div><div class="value">${pedido.cliente_dni||'—'}</div></div>
+        <div class="info-field"><div class="label">Teléfono</div><div class="value">${pedido.telefono||'—'}</div></div>
+        <div class="info-field"><div class="label">Correo</div><div class="value">${pedido.correo||'—'}</div></div>
+      </div>
+      <div class="info-grid" style="margin-top:12px;">
+        <div class="info-field"><div class="label">Distrito</div><div class="value">${pedido.distrito||'—'}</div></div>
+        <div class="info-field"><div class="label">Provincia</div><div class="value">${pedido.provincia||'—'}</div></div>
+      </div>
+      <div class="info-grid" style="margin-top:12px;">
+        <div class="info-field"><div class="label">Dirección</div><div class="value">${pedido.direccion||'—'}</div></div>
+        <div class="info-field"><div class="label">Fecha de entrega</div><div class="value" id="fechaEntregaVal">${pedido.fechaEntrega||'—'}</div></div>
+      </div>
+      ${obsHtml}
+    </div>
+
+    <!-- ÍTEMS -->
+    <div class="block">
+      <div class="block-title">Ítems del pedido</div>
+      <div id="itemsList">${itemsHtml}</div>
+      <div class="total-row">
+        <span class="total-label">Total · ${pedido.medioPago||'—'}</span>
+        <span class="total-monto" id="totalMonto">S/ ${total.toFixed(2)}</span>
+      </div>
+      ${addFormHtml}
+    </div>
+  `;
+
+  // Llenar categorías del selector
+  if (canEdit) {
+    const cats = [...new Set(productos.map(p=>p.categoria).filter(Boolean))];
+    const catSel = document.getElementById('new-cat');
+    if (catSel) {
+      cats.forEach(c => {
+        const o = document.createElement('option'); o.value=c; o.textContent=c; catSel.appendChild(o);
+      });
+    }
+  }
+}
+
+window.toggleAddForm = () => {
+  const form = document.getElementById('addItemForm');
+  if (form) form.classList.toggle('open');
+};
+
+window.onNewCatChange = () => {
+  const cat = document.getElementById('new-cat').value;
+  const sel = document.getElementById('new-prod');
+  const filtrados = productos.filter(p=>p.categoria===cat);
+  sel.innerHTML = filtrados.length
+    ? `<option value="">Seleccionar</option>${filtrados.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('')}`
+    : `<option value="">Sin productos</option>`;
+};
+
+window.guardarItem = async () => {
+  const cat     = document.getElementById('new-cat').value;
+  const prodId  = document.getElementById('new-prod').value;
+  const variante= document.getElementById('new-variante').value.trim();
+  const diseno  = document.getElementById('new-diseno').value.trim();
+  const precio  = parseFloat(document.getElementById('new-precio').value);
+  const nuevaFecha = document.getElementById('new-fecha')?.value || '';
+
+  if (!cat||!prodId||isNaN(precio)||precio<=0) { alert('Completa categoría, producto y precio.'); return; }
+
+  const prod = productos.find(p=>p.id===prodId);
+  if (!prod) { alert('Producto no encontrado.'); return; }
+  if ((prod.disponible||0) <= 0) { alert('Sin stock disponible para este producto.'); return; }
+
+  const btn = document.getElementById('btnGuardarItem');
+  btn.disabled=true; btn.textContent='Guardando...';
+
+  try {
+    // Agregar ítem al pedido
+    await addDoc(collection(db,`empresas/${EMPRESA}/pedidos/${pedidoId}/items`), {
+      categoria: cat,
+      productoId: prodId,
+      productoNombre: prod.nombre||'—',
+      variante, diseno, precio,
+      estado: 'pendiente',
+      agregadoEn: serverTimestamp(),
+      agregadoPor: user.nombre||user.email,
+    });
+
+    // Reservar inventario solo del ítem nuevo
+    const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,prodId);
+    const invSnap = await getDoc(invRef);
+    if (invSnap.exists()) {
+      const inv = invSnap.data();
+      await updateDoc(invRef, {
+        disponible: Math.max(0,(inv.disponible||0)-1),
+        reservado:  (inv.reservado||0)+1,
+      });
+    }
+
+    // Actualizar total y fecha si cambió
+    const nuevoTotal = items.reduce((s,i)=>s+(i.precio||0),0) + precio;
+    const updateData = {
+      total: nuevoTotal,
+      total_items: items.length + 1,
+    };
+    if (nuevaFecha && nuevaFecha !== pedido.fechaEntrega) {
+      updateData.fechaEntrega = nuevaFecha;
+    }
+    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pedidoId), updateData);
+
+    await cargar();
+  } catch(e) {
+    console.error(e);
+    alert('Error al agregar ítem. Intenta de nuevo.');
+  } finally {
+    btn.disabled=false; btn.textContent='Guardar ítem';
+  }
+};
+
+window.eliminarItem = async (itemId) => {
+  if (!confirm('¿Eliminar este ítem del pedido?')) return;
+
+  const item = items.find(i=>i.id===itemId);
+  if (!item) return;
+
+  try {
+    // Liberar reserva de inventario
+    if (item.productoId) {
+      const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
+      const invSnap = await getDoc(invRef);
+      if (invSnap.exists()) {
+        const inv = invSnap.data();
+        await updateDoc(invRef, {
+          disponible: (inv.disponible||0)+1,
+          reservado:  Math.max(0,(inv.reservado||0)-1),
+        });
+      }
+    }
+
+    // Eliminar ítem
+    await deleteDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pedidoId}/items`,itemId));
+
+    // Actualizar total
+    const nuevoTotal = items.filter(i=>i.id!==itemId).reduce((s,i)=>s+(i.precio||0),0);
+    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pedidoId),{
+      total: nuevoTotal,
+      total_items: items.length - 1,
+    });
+
+    await cargar();
+  } catch(e) {
+    console.error(e);
+    alert('Error al eliminar ítem.');
+  }
+};
+
+// Toggle reprogramar fecha
+document.addEventListener('click', e => {
+  if (e.target && e.target.id === 'new-prod' && document.getElementById('reprogBox')) {
+    // mostrar opción de reprogramar cuando eligen producto
+  }
+});
+
+// Mostrar opción reprogramar al escribir en el form
+document.addEventListener('input', e => {
+  const box = document.getElementById('reprogBox');
+  if (box && ['new-cat','new-prod','new-variante','new-diseno','new-precio'].includes(e.target?.id)) {
+    box.classList.add('open');
+  }
+});
+
+await cargarProductos();
+await cargar();
+</script>
+</body>
+</html>
