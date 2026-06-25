@@ -145,22 +145,22 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
   <div class="metricas">
     <div class="metrica">
       <div class="ml">Pedidos hoy</div>
-      <div class="mv" id="m-total">—</div>
+      <div class="mv" id="m-total">0</div>
       <div class="ms">en producción</div>
     </div>
     <div class="metrica">
       <div class="ml">Ítems pendientes</div>
-      <div class="mv" style="color:var(--naranja)" id="m-pend">—</div>
+      <div class="mv" style="color:var(--naranja)" id="m-pend">0</div>
       <div class="ms">sin iniciar</div>
     </div>
     <div class="metrica">
       <div class="ml">En producción</div>
-      <div class="mv" style="color:var(--azul)" id="m-prod">—</div>
+      <div class="mv" style="color:var(--azul)" id="m-prod">0</div>
       <div class="ms">fabricando</div>
     </div>
     <div class="metrica">
       <div class="ml">Listos</div>
-      <div class="mv" style="color:var(--verde)" id="m-listo">—</div>
+      <div class="mv" style="color:var(--verde)" id="m-listo">0</div>
       <div class="ms">terminados</div>
     </div>
   </div>
@@ -234,8 +234,7 @@ let todosItems = []; // para métricas
 // Cargar pedidos en_produccion en tiempo real
 const q = query(
   collection(db,`empresas/${EMPRESA}/pedidos`),
-  where('estado','==','en_produccion'),
-  orderBy('fechaEntrega','asc')
+  where('estado','==','en_produccion')
 );
 
 onSnapshot(q, async snap => {
