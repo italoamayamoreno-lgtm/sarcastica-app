@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ruta · Sarcástica OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#f1e8df;--black:#000;--rosa:#e1c4c1;--borde:#cca99d;--gris:#50504f;--verde:#3B6D11;--azul:#185FA5;--naranja:#854F0B;--rojo:#A32D2D;}
@@ -31,15 +32,86 @@
 #nav-menu-dropdown a:hover{background:var(--bg);}
 #nav-menu-dropdown .menu-sep{height:1px;background:var(--borde);margin:4px 0;}
 body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
-.page{max-width:1100px;margin:0 auto;padding:28px 24px;}
-.page-title{font-size:20px;font-weight:800;margin-bottom:24px;}
-.coming{background:#fff;border:1.5px dashed var(--borde);border-radius:12px;padding:60px;text-align:center;}
-.coming-icon{font-size:36px;margin-bottom:12px;}
-.coming h3{font-size:15px;font-weight:700;color:var(--gris);margin-bottom:8px;}
-.coming p{font-size:13px;color:var(--borde);}
+
+.page{max-width:1000px;margin:0 auto;padding:28px 24px;}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;}
+.page-title{font-size:20px;font-weight:800;}
+.page-sub{font-size:12px;color:var(--gris);margin-top:3px;}
+
+/* MÉTRICAS */
+.metricas{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.metrica{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:14px 16px;}
+.metrica .ml{font-size:11px;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;font-weight:500;margin-bottom:4px;}
+.metrica .mv{font-size:26px;font-weight:800;line-height:1;}
+
+/* LAYOUT DOS COLUMNAS */
+.layout{display:grid;grid-template-columns:1fr 420px;gap:16px;align-items:start;}
+
+/* CARDS PEDIDOS */
+.block{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:18px;margin-bottom:12px;}
+.block-title{font-size:13px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--borde);display:flex;justify-content:space-between;align-items:center;}
+
+.parada-row{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;margin-bottom:6px;cursor:grab;}
+.parada-num{width:26px;height:26px;border-radius:50%;background:var(--black);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.parada-num.olva{background:var(--azul);}
+.parada-info{flex:1;}
+.parada-nombre{font-size:12px;font-weight:600;}
+.parada-dir{font-size:11px;color:var(--gris);margin-top:1px;}
+.parada-obs{font-size:10px;color:var(--naranja);margin-top:2px;}
+.parada-actions{display:flex;gap:4px;flex-shrink:0;}
+.btn-orden{background:none;border:1px solid var(--borde);color:var(--gris);width:24px;height:24px;border-radius:4px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;}
+.btn-orden:hover{background:var(--black);color:#fff;border-color:var(--black);}
+.badge-olva{background:#e0eaf8;color:var(--azul);padding:2px 6px;border-radius:10px;font-size:10px;font-weight:600;}
+.badge-entregado{background:#e8f5e0;color:var(--verde);padding:2px 6px;border-radius:10px;font-size:10px;font-weight:600;}
+
+/* CONDUCTOR */
+.conductor-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.conductor-label{font-size:12px;color:var(--gris);flex-shrink:0;}
+.conductor-select{flex:1;border:1.5px solid var(--borde);border-radius:8px;padding:7px 10px;font-family:"Poppins",sans-serif;font-size:12px;color:var(--black);outline:none;background:#fff;}
+.conductor-select:focus{border-color:var(--black);}
+
+/* CRITERIO */
+.criterio-wrap{display:flex;gap:6px;margin-bottom:14px;}
+.criterio-btn{flex:1;padding:7px;border-radius:8px;border:1.5px solid var(--borde);background:#fff;font-family:"Poppins",sans-serif;font-size:11px;font-weight:500;color:var(--gris);cursor:pointer;text-align:center;}
+.criterio-btn.active{background:var(--black);color:#fff;border-color:var(--black);}
+
+/* ACCIONES */
+.acciones-row{display:flex;gap:8px;margin-top:14px;}
+.btn-exportar{background:#fff;border:1.5px solid var(--borde);color:var(--gris);padding:9px 14px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex:1;text-align:center;}
+.btn-exportar:hover{border-color:var(--black);color:var(--black);}
+.btn-confirmar{background:var(--black);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex:1;}
+.btn-confirmar:hover{opacity:.8;}
+.btn-confirmar:disabled{opacity:.4;cursor:not-allowed;}
+
+/* MAPA */
+#mapa{height:320px;border-radius:10px;border:1px solid var(--borde);z-index:1;}
+.mapa-block{background:#fff;border:1.5px solid var(--borde);border-radius:12px;overflow:hidden;}
+.mapa-header{padding:14px 16px;font-size:13px;font-weight:700;border-bottom:1px solid var(--borde);}
+
+/* MODAL EXPORTAR */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;padding:20px;overflow-y:auto;}
+.modal-overlay.open{display:flex;justify-content:center;align-items:center;}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:440px;}
+.modal-header{background:#000;border-radius:16px 16px 0 0;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-title{font-size:15px;font-weight:700;color:#fff;}
+.modal-close{background:none;border:none;color:#666;font-size:22px;cursor:pointer;line-height:1;}
+.modal-close:hover{color:#fff;}
+.modal-body{padding:20px;}
+.modal-sub{font-size:12px;color:var(--gris);margin-bottom:16px;}
+.export-opt{display:flex;align-items:center;gap:12px;padding:14px;border:1.5px solid var(--borde);border-radius:10px;cursor:pointer;margin-bottom:8px;transition:border-color .15s;}
+.export-opt:hover{border-color:var(--black);}
+.export-opt .eo-icon{font-size:24px;flex-shrink:0;}
+.export-opt .eo-title{font-size:13px;font-weight:700;}
+.export-opt .eo-sub{font-size:11px;color:var(--gris);margin-top:2px;}
+.export-opt.wa{border-color:#25D366;}
+.export-opt.wa:hover{background:#f0fff5;}
+
+.empty-wrap{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:60px;text-align:center;color:var(--borde);}
+.empty-wrap p{font-size:13px;}
 </style>
 </head>
 <body>
+
 <nav id="app-nav">
   <a href="inventario.html" class="nav-logo">
     <svg viewBox="0 0 200 36" xmlns="http://www.w3.org/2000/svg" height="20"><text x="0" y="29" font-family="Georgia,serif" font-size="29" font-weight="400" fill="#ffffff" letter-spacing="-0.5">sarcástica.</text></svg>
@@ -47,12 +119,12 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
   <div class="nav-divider"></div>
   <div class="nav-items">
     <a href="inventario.html" class="nav-link" data-page="inventario">Inventario</a>
-    <a href="pedidos.html" class="nav-link" data-page="pedidos">Pedidos</a>
-    <a href="validar.html" class="nav-link" data-page="validar">Validar Pagos</a>
+    <a href="pedidos.html"    class="nav-link" data-page="pedidos">Pedidos</a>
+    <a href="validar.html"    class="nav-link" data-page="validar">Validar Pagos</a>
     <a href="produccion.html" class="nav-link" data-page="produccion">Producción</a>
-    <a href="empaque.html" class="nav-link" data-page="empaque">Empaque</a>
-    <a href="ruta.html" class="nav-link active" data-page="ruta">Ruta</a>
-    <a href="clientes.html" class="nav-link" data-page="clientes">CRM</a>
+    <a href="empaque.html"    class="nav-link" data-page="empaque">Empaque</a>
+    <a href="ruta.html"       class="nav-link active" data-page="ruta">Ruta</a>
+    <a href="clientes.html"   class="nav-link" data-page="clientes">CRM</a>
   </div>
   <div class="nav-right">
     <span class="nav-powered">powered by <strong>Etrazia</strong></span>
@@ -69,17 +141,331 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
     <button class="btn-salir" id="btn-salir">Salir</button>
   </div>
 </nav>
+
 <div class="page">
-  <div class="page-title">Ruta</div>
-  <div class="coming">
-    <div class="coming-icon">🚚</div>
-    <h3>Módulo de Ruta</h3>
-    <p>En construcción &mdash; Día 4 del desarrollo.</p>
+  <div class="page-header">
+    <div>
+      <div class="page-title">Ruta de despacho</div>
+      <div class="page-sub" id="pageSub"></div>
+    </div>
+  </div>
+
+  <div class="metricas">
+    <div class="metrica">
+      <div class="ml">Para despachar</div>
+      <div class="mv" style="color:var(--naranja)" id="m-total">0</div>
+    </div>
+    <div class="metrica">
+      <div class="ml">Lima</div>
+      <div class="mv" style="color:var(--azul)" id="m-lima">0</div>
+    </div>
+    <div class="metrica">
+      <div class="ml">Provincia (Olva)</div>
+      <div class="mv" style="color:var(--gris)" id="m-olva">0</div>
+    </div>
+    <div class="metrica">
+      <div class="ml">Entregados hoy</div>
+      <div class="mv" style="color:var(--verde)" id="m-entregados">0</div>
+    </div>
+  </div>
+
+  <div id="mainContent">
+    <div class="empty-wrap"><p>Cargando pedidos...</p></div>
   </div>
 </div>
+
+<!-- MODAL EXPORTAR -->
+<div class="modal-overlay" id="modalExportar">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Compartir / Exportar ruta</div>
+      <button class="modal-close" id="btnCerrarExportar">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-sub" id="exportSub"></div>
+      <div class="export-opt wa" onclick="exportarWA()">
+        <div class="eo-icon">💬</div>
+        <div>
+          <div class="eo-title">Enviar por WhatsApp</div>
+          <div class="eo-sub">Copia el texto y envíaselo al conductor</div>
+        </div>
+      </div>
+      <div class="export-opt" onclick="exportarPDF()">
+        <div class="eo-icon">📄</div>
+        <div>
+          <div class="eo-title">Descargar PDF</div>
+          <div class="eo-sub">Hoja de ruta completa para imprimir</div>
+        </div>
+      </div>
+      <div class="export-opt" onclick="exportarExcel()">
+        <div class="eo-icon">📊</div>
+        <div>
+          <div class="eo-title">Descargar Excel</div>
+          <div class="eo-sub">Tabla con todos los datos del despacho</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
-import { initPage } from './nav.js';
-await initPage(['directora','operaciones']);
+import { initPage, db } from './nav.js';
+import {
+  collection, query, where, onSnapshot,
+  doc, getDocs, updateDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const EMPRESA = 'sarcastica';
+const user = await initPage(['directora','operaciones']);
+
+const hoy = new Date();
+const hoyStr = hoy.toISOString().split('T')[0];
+document.getElementById('pageSub').textContent =
+  hoy.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'}) + ' · despacho del día';
+
+const col = collection(db,`empresas/${EMPRESA}/pedidos`);
+
+// Contadores
+onSnapshot(query(col,where('estado','==','en_ruta')), s => {
+  const lima = s.docs.filter(d => d.data().provincia?.toLowerCase().includes('lima') || !d.data().esOlva).length;
+  const olva = s.docs.filter(d => d.data().esOlva).length;
+  document.getElementById('m-total').textContent = s.size;
+  document.getElementById('m-lima').textContent = lima;
+  document.getElementById('m-olva').textContent = olva;
+});
+onSnapshot(query(col,where('estado','==','entregado')), s =>
+  document.getElementById('m-entregados').textContent = s.size);
+
+// Estado de la ruta
+let pedidos = [];
+let repartidores = [];
+let conductorSeleccionado = '';
+let criterio = 'cercano'; // cercano | lejano
+let mapa = null;
+let markersLayer = null;
+
+// Cargar repartidores
+async function cargarRepartidores() {
+  const snap = await getDocs(collection(db,`empresas/${EMPRESA}/repartidores`));
+  repartidores = [];
+  snap.forEach(d => repartidores.push({id:d.id,...d.data()}));
+}
+
+// Cargar pedidos en_ruta en tiempo real
+onSnapshot(query(col, where('estado','==','en_ruta')), async snap => {
+  pedidos = snap.docs.map(d => ({id:d.id,...d.data()}));
+  await cargarRepartidores();
+  renderMain();
+});
+
+function ordenarPedidos(lista) {
+  // Ordenar por distancia estimada (usamos provincia como proxy: Lima=cercano, otros=lejano)
+  // En producción real se usaría geocoding. Por ahora: Lima primero si criterio=cercano
+  return [...lista].sort((a,b) => {
+    const aLima = (a.provincia||'').toLowerCase().includes('lima');
+    const bLima = (b.provincia||'').toLowerCase().includes('lima');
+    if (criterio === 'cercano') return (bLima ? 1 : 0) - (aLima ? 1 : 0);
+    return (aLima ? 1 : 0) - (bLima ? 1 : 0);
+  });
+}
+
+function renderMain() {
+  const main = document.getElementById('mainContent');
+  if (pedidos.length === 0) {
+    main.innerHTML = '<div class="empty-wrap"><p>No hay pedidos para despachar hoy</p></div>';
+    return;
+  }
+
+  const conductorOpts = repartidores.length
+    ? repartidores.map(r => `<option value="${r.id}">${r.nombre} · ${r.vehiculo||'—'}</option>`).join('')
+    : '<option value="david">David · Moto</option>';
+
+  const ordenados = ordenarPedidos(pedidos);
+
+  const paradasHtml = ordenados.map((p,i) => {
+    const esOlva = p.esOlva || !((p.provincia||'').toLowerCase().includes('lima'));
+    const obsHtml = p.observacion ? `<div class="parada-obs">📝 ${p.observacion}</div>` : '';
+    const olvaBadge = esOlva ? '<span class="badge-olva">Olva Courier</span>' : '';
+    return `<div class="parada-row" id="parada-${p.id}" data-idx="${i}">
+      <div class="parada-num${esOlva?' olva':''}">${i+1}</div>
+      <div class="parada-info">
+        <div class="parada-nombre">${p.cliente_nombre||'—'} ${olvaBadge}</div>
+        <div class="parada-dir">${p.direccion||[p.distrito,p.provincia].filter(Boolean).join(', ')||'Sin dirección'}</div>
+        ${obsHtml}
+      </div>
+      <div class="parada-actions">
+        <button class="btn-orden" onclick="moverParada('${p.id}','up')" title="Subir">↑</button>
+        <button class="btn-orden" onclick="moverParada('${p.id}','down')" title="Bajar">↓</button>
+        <button class="btn-orden" style="color:var(--verde);border-color:var(--verde);" onclick="confirmarEntrega('${p.id}')" title="Marcar entregado">✓</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  main.innerHTML = `
+    <div class="layout">
+      <div>
+        <div class="block">
+          <div class="block-title">
+            <span>Conductor del día</span>
+          </div>
+          <div class="conductor-row">
+            <span class="conductor-label">Asignar a:</span>
+            <select class="conductor-select" id="conductorSel" onchange="setConductor(this.value)">
+              <option value="">Seleccionar conductor</option>
+              ${conductorOpts}
+            </select>
+          </div>
+          <div class="criterio-wrap">
+            <button class="criterio-btn ${criterio==='cercano'?'active':''}" onclick="setCriterio('cercano')">Cerca → Lejos</button>
+            <button class="criterio-btn ${criterio==='lejano'?'active':''}" onclick="setCriterio('lejano')">Lejos → Cerca</button>
+          </div>
+          <div class="block-title" style="margin-top:4px;">
+            <span>${ordenados.length} paradas · ${criterio==='cercano'?'cerca → lejos':'lejos → cerca'}</span>
+          </div>
+          <div id="paradasList">${paradasHtml}</div>
+          <div class="acciones-row">
+            <button class="btn-exportar" onclick="abrirExportar()">📤 Exportar ruta</button>
+            <button class="btn-confirmar" id="btnConfirmarSalida" onclick="confirmarSalida()">Confirmar salida →</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="mapa-block">
+          <div class="mapa-header">🗺 Vista de ruta</div>
+          <div id="mapa"></div>
+        </div>
+      </div>
+    </div>`;
+
+  initMapa(ordenados);
+}
+
+function initMapa(lista) {
+  if (mapa) { mapa.remove(); mapa = null; }
+  mapa = L.map('mapa').setView([-12.0464, -77.0428], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap',maxZoom:18
+  }).addTo(mapa);
+
+  // Marcador de almacén (Sarcástica — placeholder Lima centro)
+  L.marker([-12.0464,-77.0428],{
+    icon: L.divIcon({className:'',html:'<div style="background:#000;color:#fff;width:12px;height:12px;border-radius:50%;border:2px solid #e1c4c1;"></div>',iconSize:[12,12]})
+  }).addTo(mapa).bindPopup('Almacén Sarcástica');
+
+  // Paradas con coords de Lima genéricas (en producción usaría geocoding)
+  const limeCoords = [
+    [-12.0600,-77.0367],[-12.1101,-77.0430],[-12.0853,-76.9762],
+    [-11.9878,-77.0647],[-12.0700,-76.9000],[-12.1200,-77.0300],
+  ];
+  lista.forEach((p,i) => {
+    const coord = limeCoords[i % limeCoords.length];
+    const icon = L.divIcon({
+      className:'',
+      html:`<div style="background:#000;color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Poppins,sans-serif;font-size:10px;font-weight:700;border:2px solid #e1c4c1;">${i+1}</div>`,
+      iconSize:[22,22]
+    });
+    L.marker(coord,{icon}).addTo(mapa)
+      .bindPopup(`<b>${i+1}. ${p.cliente_nombre||'—'}</b><br>${p.distrito||'—'}`);
+  });
+}
+
+window.setConductor = (val) => { conductorSeleccionado = val; };
+
+window.setCriterio = (c) => {
+  criterio = c;
+  renderMain();
+};
+
+window.moverParada = (pid, dir) => {
+  const idx = pedidos.findIndex(p => p.id === pid);
+  if (idx < 0) return;
+  const newIdx = dir === 'up' ? idx - 1 : idx + 1;
+  if (newIdx < 0 || newIdx >= pedidos.length) return;
+  [pedidos[idx], pedidos[newIdx]] = [pedidos[newIdx], pedidos[idx]];
+  renderMain();
+};
+
+window.confirmarEntrega = async (pid) => {
+  if (!confirm('¿Marcar este pedido como entregado?')) return;
+  try {
+    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
+      estado: 'entregado',
+      entregadoEn: serverTimestamp(),
+      entregadoPor: user.nombre||user.email,
+    });
+  } catch(e) { console.error(e); alert('Error al actualizar.'); }
+};
+
+window.confirmarSalida = async () => {
+  if (!conductorSeleccionado) { alert('Asigna un conductor antes de confirmar la salida.'); return; }
+  const btn = document.getElementById('btnConfirmarSalida');
+  btn.disabled = true; btn.textContent = 'Confirmando...';
+  try {
+    const conductor = repartidores.find(r=>r.id===conductorSeleccionado);
+    for (const p of pedidos) {
+      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,p.id), {
+        conductor: conductor?.nombre || conductorSeleccionado,
+        conductorId: conductorSeleccionado,
+        salidaEn: serverTimestamp(),
+      });
+    }
+    alert('✓ Ruta confirmada. El conductor tiene sus paradas asignadas.');
+  } catch(e) {
+    console.error(e); alert('Error al confirmar.');
+  } finally {
+    btn.disabled=false; btn.textContent='Confirmar salida →';
+  }
+};
+
+// EXPORTAR
+window.abrirExportar = () => {
+  const conductor = repartidores.find(r=>r.id===conductorSeleccionado);
+  document.getElementById('exportSub').textContent =
+    `${conductor?.nombre||'Sin conductor'} · ${pedidos.length} paradas · ${criterio==='cercano'?'cerca → lejos':'lejos → cerca'}`;
+  document.getElementById('modalExportar').classList.add('open');
+};
+
+document.getElementById('btnCerrarExportar').onclick = () =>
+  document.getElementById('modalExportar').classList.remove('open');
+
+window.exportarWA = () => {
+  const conductor = repartidores.find(r=>r.id===conductorSeleccionado);
+  const ordenados = ordenarPedidos(pedidos);
+  const fecha = hoy.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'});
+  const lineas = ordenados.map((p,i) => {
+    const esOlva = p.esOlva || !((p.provincia||'').toLowerCase().includes('lima'));
+    const obs = p.observacion ? ` (📝 ${p.observacion})` : '';
+    const tipo = esOlva ? ' 📦 → Olva Courier' : '';
+    return `${i+1}. ${p.cliente_nombre||'—'}${tipo}${obs}\n   ${p.direccion||[p.distrito,p.provincia].filter(Boolean).join(', ')||'Sin dirección'}\n   Tel: ${p.telefono||'—'}`;
+  }).join('\n\n');
+
+  const texto = `🛵 *Ruta de despacho Sarcástica*\n📅 ${fecha}\n👤 ${conductor?.nombre||'—'}\n\n${lineas}\n\n_Generado por Sarcástica OS · EtraziApp_`;
+  navigator.clipboard.writeText(texto).then(() => {
+    alert('✓ Texto copiado. Pégalo en WhatsApp del conductor.');
+    document.getElementById('modalExportar').classList.remove('open');
+  });
+};
+
+window.exportarPDF = () => {
+  alert('Exportación PDF disponible en próxima versión.');
+};
+
+window.exportarExcel = () => {
+  const ordenados = ordenarPedidos(pedidos);
+  const rows = [['#','Cliente','Dirección','Teléfono','Monto','Tipo']];
+  ordenados.forEach((p,i) => {
+    const esOlva = p.esOlva || !((p.provincia||'').toLowerCase().includes('lima'));
+    rows.push([i+1, p.cliente_nombre||'—', p.direccion||[p.distrito,p.provincia].filter(Boolean).join(', '), p.telefono||'—', `S/ ${(p.total||0).toFixed(2)}`, esOlva?'Olva Courier':'Lima']);
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`ruta-sarcastica-${hoyStr}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  document.getElementById('modalExportar').classList.remove('open');
+};
 </script>
 </body>
 </html>
