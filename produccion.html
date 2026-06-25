@@ -6,9 +6,13 @@
 <title>Producción · Sarcástica OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
+
+/* ====== RESET ====== */
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#f1e8df;--black:#000;--rosa:#e1c4c1;--borde:#cca99d;--gris:#50504f;--verde:#3B6D11;--azul:#185FA5;--naranja:#854F0B;--rojo:#A32D2D;}
-#app-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:#000;display:flex;align-items:center;padding:0 20px;height:52px;gap:4px;border-bottom:2px solid #e1c4c1;font-family:"Poppins",sans-serif;}
+
+/* ====== NAV ====== */
+#app-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:#000;display:flex;align-items:center;padding:0 20px;height:52px;border-bottom:2px solid #e1c4c1;font-family:"Poppins",sans-serif;}
 #app-nav .nav-logo{display:flex;align-items:center;margin-right:16px;flex-shrink:0;text-decoration:none;}
 #app-nav .nav-divider{width:1px;height:20px;background:#333;margin-right:8px;flex-shrink:0;}
 #app-nav .nav-items{display:flex;gap:2px;flex:1;overflow-x:auto;}
@@ -19,25 +23,31 @@
 #app-nav .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
 #app-nav .nav-powered{font-size:10px;color:#444;letter-spacing:.04em;white-space:nowrap;}
 #app-nav .nav-powered strong{color:#cca99d;}
-#app-nav .nav-user-name{font-size:11px;color:#666;white-space:nowrap;}
-#app-nav .btn-salir{background:none;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:"Poppins",sans-serif;font-size:11px;white-space:nowrap;}
+#app-nav .nav-username{font-size:11px;color:#666;white-space:nowrap;}
+#app-nav .btn-salir{background:none;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:"Poppins",sans-serif;font-size:11px;white-space:nowrap;transition:border-color .15s,color .15s;}
 #app-nav .btn-salir:hover{border-color:#e1c4c1;color:#f1e8df;}
-#nav-menu-btn{display:none;width:30px;height:30px;border-radius:50%;background:#e1c4c1;cursor:pointer;border:none;padding:0;position:relative;flex-shrink:0;}
-#nav-menu-btn span{display:block;width:14px;height:1.5px;background:#000;border-radius:2px;margin:2px auto;}
-#nav-menu-dropdown{display:none;position:absolute;top:40px;right:0;background:#fff;border:1.5px solid var(--borde);border-radius:10px;min-width:180px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:500;}
+
+/* ====== MENÚ ANA ====== */
+.nav-user-wrap{position:relative;}
+#nav-menu-btn{display:none;width:28px;height:28px;border-radius:50%;background:#e1c4c1;cursor:pointer;border:none;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;flex-shrink:0;}
+#nav-menu-btn span{display:block;width:12px;height:1.5px;background:#000;border-radius:2px;}
+#nav-menu-dropdown{display:none;position:absolute;top:38px;right:0;background:#fff;border:1.5px solid var(--borde);border-radius:10px;min-width:180px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:500;}
 #nav-menu-dropdown.open{display:block;}
 #nav-menu-dropdown a{display:block;padding:11px 16px;font-size:13px;color:var(--black);text-decoration:none;font-family:"Poppins",sans-serif;white-space:nowrap;}
 #nav-menu-dropdown a:hover{background:var(--bg);}
-#nav-menu-dropdown .menu-div{height:1px;background:var(--borde);margin:4px 0;}
-.nav-user-wrap{position:relative;}
-body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
-</style>
-<style>
+#nav-menu-dropdown .menu-sep{height:1px;background:var(--borde);margin:4px 0;}
+
+/* ====== BODY ====== */
+body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
+
+/* ====== PAGE ====== */
 .page{max-width:1100px;margin:0 auto;padding:28px 24px;}
 .page-title{font-size:20px;font-weight:800;margin-bottom:24px;}
-.coming{background:#fff;border:1.5px dashed var(--borde);border-radius:12px;padding:60px;text-align:center;color:var(--borde);}
+.coming{background:#fff;border:1.5px dashed var(--borde);border-radius:12px;padding:60px;text-align:center;}
+.coming .coming-icon{font-size:36px;margin-bottom:12px;}
 .coming h3{font-size:15px;font-weight:700;color:var(--gris);margin-bottom:8px;}
-.coming p{font-size:13px;}
+.coming p{font-size:13px;color:var(--borde);}
+
 </style>
 </head>
 <body>
@@ -57,15 +67,13 @@ body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(
   </div>
   <div class="nav-right">
     <span class="nav-powered">powered by <strong>Etrazia</strong></span>
-    <span class="nav-user-name" id="nav-rol"></span>
+    <span class="nav-username" id="nav-rol"></span>
     <div class="nav-user-wrap">
-      <button id="nav-menu-btn" aria-label="Menú de Ana">
-        <span></span><span></span><span></span>
-      </button>
+      <button id="nav-menu-btn"><span></span><span></span><span></span></button>
       <div id="nav-menu-dropdown">
         <a href="dashboard.html">Dashboard</a>
         <a href="clientes.html">CRM Clientes</a>
-        <div class="menu-div"></div>
+        <div class="menu-sep"></div>
         <a href="configuracion.html">Configuración</a>
       </div>
     </div>
@@ -75,9 +83,9 @@ body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(
 <div class="page">
   <div class="page-title">Producción</div>
   <div class="coming">
-    <div style="font-size:36px;margin-bottom:12px;">🔧</div>
+    <div class="coming-icon">🔧</div>
     <h3>Módulo de Producción</h3>
-    <p>En construcción — Día 3 del desarrollo.</p>
+    <p>En construcción &mdash; Día 3 del desarrollo.</p>
   </div>
 </div>
 <script type="module">
