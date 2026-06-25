@@ -15,83 +15,77 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db   = getFirestore(app);
 
-// Links visibles por rol — en orden del proceso
-const NAV_LINKS = {
+const ROL_LINKS = {
   ventas:      ['inventario','pedidos','clientes'],
   produccion:  ['produccion'],
   operaciones: ['inventario','pedidos','validar','produccion','empaque','ruta','clientes'],
   directora:   ['inventario','pedidos','validar','produccion','empaque','ruta','clientes'],
 };
 
-const NAV_LABELS = {
-  inventario: 'Inventario',
-  pedidos:    'Pedidos',
-  validar:    'Validar Pagos',
-  produccion: 'Producción',
-  empaque:    'Empaque',
-  ruta:       'Ruta',
-  clientes:   'CRM Clientes',
-};
+// Aplica lo visual INMEDIATAMENTE desde localStorage (sin esperar Firebase)
+function applyNavInstant() {
+  const cached = localStorage.getItem('sc_user');
+  if (!cached) return;
+  const u = JSON.parse(cached);
 
-const NAV_HREFS = {
-  inventario: 'inventario.html',
-  pedidos:    'pedidos.html',
-  validar:    'validar.html',
-  produccion: 'produccion.html',
-  empaque:    'empaque.html',
-  ruta:       'ruta.html',
-  clientes:   'clientes.html',
-};
+  // Nombre
+  const el = document.getElementById('nav-rol');
+  if (el) el.textContent = u.nombre;
+
+  // Rol en body → activa hamburguesa via CSS
+  document.body.classList.add('rol-' + u.rol);
+
+  // Ocultar links que el rol no ve
+  const links = ROL_LINKS[u.rol] || [];
+  document.querySelectorAll('.nav-link').forEach(a => {
+    if (!links.includes(a.dataset.page)) a.style.display = 'none';
+  });
+}
+
+// Llamar SINCRÓNICAMENTE antes de que el DOM termine de pintar
+applyNavInstant();
 
 export async function initPage(allowedRoles = null) {
   return new Promise((resolve) => {
     onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = 'index.html'; return; }
+      if (!user) {
+        localStorage.removeItem('sc_user');
+        window.location.href = 'index.html';
+        return;
+      }
 
-      const snap = await getDoc(doc(db, 'usuarios', user.uid));
-      if (!snap.exists()) { window.location.href = 'index.html'; return; }
+      let userData;
+      const cached = localStorage.getItem('sc_user');
 
-      const userData = { uid: user.uid, email: user.email, ...snap.data() };
+      if (cached) {
+        userData = JSON.parse(cached);
+      } else {
+        const snap = await getDoc(doc(db, 'usuarios', user.uid));
+        if (!snap.exists()) { window.location.href = 'index.html'; return; }
+        userData = { uid: user.uid, email: user.email, ...snap.data() };
+        localStorage.setItem('sc_user', JSON.stringify(userData));
+      }
 
       if (allowedRoles && !allowedRoles.includes(userData.rol)) {
         window.location.href = 'index.html'; return;
       }
 
-      const current = location.pathname.split('/').pop().replace('.html','') || 'inventario';
-      const links = NAV_LINKS[userData.rol] || [];
-
-      // Activar/ocultar links
-      document.querySelectorAll('.nav-link').forEach(a => {
-        const p = a.dataset.page;
-        if (!links.includes(p)) {
-          a.style.display = 'none';
-        } else if (p === current) {
-          a.classList.add('active');
-        }
-      });
-
-      // Rol label
-      const rolEl = document.getElementById('nav-rol');
-      if (rolEl) rolEl.textContent = userData.nombre || userData.email.split('@')[0];
-
-      // Salir
+      // Logout
       const btnSalir = document.getElementById('btn-salir');
       if (btnSalir) {
-        btnSalir.onclick = async () => { await signOut(auth); window.location.href = 'index.html'; };
+        btnSalir.onclick = async () => {
+          localStorage.removeItem('sc_user');
+          await signOut(auth);
+          window.location.href = 'index.html';
+        };
       }
 
-      // Menú hamburguesa solo para directora
-      if (userData.rol === 'directora') {
-        const menuBtn = document.getElementById('nav-menu-btn');
-        const menuDropdown = document.getElementById('nav-menu-dropdown');
-        if (menuBtn && menuDropdown) {
-          menuBtn.style.display = 'flex';
-          menuBtn.onclick = (e) => {
-            e.stopPropagation();
-            menuDropdown.classList.toggle('open');
-          };
-          document.addEventListener('click', () => menuDropdown.classList.remove('open'));
-        }
+      // Hamburguesa dropdown
+      const menuBtn = document.getElementById('nav-menu-btn');
+      const menuDrop = document.getElementById('nav-menu-dropdown');
+      if (menuBtn && menuDrop) {
+        menuBtn.onclick = (e) => { e.stopPropagation(); menuDrop.classList.toggle('open'); };
+        document.addEventListener('click', () => menuDrop.classList.remove('open'));
       }
 
       resolve(userData);
