@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Pedidos · Sarcástica OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<style id="nav-css">
+<style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#f1e8df;--black:#000;--rosa:#e1c4c1;--borde:#cca99d;--gris:#50504f;--verde:#3B6D11;--azul:#185FA5;--naranja:#854F0B;--rojo:#A32D2D;}
 #app-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:#000;display:flex;align-items:center;padding:0 20px;height:52px;gap:4px;border-bottom:2px solid #e1c4c1;font-family:"Poppins",sans-serif;}
@@ -20,27 +20,28 @@
 #app-nav .nav-powered{font-size:10px;color:#444;letter-spacing:.04em;}
 #app-nav .nav-powered strong{color:#cca99d;}
 #app-nav .nav-rol{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.06em;}
-#app-nav .btn-salir{background:none;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:"Poppins",sans-serif;font-size:11px;transition:border-color .15s,color .15s;}
+#app-nav .btn-salir{background:none;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:"Poppins",sans-serif;font-size:11px;}
 #app-nav .btn-salir:hover{border-color:#e1c4c1;color:#f1e8df;}
 body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
-</style>
-<style>
+
 .page{max-width:1100px;margin:0 auto;padding:28px 24px;}
 .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
 .page-title{font-size:20px;font-weight:800;}
 .page-sub{font-size:12px;color:var(--gris);margin-top:2px;}
 .btn-primary{background:var(--black);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
 .btn-primary:hover{opacity:.8;}
+
 .filtros{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
 .filtro-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-family:"Poppins",sans-serif;font-size:12px;font-weight:500;color:var(--gris);cursor:pointer;transition:all .15s;}
 .filtro-btn.active,.filtro-btn:hover{background:var(--black);color:#fff;border-color:var(--black);}
+
 .tabla-wrap{background:#fff;border:1.5px solid var(--borde);border-radius:12px;overflow:hidden;}
 .tabla-header{display:grid;grid-template-columns:70px 1fr 90px 90px 80px 140px 60px;padding:10px 16px;background:#eddbd0;gap:8px;}
 .tabla-header span{font-size:11px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;}
-.tabla-row{display:grid;grid-template-columns:70px 1fr 90px 90px 80px 140px 60px;padding:13px 16px;border-top:1px solid #f0e8e0;align-items:center;gap:8px;transition:background .1s;}
+.tabla-row{display:grid;grid-template-columns:70px 1fr 90px 90px 80px 140px 60px;padding:13px 16px;border-top:1px solid #f0e8e0;align-items:center;gap:8px;}
 .tabla-row:hover{background:#fdf9f6;}
 .tabla-empty{text-align:center;padding:60px 0;color:var(--borde);font-size:13px;}
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
+.badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
 .badge-pend{background:#faeeda;color:var(--naranja);}
 .badge-prod{background:#e0eaf8;color:var(--azul);}
 .badge-emp{background:#f0e0f8;color:#6B21A8;}
@@ -51,7 +52,7 @@ body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(
 .badge-web{background:#e0eaf8;color:var(--azul);}
 .cliente-nombre{font-size:13px;font-weight:600;}
 .cliente-sub{font-size:11px;color:var(--gris);margin-top:1px;}
-.ver-link{font-size:12px;color:var(--azul);font-weight:500;text-decoration:none;cursor:pointer;}
+.ver-link{font-size:12px;color:var(--azul);font-weight:500;text-decoration:none;}
 .pedido-num{font-size:12px;font-weight:600;color:var(--gris);}
 .monto{font-size:13px;font-weight:600;}
 
@@ -81,10 +82,6 @@ body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(
 .item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .item-num{font-size:10px;color:var(--borde);font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
 .item-del{font-size:11px;color:var(--rojo);cursor:pointer;background:none;border:none;font-family:"Poppins",sans-serif;padding:0;}
-.stock-msg{border-radius:5px;padding:5px 8px;font-size:10px;margin-top:6px;display:none;}
-.stock-ok{background:#e8f5e0;color:var(--verde);}
-.stock-low{background:#faeeda;color:var(--naranja);}
-.stock-out{background:#fcebeb;color:var(--rojo);}
 .btn-add-item{border:1.5px dashed var(--borde);border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--borde);cursor:pointer;background:none;width:100%;font-family:"Poppins",sans-serif;margin-bottom:4px;}
 .btn-add-item:hover{border-color:var(--black);color:var(--black);}
 .voucher-box{background:#fff;border:1px solid var(--borde);border-radius:6px;padding:10px;text-align:center;font-size:11px;color:var(--gris);cursor:pointer;margin-top:4px;}
@@ -164,7 +161,8 @@ body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(
     </div>
 
     <div class="modal-body">
-      <!-- CLIENTA -->
+
+      <!-- DATOS DE LA CLIENTA -->
       <div class="form-card">
         <div class="sec-label">Datos de la clienta</div>
         <div class="g3">
@@ -188,7 +186,7 @@ body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(
         </div>
       </div>
 
-      <!-- ITEMS -->
+      <!-- ITEMS DEL PEDIDO -->
       <div class="form-card">
         <div class="sec-label">Ítems del pedido</div>
         <div id="itemsContainer"></div>
@@ -216,6 +214,7 @@ body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(
           <input type="text" id="observacion" placeholder="Ej: envolver para regalo"/>
         </div>
       </div>
+
     </div>
 
     <div class="modal-footer">
@@ -229,7 +228,7 @@ body{padding-top:52px!important;font-family:"Poppins",sans-serif;background:var(
 </div>
 
 <script type="module">
-import { initPage, db, auth } from './nav.js';
+import { initPage, db } from './nav.js';
 import {
   collection, query, orderBy, where, onSnapshot,
   doc, getDoc, setDoc, addDoc, serverTimestamp, getDocs
@@ -243,7 +242,7 @@ const hoyStr = hoy.toISOString().split('T')[0];
 document.getElementById('fechaHoy').textContent =
   hoy.toLocaleDateString('es-PE',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 document.getElementById('modalSub').textContent =
-  (user.nombre || user.email) + ' · ' + hoy.toLocaleDateString('es-PE',{day:'numeric',month:'short',year:'numeric'});
+  (user.nombre||user.email) + ' · ' + hoy.toLocaleDateString('es-PE',{day:'numeric',month:'short',year:'numeric'});
 document.getElementById('fechaEntrega').min = hoyStr;
 document.getElementById('fechaEntrega').value = hoyStr;
 
@@ -257,29 +256,27 @@ const BADGE = {
 };
 const CANAL_B = { WhatsApp:['badge-wa','WA'], Instagram:['badge-ig','IG'], Web:['badge-web','Web'] };
 
-// ---- LISTA ----
+// ---- LISTA DE PEDIDOS ----
 let estadoActual = 'todos', unsub = null;
 function cargarPedidos() {
   if (unsub) unsub();
-  const col = collection(db, `empresas/${EMPRESA}/pedidos`);
-  const q = estadoActual === 'todos'
-    ? query(col, orderBy('creadoEn','desc'))
-    : query(col, where('estado','==',estadoActual), orderBy('creadoEn','desc'));
+  const col = collection(db,`empresas/${EMPRESA}/pedidos`);
+  const q = estadoActual==='todos'
+    ? query(col,orderBy('creadoEn','desc'))
+    : query(col,where('estado','==',estadoActual),orderBy('creadoEn','desc'));
   unsub = onSnapshot(q, snap => {
     const lista = document.getElementById('listaPedidos');
-    if (snap.empty) { lista.innerHTML = '<div class="tabla-empty">No hay pedidos en este estado</div>'; return; }
+    if (snap.empty) { lista.innerHTML='<div class="tabla-empty">No hay pedidos en este estado</div>'; return; }
     lista.innerHTML = snap.docs.map(d => {
       const p = d.data();
-      const [bc,bl] = BADGE[p.estado] || ['','--'];
-      const [cc,cl] = CANAL_B[p.canal] || ['badge-web', p.canal||'--'];
-      const fecha = p.fechaEntrega || '--';
-      const urgente = fecha === hoyStr ? ' <span style="color:var(--rojo);font-size:10px;font-weight:600;">HOY</span>' : '';
+      const [bc,bl] = BADGE[p.estado]||['','--'];
+      const [cc,cl] = CANAL_B[p.canal]||['badge-web',p.canal||'--'];
+      const fecha = p.fechaEntrega||'--';
+      const urgente = fecha===hoyStr ? ' <span style="color:var(--rojo);font-size:10px;font-weight:600;">HOY</span>' : '';
       return `<div class="tabla-row">
         <span class="pedido-num">#${d.id.slice(-5).toUpperCase()}</span>
-        <div>
-          <div class="cliente-nombre">${p.cliente_nombre||'--'}</div>
-          <div class="cliente-sub">${[p.distrito,p.provincia,p.cliente_dni].filter(Boolean).join(' · ')}</div>
-        </div>
+        <div><div class="cliente-nombre">${p.cliente_nombre||'--'}</div>
+        <div class="cliente-sub">${[p.distrito,p.provincia,p.cliente_dni].filter(Boolean).join(' · ')}</div></div>
         <span class="badge ${cc}">${cl}</span>
         <span style="font-size:12px;color:var(--gris);">${fecha}${urgente}</span>
         <span class="monto">S/ ${(p.total||0).toFixed(2)}</span>
@@ -292,27 +289,22 @@ function cargarPedidos() {
 
 // Contadores
 [['todos','cnt-todos'],['pendiente_validacion','cnt-pv'],['en_produccion','cnt-ep'],
- ['en_empaque','cnt-ee'],['en_ruta','cnt-er'],['entregado','cnt-en']].forEach(([estado,elId]) => {
-  const q2 = estado === 'todos'
+ ['en_empaque','cnt-ee'],['en_ruta','cnt-er'],['entregado','cnt-en']].forEach(([estado,elId])=>{
+  const q2 = estado==='todos'
     ? query(collection(db,`empresas/${EMPRESA}/pedidos`))
     : query(collection(db,`empresas/${EMPRESA}/pedidos`),where('estado','==',estado));
-  onSnapshot(q2, snap => {
-    const el = document.getElementById(elId);
-    if (el) el.textContent = snap.size ? `(${snap.size})` : '';
-  });
+  onSnapshot(q2,snap=>{ const el=document.getElementById(elId); if(el) el.textContent=snap.size?`(${snap.size})`:''; });
 });
 
-document.querySelectorAll('.filtro-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    estadoActual = btn.dataset.estado;
-    cargarPedidos();
+document.querySelectorAll('.filtro-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); estadoActual=btn.dataset.estado; cargarPedidos();
   });
 });
 cargarPedidos();
 
-// ---- MODAL ----
+// ---- MODAL NUEVO PEDIDO ----
 let productos = [];
 let itemCount = 0;
 
@@ -324,7 +316,7 @@ async function cargarProductos() {
 
 function calcTotal() {
   let t = 0;
-  document.querySelectorAll('.item-precio').forEach(inp => { const v=parseFloat(inp.value); if(!isNaN(v)) t+=v; });
+  document.querySelectorAll('.item-precio').forEach(inp=>{ const v=parseFloat(inp.value); if(!isNaN(v)) t+=v; });
   document.getElementById('totalLabel').textContent = `Total: S/ ${t.toFixed(2)}`;
 }
 
@@ -338,7 +330,7 @@ function addItem() {
   const idx = itemCount;
   const cats = getCategorias();
   const div = document.createElement('div');
-  div.className = 'item-box'; div.id = `item-${idx}`;
+  div.className='item-box'; div.id=`item-${idx}`;
   div.innerHTML = `
     <div class="item-header">
       <span class="item-num">Ítem ${idx}</span>
@@ -351,7 +343,7 @@ function addItem() {
         </select>
       </div>
       <div class="field"><label>Producto</label>
-        <select class="item-prod" data-idx="${idx}" onchange="onProdChange(${idx})">
+        <select class="item-prod" data-idx="${idx}">
           <option value="">-- elige categoría --</option>
         </select>
       </div>
@@ -366,10 +358,7 @@ function addItem() {
       <div class="field"><label>Precio unitario (S/)</label>
         <input type="number" class="item-precio" data-idx="${idx}" placeholder="0.00" step="0.01" min="0" oninput="calcTotal()"/>
       </div>
-    </div>
-    <div class="stock-msg stock-ok" id="sok-${idx}"></div>
-    <div class="stock-msg stock-low" id="slow-${idx}"></div>
-    <div class="stock-msg stock-out" id="sout-${idx}"></div>`;
+    </div>`;
   document.getElementById('itemsContainer').appendChild(div);
 }
 
@@ -381,50 +370,34 @@ window.onCatChange = idx => {
   const filtrados = productos.filter(p=>p.categoria===cat);
   sel.innerHTML = filtrados.length
     ? `<option value="">Seleccionar</option>${filtrados.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join('')}`
-    : `<option value="">Sin productos</option>`;
-  [`sok-${idx}`,`slow-${idx}`,`sout-${idx}`].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+    : `<option value="">Sin productos en esta categoría</option>`;
 };
 
-window.onProdChange = idx => {
-  const prodId = document.querySelector(`.item-prod[data-idx="${idx}"]`).value;
-  const prod = productos.find(p=>p.id===prodId);
-  [`sok-${idx}`,`slow-${idx}`,`sout-${idx}`].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
-  if (!prod) return;
-  const disp = prod.disponible||0, seg = prod.stock_seguridad||0;
-  if (disp===0) {
-    const e=document.getElementById(`sout-${idx}`); e.textContent='✕ Sin stock disponible — no se puede registrar'; e.style.display='block';
-  } else if (disp<=seg) {
-    const e=document.getElementById(`slow-${idx}`); e.textContent=`⚠ Solo ${disp} disponibles (bajo mínimo) · Se reservará al registrar`; e.style.display='block';
-  } else {
-    const e=document.getElementById(`sok-${idx}`); e.textContent=`✓ ${disp} unidades disponibles · Se reservará al registrar`; e.style.display='block';
-  }
-};
-
-// DNI lookup
+// DNI → busca en CRM
 let dniTimer = null;
 document.getElementById('dni').addEventListener('input', function() {
   clearTimeout(dniTimer);
   const dni = this.value.trim();
   const alertEl = document.getElementById('clienteAlert');
   const fieldsEl = document.getElementById('clienteFields');
-  alertEl.className = 'cliente-alert'; alertEl.textContent = '';
+  alertEl.className='cliente-alert'; alertEl.textContent='';
   if (dni.length < 8) { fieldsEl.style.display='none'; return; }
   dniTimer = setTimeout(async () => {
     const snap = await getDocs(query(collection(db,`empresas/${EMPRESA}/clientes`),where('dni','==',dni)));
-    fieldsEl.style.display = 'block';
+    fieldsEl.style.display='block';
     if (!snap.empty) {
       const c = snap.docs[0].data();
-      ['nombre','correo','distrito','provincia','direccion'].forEach(id=>{
+      ['nombre','correo','distrito','provincia','direccion','telefono'].forEach(id=>{
         const el=document.getElementById(id); if(el) el.value=c[id]||'';
       });
       alertEl.className='cliente-alert alert-encontrado';
-      alertEl.textContent='✓ Cliente encontrada en CRM — datos cargados automáticamente';
+      alertEl.textContent='✓ Clienta encontrada en CRM — datos cargados automáticamente';
     } else {
       ['nombre','correo','distrito','provincia','direccion'].forEach(id=>{
         const el=document.getElementById(id); if(el) el.value='';
       });
       alertEl.className='cliente-alert alert-nuevo';
-      alertEl.textContent='Cliente nueva — por favor completa los datos';
+      alertEl.textContent='Clienta nueva — por favor completa los datos';
     }
   }, 600);
 });
@@ -441,7 +414,7 @@ document.getElementById('btnNuevo').onclick = async () => {
   itemCount=0;
   document.getElementById('itemsContainer').innerHTML='';
   ['dni','telefono','nombre','correo','distrito','provincia','direccion','observacion'].forEach(id=>{
-    const el=document.getElementById(id); if(el)el.value='';
+    const el=document.getElementById(id); if(el) el.value='';
   });
   document.getElementById('canal').value='';
   document.getElementById('medioPago').value='';
@@ -455,40 +428,40 @@ document.getElementById('btnNuevo').onclick = async () => {
   document.getElementById('modalOverlay').classList.add('open');
 };
 
-document.getElementById('btnCerrar').onclick = () => document.getElementById('modalOverlay').classList.remove('open');
-document.getElementById('modalOverlay').onclick = e => { if(e.target===document.getElementById('modalOverlay')) document.getElementById('modalOverlay').classList.remove('open'); };
+document.getElementById('btnCerrar').onclick = ()=>document.getElementById('modalOverlay').classList.remove('open');
+document.getElementById('modalOverlay').onclick = e=>{ if(e.target===document.getElementById('modalOverlay')) document.getElementById('modalOverlay').classList.remove('open'); };
 document.getElementById('btnAddItem').onclick = addItem;
 
-// REGISTRAR
+// REGISTRAR PEDIDO
 document.getElementById('btnRegistrar').onclick = async () => {
   const dni=document.getElementById('dni').value.trim();
   const nombre=document.getElementById('nombre').value.trim();
   const canal=document.getElementById('canal').value;
   const fechaEntrega=document.getElementById('fechaEntrega').value;
   const medioPago=document.getElementById('medioPago').value;
-  if(!dni||!nombre||!canal||!fechaEntrega||!medioPago){alert('Completa todos los campos obligatorios (*).');return;}
+  if (!dni||!nombre||!canal||!fechaEntrega||!medioPago) { alert('Completa todos los campos obligatorios (*).'); return; }
 
   const items=[]; let total=0; let valido=true;
   document.querySelectorAll('.item-box').forEach(box=>{
     const idx=box.id.replace('item-','');
     const cat=box.querySelector('.item-cat').value;
-    const prodId=box.querySelector('.item-prod').value;
+    const prodEl=box.querySelector('.item-prod');
+    const prodId=prodEl ? prodEl.value : '';
     const variante=box.querySelector('.item-variante').value.trim();
     const diseno=box.querySelector('.item-diseno').value.trim();
     const precio=parseFloat(box.querySelector('.item-precio').value);
-    if(!cat||!prodId||isNaN(precio)||precio<=0){valido=false;return;}
+    if (!cat||!prodId||isNaN(precio)||precio<=0) { valido=false; return; }
     const prod=productos.find(p=>p.id===prodId);
-    if(!prod||(prod.disponible||0)<=0){valido=false;return;}
     total+=precio;
-    items.push({categoria:cat,productoId:prodId,productoNombre:prod.nombre,variante,diseno,precio,estado:'pendiente'});
+    items.push({categoria:cat,productoId:prodId,productoNombre:prod?prod.nombre:'',variante,diseno,precio,estado:'pendiente'});
   });
 
-  if(!valido||items.length===0){alert('Revisa los ítems: categoría, producto y precio son obligatorios, y debe haber stock.');return;}
+  if (!valido||items.length===0) { alert('Revisa los ítems: categoría, producto y precio son obligatorios.'); return; }
 
   const btn=document.getElementById('btnRegistrar');
   btn.disabled=true; btn.textContent='Registrando...';
   try {
-    const pedidoRef=await addDoc(collection(db,`empresas/${EMPRESA}/pedidos`),{
+    const pedidoRef = await addDoc(collection(db,`empresas/${EMPRESA}/pedidos`),{
       cliente_dni:dni, cliente_nombre:nombre,
       correo:document.getElementById('correo').value.trim(),
       telefono:document.getElementById('telefono').value.trim(),
@@ -500,33 +473,38 @@ document.getElementById('btnRegistrar').onclick = async () => {
       estado:'pendiente_validacion', total, total_items:items.length,
       vendedor:user.nombre||user.email, creadoEn:serverTimestamp(),
     });
-    for(const item of items){
+
+    for (const item of items) {
       await addDoc(collection(db,`empresas/${EMPRESA}/pedidos/${pedidoRef.id}/items`),item);
+      // Reservar crudo: disponible -1, reservado +1
       const invRef=doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
       const invSnap=await getDoc(invRef);
-      if(invSnap.exists()){
+      if (invSnap.exists()) {
         const d=invSnap.data();
         await setDoc(invRef,{...d,disponible:Math.max(0,(d.disponible||0)-1),reservado:(d.reservado||0)+1});
       }
     }
+
+    // Upsert CRM
     await setDoc(doc(db,`empresas/${EMPRESA}/clientes`,dni),{
-      dni,nombre,correo:document.getElementById('correo').value.trim(),
+      dni, nombre, correo:document.getElementById('correo').value.trim(),
       telefono:document.getElementById('telefono').value.trim(),
       distrito:document.getElementById('distrito').value.trim(),
       provincia:document.getElementById('provincia').value.trim(),
       direccion:document.getElementById('direccion').value.trim(),
       ultimoPedido:serverTimestamp(),
     },{merge:true});
+
     document.getElementById('modalOverlay').classList.remove('open');
     alert('✓ Pedido registrado y enviado a validación');
-  } catch(e){
+  } catch(e) {
     console.error(e); alert('Error al registrar. Intenta de nuevo.');
   } finally {
     btn.disabled=false; btn.textContent='Registrar y enviar a validación →';
   }
 };
 
-document.getElementById('btnBorrador').onclick = () => alert('Función de borrador disponible próximamente.');
+document.getElementById('btnBorrador').onclick = ()=>alert('Función de borrador disponible próximamente.');
 </script>
 </body>
 </html>
