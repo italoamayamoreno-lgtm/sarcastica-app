@@ -31,15 +31,60 @@
 #nav-menu-dropdown a:hover{background:var(--bg);}
 #nav-menu-dropdown .menu-sep{height:1px;background:var(--borde);margin:4px 0;}
 body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
-.page{max-width:1100px;margin:0 auto;padding:28px 24px;}
-.page-title{font-size:20px;font-weight:800;margin-bottom:24px;}
-.coming{background:#fff;border:1.5px dashed var(--borde);border-radius:12px;padding:60px;text-align:center;}
-.coming-icon{font-size:36px;margin-bottom:12px;}
-.coming h3{font-size:15px;font-weight:700;color:var(--gris);margin-bottom:8px;}
-.coming p{font-size:13px;color:var(--borde);}
+
+.page{max-width:900px;margin:0 auto;padding:28px 24px;}
+.page-header{margin-bottom:24px;}
+.page-title{font-size:20px;font-weight:800;}
+.page-sub{font-size:12px;color:var(--gris);margin-top:3px;}
+
+/* MÉTRICAS */
+.metricas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.metrica{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:14px 16px;}
+.metrica .ml{font-size:11px;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;font-weight:500;margin-bottom:4px;}
+.metrica .mv{font-size:26px;font-weight:800;line-height:1;}
+
+/* FILTROS */
+.filtros{display:flex;gap:8px;margin-bottom:16px;}
+.filtro-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-family:"Poppins",sans-serif;font-size:12px;font-weight:500;color:var(--gris);cursor:pointer;transition:all .15s;}
+.filtro-btn.active,.filtro-btn:hover{background:var(--black);color:#fff;border-color:var(--black);}
+
+/* CARDS */
+.card{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:18px;margin-bottom:12px;}
+.card.empaquetado{border-color:#b8dcb8;background:#f8fff5;}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.card-nombre{font-size:14px;font-weight:700;}
+.card-meta{font-size:11px;color:var(--gris);margin-top:2px;}
+.badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
+.badge-pend{background:#faeeda;color:var(--naranja);}
+.badge-proc{background:#e0eaf8;color:var(--azul);}
+.badge-emp{background:#e8f5e0;color:var(--verde);}
+
+/* ITEMS */
+.items-box{background:var(--bg);border-radius:8px;padding:12px;margin-bottom:10px;}
+.item-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid #e6dddb;}
+.item-row:first-child{border-top:none;}
+.item-nombre{font-size:12px;font-weight:600;}
+.item-diseno{font-size:11px;color:var(--gris);}
+.item-listo{font-size:11px;font-weight:600;color:var(--verde);}
+
+/* OBSERVACIÓN */
+.obs-box{background:#faeeda;border-radius:6px;padding:8px 12px;font-size:12px;color:var(--naranja);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+
+/* ACCIONES */
+.card-actions{display:flex;justify-content:flex-end;}
+.btn-avanzar{background:var(--black);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-avanzar:hover{opacity:.8;}
+.btn-avanzar:disabled{opacity:.4;cursor:not-allowed;}
+.btn-despacho{background:var(--verde);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-despacho:hover{opacity:.8;}
+
+.empty{text-align:center;padding:60px 0;color:var(--borde);font-size:13px;}
+.empty-wrap{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:60px;text-align:center;color:var(--borde);}
+.empty-wrap p{font-size:13px;}
 </style>
 </head>
 <body>
+
 <nav id="app-nav">
   <a href="inventario.html" class="nav-logo">
     <svg viewBox="0 0 200 36" xmlns="http://www.w3.org/2000/svg" height="20"><text x="0" y="29" font-family="Georgia,serif" font-size="29" font-weight="400" fill="#ffffff" letter-spacing="-0.5">sarcástica.</text></svg>
@@ -47,12 +92,12 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
   <div class="nav-divider"></div>
   <div class="nav-items">
     <a href="inventario.html" class="nav-link" data-page="inventario">Inventario</a>
-    <a href="pedidos.html" class="nav-link" data-page="pedidos">Pedidos</a>
-    <a href="validar.html" class="nav-link" data-page="validar">Validar Pagos</a>
+    <a href="pedidos.html"    class="nav-link" data-page="pedidos">Pedidos</a>
+    <a href="validar.html"    class="nav-link" data-page="validar">Validar Pagos</a>
     <a href="produccion.html" class="nav-link" data-page="produccion">Producción</a>
-    <a href="empaque.html" class="nav-link active" data-page="empaque">Empaque</a>
-    <a href="ruta.html" class="nav-link" data-page="ruta">Ruta</a>
-    <a href="clientes.html" class="nav-link" data-page="clientes">CRM</a>
+    <a href="empaque.html"    class="nav-link active" data-page="empaque">Empaque</a>
+    <a href="ruta.html"       class="nav-link" data-page="ruta">Ruta</a>
+    <a href="clientes.html"   class="nav-link" data-page="clientes">CRM</a>
   </div>
   <div class="nav-right">
     <span class="nav-powered">powered by <strong>Etrazia</strong></span>
@@ -69,17 +114,167 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
     <button class="btn-salir" id="btn-salir">Salir</button>
   </div>
 </nav>
+
 <div class="page">
-  <div class="page-title">Empaque</div>
-  <div class="coming">
-    <div class="coming-icon">📫</div>
-    <h3>Módulo de Empaque</h3>
-    <p>En construcción &mdash; Día 4 del desarrollo.</p>
+  <div class="page-header">
+    <div class="page-title">Empaque</div>
+    <div class="page-sub" id="pageSub"></div>
   </div>
+
+  <div class="metricas">
+    <div class="metrica">
+      <div class="ml">Por empaquetar</div>
+      <div class="mv" style="color:var(--naranja)" id="m-pend">0</div>
+    </div>
+    <div class="metrica">
+      <div class="ml">Empaquetados</div>
+      <div class="mv" style="color:var(--verde)" id="m-emp">0</div>
+    </div>
+    <div class="metrica">
+      <div class="ml">A despacho hoy</div>
+      <div class="mv" style="color:var(--gris)" id="m-desp">0</div>
+    </div>
+  </div>
+
+  <div class="filtros">
+    <button class="filtro-btn active" data-filtro="en_empaque">Pendientes</button>
+    <button class="filtro-btn" data-filtro="empaquetado">A despacho</button>
+  </div>
+
+  <div id="listaPedidos"><div class="empty-wrap"><p>Cargando...</p></div></div>
 </div>
+
 <script type="module">
-import { initPage } from './nav.js';
-await initPage(['directora','operaciones']);
+import { initPage, db } from './nav.js';
+import {
+  collection, query, where, onSnapshot,
+  doc, getDocs, updateDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const EMPRESA = 'sarcastica';
+const user = await initPage(['directora','operaciones']);
+
+const hoy = new Date();
+const hoyStr = hoy.toISOString().split('T')[0];
+document.getElementById('pageSub').textContent =
+  'Pedidos listos desde producción · ' + hoy.toLocaleDateString('es-PE',{day:'numeric',month:'long'});
+
+const col = collection(db,`empresas/${EMPRESA}/pedidos`);
+
+// Contadores
+onSnapshot(query(col, where('estado','==','en_empaque')), s =>
+  document.getElementById('m-pend').textContent = s.size);
+onSnapshot(query(col, where('estado','==','empaquetado')), s => {
+  document.getElementById('m-emp').textContent = s.size;
+  document.getElementById('m-desp').textContent = s.size;
+});
+
+let filtroActual = 'en_empaque';
+let unsubLista = null;
+
+function cargar() {
+  if (unsubLista) unsubLista();
+  const q = query(col, where('estado','==', filtroActual));
+  unsubLista = onSnapshot(q, async snap => {
+    const lista = document.getElementById('listaPedidos');
+    if (snap.empty) {
+      lista.innerHTML = '<div class="empty-wrap"><p>No hay pedidos en este estado</p></div>';
+      return;
+    }
+
+    const htmls = await Promise.all(snap.docs.map(async d => {
+      const p = d.data();
+      const pid = d.id;
+      const esEmpaquetado = p.estado === 'empaquetado';
+
+      // Cargar ítems
+      const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+      const items = [];
+      itemsSnap.forEach(i => items.push(i.data()));
+
+      const itemsHtml = items.map(i => `
+        <div class="item-row">
+          <div>
+            <div class="item-nombre">${i.productoNombre||'—'}${i.variante?' · '+i.variante:''}</div>
+            <div class="item-diseno">${i.diseno||''}</div>
+          </div>
+          <span class="item-listo">✓ Listo</span>
+        </div>`).join('');
+
+      const obsHtml = p.observacion
+        ? `<div class="obs-box">📝 Observación: <strong>${p.observacion}</strong></div>`
+        : '';
+
+      const badgeHtml = esEmpaquetado
+        ? '<span class="badge badge-emp">✓ Empaquetado</span>'
+        : '<span class="badge badge-pend">Pendiente</span>';
+
+      const accionHtml = esEmpaquetado
+        ? `<div class="card-actions"><button class="btn-despacho" onclick="pasarDespacho('${pid}')">Pasar a despacho →</button></div>`
+        : `<div class="card-actions"><button class="btn-avanzar" onclick="confirmarEmpaque('${pid}')">Confirmar empaque ✓</button></div>`;
+
+      return `<div class="card${esEmpaquetado?' empaquetado':''}" id="card-${pid}">
+        <div class="card-header">
+          <div>
+            <div class="card-nombre">${p.cliente_nombre||'—'}</div>
+            <div class="card-meta">${[p.distrito, p.provincia].filter(Boolean).join(' · ')} · ${p.fechaEntrega||'—'} · ${p.canal||'—'} · ${p.medioPago||'—'}</div>
+          </div>
+          ${badgeHtml}
+        </div>
+        <div class="items-box">${itemsHtml}</div>
+        ${obsHtml}
+        ${accionHtml}
+      </div>`;
+    }));
+
+    lista.innerHTML = htmls.join('');
+  });
+}
+
+// Confirmar empaque → estado: empaquetado
+window.confirmarEmpaque = async (pid) => {
+  const btn = document.querySelector(`#card-${pid} .btn-avanzar`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Procesando...'; }
+  try {
+    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
+      estado: 'empaquetado',
+      empaquetadoEn: serverTimestamp(),
+      empaquetadoPor: user.nombre||user.email,
+    });
+  } catch(e) {
+    console.error(e);
+    alert('Error. Intenta de nuevo.');
+    if (btn) { btn.disabled = false; btn.textContent = 'Confirmar empaque ✓'; }
+  }
+};
+
+// Pasar a despacho → estado: en_ruta (pasa a bandeja de Ruta)
+window.pasarDespacho = async (pid) => {
+  const btn = document.querySelector(`#card-${pid} .btn-despacho`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Procesando...'; }
+  try {
+    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
+      estado: 'en_ruta',
+      pasadoRutaEn: serverTimestamp(),
+    });
+  } catch(e) {
+    console.error(e);
+    alert('Error. Intenta de nuevo.');
+    if (btn) { btn.disabled = false; btn.textContent = 'Pasar a despacho →'; }
+  }
+};
+
+// Filtros
+document.querySelectorAll('.filtro-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filtroActual = btn.dataset.filtro;
+    cargar();
+  });
+});
+
+cargar();
 </script>
 </body>
 </html>
