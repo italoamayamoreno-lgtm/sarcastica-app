@@ -1,6 +1,3 @@
-// nav.js — autenticación + protección de ruta
-// El HTML de la nav va hardcodeado en cada página para evitar parpadeo
-
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -19,25 +16,14 @@ export const auth = getAuth(app);
 export const db   = getFirestore(app);
 
 const NAV_LINKS = {
-  directora:   ['dashboard','pedidos','inventario','produccion','empaque','ruta','clientes'],
-  operaciones: ['pedidos','inventario','produccion','empaque','ruta','clientes'],
+  directora:   ['dashboard','pedidos','inventario','produccion','empaque','ruta','clientes','mermas'],
+  operaciones: ['pedidos','inventario','produccion','empaque','ruta','clientes','mermas'],
   ventas:      ['pedidos','inventario','clientes'],
   produccion:  ['produccion','mermas'],
 };
 
-const LABELS = {
-  dashboard:  'Dashboard',
-  pedidos:    'Pedidos',
-  inventario: 'Inventario',
-  produccion: 'Producción',
-  empaque:    'Empaque',
-  ruta:       'Ruta',
-  clientes:   'Clientes',
-  mermas:     'Mermas',
-};
-
 export async function initPage(allowedRoles = null) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     onAuthStateChanged(auth, async (user) => {
       if (!user) { window.location.href = 'index.html'; return; }
 
@@ -50,32 +36,28 @@ export async function initPage(allowedRoles = null) {
         window.location.href = 'index.html'; return;
       }
 
-      // Activar links del rol y marcar activo
-      const current = location.pathname.split('/').pop().replace('.html','') || 'index';
+      const current = location.pathname.split('/').pop().replace('.html','') || 'dashboard';
       const links = NAV_LINKS[userData.rol] || [];
 
       document.querySelectorAll('.nav-link').forEach(a => {
-        const page = a.dataset.page;
-        if (!links.includes(page)) {
+        const p = a.dataset.page;
+        if (!links.includes(p)) {
           a.style.display = 'none';
-        } else if (page === current) {
+        } else if (p === current) {
           a.classList.add('active');
         }
       });
 
-      // Mostrar rol
       const rolEl = document.getElementById('nav-rol');
       if (rolEl) rolEl.textContent = userData.rol;
 
-      // Logout
-      document.getElementById('btn-salir').onclick = async () => {
-        await signOut(auth);
-        window.location.href = 'index.html';
-      };
-
-      // Mostrar nav (estaba oculto para evitar flash)
-      const nav = document.getElementById('app-nav');
-      if (nav) nav.style.opacity = '1';
+      const btnSalir = document.getElementById('btn-salir');
+      if (btnSalir) {
+        btnSalir.onclick = async () => {
+          await signOut(auth);
+          window.location.href = 'index.html';
+        };
+      }
 
       resolve(userData);
     });
