@@ -31,15 +31,73 @@
 #nav-menu-dropdown a:hover{background:var(--bg);}
 #nav-menu-dropdown .menu-sep{height:1px;background:var(--borde);margin:4px 0;}
 body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
-.page{max-width:1100px;margin:0 auto;padding:28px 24px;}
-.page-title{font-size:20px;font-weight:800;margin-bottom:24px;}
-.coming{background:#fff;border:1.5px dashed var(--borde);border-radius:12px;padding:60px;text-align:center;}
-.coming-icon{font-size:36px;margin-bottom:12px;}
-.coming h3{font-size:15px;font-weight:700;color:var(--gris);margin-bottom:8px;}
-.coming p{font-size:13px;color:var(--borde);}
+
+.page{max-width:900px;margin:0 auto;padding:28px 24px;}
+.page-header{margin-bottom:24px;}
+.page-title{font-size:20px;font-weight:800;}
+.page-sub{font-size:12px;color:var(--gris);margin-top:3px;}
+
+/* MÉTRICAS */
+.metricas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.metrica{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:16px 20px;}
+.metrica .ml{font-size:11px;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;font-weight:500;margin-bottom:6px;}
+.metrica .mv{font-size:28px;font-weight:800;line-height:1;}
+.metrica .ms{font-size:11px;color:var(--gris);margin-top:4px;}
+
+/* FILTROS */
+.filtros{display:flex;gap:8px;margin-bottom:16px;}
+.filtro-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-family:"Poppins",sans-serif;font-size:12px;font-weight:500;color:var(--gris);cursor:pointer;transition:all .15s;}
+.filtro-btn.active,.filtro-btn:hover{background:var(--black);color:#fff;border-color:var(--black);}
+
+/* CARDS */
+.card{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:18px;margin-bottom:12px;}
+.card.aprobado{border-color:#b8dcb8;background:#f8fff5;}
+.card.rechazado{border-color:#f0c0c0;background:#fff8f8;}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.card-nombre{font-size:14px;font-weight:700;color:var(--black);}
+.card-meta{font-size:11px;color:var(--gris);margin-top:2px;}
+.badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
+.badge-pend{background:#faeeda;color:var(--naranja);}
+.badge-prod{background:#e8f5e0;color:var(--verde);}
+.badge-rech{background:#fcebeb;color:var(--rojo);}
+
+/* ITEMS */
+.items-box{background:var(--bg);border-radius:8px;padding:12px;margin-bottom:10px;}
+.items-header{display:grid;grid-template-columns:2fr 1fr 80px;font-size:10px;font-weight:600;color:var(--borde);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
+.items-header span:last-child{text-align:right;}
+.item-row{display:grid;grid-template-columns:2fr 1fr 80px;font-size:12px;color:var(--gris);padding:6px 0;border-top:1px solid #e6dddb;align-items:center;}
+.item-row span:last-child{text-align:right;font-weight:600;color:var(--black);}
+.items-total{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--borde);font-size:13px;}
+.items-total .label{color:var(--gris);}
+.items-total .monto{font-weight:700;color:var(--black);}
+
+/* VOUCHER */
+.voucher-box{background:#fff;border:1px solid var(--borde);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--gris);display:flex;align-items:center;gap:8px;}
+.voucher-link{color:var(--azul);cursor:pointer;font-weight:500;}
+
+/* ACCIONES */
+.card-actions{display:flex;justify-content:flex-end;gap:8px;}
+.btn-rechazar{background:#fff;border:1.5px solid var(--rojo);color:var(--rojo);padding:8px 16px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-rechazar:hover{background:var(--rojo);color:#fff;}
+.btn-aprobar{background:var(--black);color:#fff;border:none;padding:8px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.btn-aprobar:hover{opacity:.8;}
+.btn-aprobar:disabled,.btn-rechazar:disabled{opacity:.4;cursor:not-allowed;}
+
+/* MOTIVO RECHAZO */
+.rechazo-wrap{background:#fcebeb;border:1px solid #f0c0c0;border-radius:8px;padding:12px;margin-bottom:12px;display:none;}
+.rechazo-wrap.open{display:block;}
+.rechazo-wrap label{font-size:11px;font-weight:600;color:var(--rojo);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px;}
+.rechazo-wrap textarea{width:100%;border:1px solid #f0c0c0;border-radius:6px;padding:8px 10px;font-family:"Poppins",sans-serif;font-size:12px;color:var(--black);outline:none;resize:none;background:#fff;}
+.rechazo-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px;}
+.btn-cancelar{background:#fff;border:1px solid var(--borde);color:var(--gris);padding:7px 14px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;cursor:pointer;}
+.btn-confirmar-rechazo{background:var(--rojo);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+
+.empty{text-align:center;padding:60px 0;color:var(--borde);font-size:13px;}
+.estado-label{font-size:11px;color:var(--gris);font-style:italic;}
 </style>
 </head>
 <body>
+
 <nav id="app-nav">
   <a href="inventario.html" class="nav-logo">
     <svg viewBox="0 0 200 36" xmlns="http://www.w3.org/2000/svg" height="20"><text x="0" y="29" font-family="Georgia,serif" font-size="29" font-weight="400" fill="#ffffff" letter-spacing="-0.5">sarcástica.</text></svg>
@@ -47,12 +105,12 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
   <div class="nav-divider"></div>
   <div class="nav-items">
     <a href="inventario.html" class="nav-link" data-page="inventario">Inventario</a>
-    <a href="pedidos.html" class="nav-link" data-page="pedidos">Pedidos</a>
-    <a href="validar.html" class="nav-link active" data-page="validar">Validar Pagos</a>
+    <a href="pedidos.html"    class="nav-link" data-page="pedidos">Pedidos</a>
+    <a href="validar.html"    class="nav-link active" data-page="validar">Validar Pagos</a>
     <a href="produccion.html" class="nav-link" data-page="produccion">Producción</a>
-    <a href="empaque.html" class="nav-link" data-page="empaque">Empaque</a>
-    <a href="ruta.html" class="nav-link" data-page="ruta">Ruta</a>
-    <a href="clientes.html" class="nav-link" data-page="clientes">CRM</a>
+    <a href="empaque.html"    class="nav-link" data-page="empaque">Empaque</a>
+    <a href="ruta.html"       class="nav-link" data-page="ruta">Ruta</a>
+    <a href="clientes.html"   class="nav-link" data-page="clientes">CRM</a>
   </div>
   <div class="nav-right">
     <span class="nav-powered">powered by <strong>Etrazia</strong></span>
@@ -69,17 +127,258 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
     <button class="btn-salir" id="btn-salir">Salir</button>
   </div>
 </nav>
+
 <div class="page">
-  <div class="page-title">Validar Pagos</div>
-  <div class="coming">
-    <div class="coming-icon">✅</div>
-    <h3>Módulo de Validar Pagos</h3>
-    <p>En construcción &mdash; Día 3 del desarrollo.</p>
+  <div class="page-header">
+    <div class="page-title">Validar pagos</div>
+    <div class="page-sub" id="pageSub"></div>
   </div>
+
+  <div class="metricas">
+    <div class="metrica">
+      <div class="ml">Pendientes</div>
+      <div class="mv" style="color:var(--naranja)" id="m-pend">—</div>
+      <div class="ms">esperando revisión</div>
+    </div>
+    <div class="metrica">
+      <div class="ml">A producción</div>
+      <div class="mv" style="color:var(--verde)" id="m-apro">—</div>
+      <div class="ms">aprobados hoy</div>
+    </div>
+    <div class="metrica">
+      <div class="ml">Rechazados</div>
+      <div class="mv" style="color:var(--rojo)" id="m-rech">—</div>
+      <div class="ms">reserva liberada</div>
+    </div>
+  </div>
+
+  <div class="filtros">
+    <button class="filtro-btn active" data-filtro="pendiente_validacion">Pendientes</button>
+    <button class="filtro-btn" data-filtro="en_produccion">A producción</button>
+    <button class="filtro-btn" data-filtro="cancelado">Rechazados</button>
+  </div>
+
+  <div id="listaPedidos"><div class="empty">Cargando...</div></div>
 </div>
+
 <script type="module">
-import { initPage } from './nav.js';
-await initPage(['directora','operaciones']);
+import { initPage, db } from './nav.js';
+import {
+  collection, query, where, orderBy, onSnapshot,
+  doc, getDoc, getDocs, updateDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const EMPRESA = 'sarcastica';
+const user = await initPage(['directora','operaciones']);
+
+const hoy = new Date();
+const hoyStr = hoy.toISOString().split('T')[0];
+document.getElementById('pageSub').textContent =
+  (user.nombre||user.email) + ' · ' + hoy.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'});
+
+const CANAL_LABEL = {WhatsApp:'WA',Instagram:'IG',Web:'Web'};
+
+// Contadores
+const col = collection(db,`empresas/${EMPRESA}/pedidos`);
+onSnapshot(query(col,where('estado','==','pendiente_validacion')), s => {
+  document.getElementById('m-pend').textContent = s.size;
+});
+onSnapshot(query(col,where('estado','==','en_produccion'),where('fechaValidacion','>=',hoyStr)), s => {
+  document.getElementById('m-apro').textContent = s.size;
+}).catch(() => {
+  onSnapshot(query(col,where('estado','==','en_produccion')), s => {
+    document.getElementById('m-apro').textContent = s.size;
+  });
+});
+onSnapshot(query(col,where('estado','==','cancelado')), s => {
+  document.getElementById('m-rech').textContent = s.size;
+});
+
+let filtroActual = 'pendiente_validacion';
+let unsubLista = null;
+
+function cargar() {
+  if (unsubLista) unsubLista();
+  const q = query(col, where('estado','==',filtroActual), orderBy('creadoEn','desc'));
+  unsubLista = onSnapshot(q, async snap => {
+    const lista = document.getElementById('listaPedidos');
+    if (snap.empty) {
+      lista.innerHTML = '<div class="empty">No hay pedidos en este estado</div>';
+      return;
+    }
+
+    const htmls = await Promise.all(snap.docs.map(async d => {
+      const p = d.data();
+      const pid = d.id;
+
+      // Cargar items
+      const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+      const items = [];
+      itemsSnap.forEach(i => items.push(i.data()));
+
+      const tiempoAtras = p.creadoEn?.toDate
+        ? Math.round((Date.now() - p.creadoEn.toDate().getTime()) / 60000) + ' min'
+        : '—';
+
+      const canal = CANAL_LABEL[p.canal] || p.canal || '—';
+      const esPend = p.estado === 'pendiente_validacion';
+      const esApro = p.estado === 'en_produccion';
+      const cardClass = esApro ? 'card aprobado' : p.estado === 'cancelado' ? 'card rechazado' : 'card';
+      const badgeHtml = esPend
+        ? '<span class="badge badge-pend">Pendiente</span>'
+        : esApro
+          ? '<span class="badge badge-prod">✓ A producción</span>'
+          : '<span class="badge badge-rech">✗ Rechazado</span>';
+
+      const itemsHtml = items.map(i => `
+        <div class="item-row">
+          <span>${i.productoNombre||'—'}${i.variante?' · '+i.variante:''}</span>
+          <span>${i.diseno||'—'}</span>
+          <span>S/ ${(i.precio||0).toFixed(2)}</span>
+        </div>`).join('');
+
+      const voucherHtml = p.voucher
+        ? `<div class="voucher-box">📎 Voucher adjunto · <span class="voucher-link">ver imagen</span></div>`
+        : `<div class="voucher-box">📎 Sin voucher adjunto</div>`;
+
+      const accionesHtml = esPend ? `
+        <div class="rechazo-wrap" id="rechazo-${pid}">
+          <label>Motivo del rechazo *</label>
+          <textarea rows="2" id="motivo-${pid}" placeholder="Ej: el voucher no corresponde al monto..."></textarea>
+          <div class="rechazo-actions">
+            <button class="btn-cancelar" onclick="cancelarRechazo('${pid}')">Cancelar</button>
+            <button class="btn-confirmar-rechazo" onclick="confirmarRechazo('${pid}')">Confirmar rechazo</button>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="btn-rechazar" id="btnR-${pid}" onclick="iniciarRechazo('${pid}')">Rechazar</button>
+          <button class="btn-aprobar" id="btnA-${pid}" onclick="aprobar('${pid}')">Enviar a producción →</button>
+        </div>` : `<div class="estado-label">${esApro ? '✓ Aprobado y enviado a producción' : '✗ Rechazado — ' + (p.motivoRechazo||'sin motivo')}</div>`;
+
+      return `<div class="${cardClass}" id="card-${pid}">
+        <div class="card-header">
+          <div>
+            <div class="card-nombre">${p.cliente_nombre||'—'}</div>
+            <div class="card-meta">Pedido #${pid.slice(-5).toUpperCase()} · ${canal} · ${p.vendedor||'—'} · hace ${tiempoAtras}</div>
+          </div>
+          ${badgeHtml}
+        </div>
+        <div class="items-box">
+          <div class="items-header"><span>Producto</span><span>Diseño</span><span>Precio</span></div>
+          ${itemsHtml}
+          <div class="items-total">
+            <span class="label">Total · ${p.medioPago||'—'}</span>
+            <span class="monto">S/ ${(p.total||0).toFixed(2)}</span>
+          </div>
+        </div>
+        ${voucherHtml}
+        ${accionesHtml}
+      </div>`;
+    }));
+
+    lista.innerHTML = htmls.join('');
+  });
+}
+
+// APROBAR
+window.aprobar = async (pid) => {
+  const btnA = document.getElementById(`btnA-${pid}`);
+  const btnR = document.getElementById(`btnR-${pid}`);
+  if (btnA) { btnA.disabled = true; btnA.textContent = 'Procesando...'; }
+  if (btnR) btnR.disabled = true;
+  try {
+    // Obtener items del pedido
+    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+
+    // Actualizar inventario: reservado→consumido (disponible ya se descontó al reservar)
+    for (const iDoc of itemsSnap.docs) {
+      const item = iDoc.data();
+      if (!item.productoId) continue;
+      const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
+      const invSnap = await getDoc(invRef);
+      if (invSnap.exists()) {
+        const inv = invSnap.data();
+        await updateDoc(invRef, {
+          reservado: Math.max(0, (inv.reservado||0) - 1),
+          consumido: (inv.consumido||0) + 1,
+        });
+      }
+      // Actualizar estado del ítem
+      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {
+        estado: 'pendiente'
+      });
+    }
+
+    // Actualizar pedido
+    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
+      estado: 'en_produccion',
+      fechaValidacion: hoyStr,
+      validadoPor: user.nombre||user.email,
+      validadoEn: serverTimestamp(),
+    });
+  } catch(e) {
+    console.error(e);
+    alert('Error al aprobar. Intenta de nuevo.');
+    if (btnA) { btnA.disabled = false; btnA.textContent = 'Enviar a producción →'; }
+    if (btnR) btnR.disabled = false;
+  }
+};
+
+// RECHAZO
+window.iniciarRechazo = (pid) => {
+  document.getElementById(`rechazo-${pid}`)?.classList.add('open');
+  document.getElementById(`btnA-${pid}`)?.setAttribute('disabled','');
+  document.getElementById(`btnR-${pid}`)?.setAttribute('disabled','');
+};
+
+window.cancelarRechazo = (pid) => {
+  document.getElementById(`rechazo-${pid}`)?.classList.remove('open');
+  document.getElementById(`btnA-${pid}`)?.removeAttribute('disabled');
+  document.getElementById(`btnR-${pid}`)?.removeAttribute('disabled');
+};
+
+window.confirmarRechazo = async (pid) => {
+  const motivo = document.getElementById(`motivo-${pid}`)?.value.trim();
+  if (!motivo) { alert('El motivo de rechazo es obligatorio.'); return; }
+  try {
+    // Liberar reserva: reservado→disponible
+    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+    for (const iDoc of itemsSnap.docs) {
+      const item = iDoc.data();
+      if (!item.productoId) continue;
+      const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
+      const invSnap = await getDoc(invRef);
+      if (invSnap.exists()) {
+        const inv = invSnap.data();
+        await updateDoc(invRef, {
+          reservado:  Math.max(0, (inv.reservado||0) - 1),
+          disponible: (inv.disponible||0) + 1,
+        });
+      }
+    }
+    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
+      estado: 'cancelado',
+      motivoRechazo: motivo,
+      rechazadoPor: user.nombre||user.email,
+      rechazadoEn: serverTimestamp(),
+    });
+  } catch(e) {
+    console.error(e);
+    alert('Error al rechazar. Intenta de nuevo.');
+  }
+};
+
+// Filtros
+document.querySelectorAll('.filtro-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filtroActual = btn.dataset.filtro;
+    cargar();
+  });
+});
+
+cargar();
 </script>
 </body>
 </html>
