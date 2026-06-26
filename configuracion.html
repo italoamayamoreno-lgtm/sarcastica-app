@@ -147,35 +147,69 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
   <div class="tab-panel" id="tab-insumos">
     <div class="block">
       <div class="block-header"><div class="block-title">Agregar insumo crudo</div></div>
-      <div class="form-grid g4">
-        <div class="field"><label>Nombre del insumo</label><input type="text" id="i-nombre" placeholder="Ej: Vaso térmico"/></div>
-        <div class="field"><label>Categoría</label>
-          <select id="i-categoria">
-            <option value="Para beber">Para beber</option>
-            <option value="Librería">Librería</option>
-            <option value="Prendas">Prendas</option>
-            <option value="Bebés">Bebés</option>
-            <option value="Otro">Otro</option>
+
+      <!-- FILA 1: Producto + Color + Talla -->
+      <div class="form-grid g3" style="margin-bottom:10px;">
+        <div class="field">
+          <label>Producto base</label>
+          <select id="i-producto" onchange="generarCodigo()">
+            <option value="">Seleccionar</option>
+            <option value="POL|Polo|Prendas">Polo</option>
+            <option value="PLE|Polera|Prendas">Polera</option>
+            <option value="GOR|Gorro|Prendas">Gorro</option>
+            <option value="MAN|Manta|Prendas">Manta</option>
+            <option value="MAD|Mandil|Prendas">Mandil</option>
+            <option value="TAZ|Taza|Para beber">Taza</option>
+            <option value="VAS|Vaso térmico|Para beber">Vaso térmico</option>
+            <option value="LIB|Libreta|Librería">Libreta</option>
+            <option value="MOU|Mouse pad|Librería">Mouse pad</option>
           </select>
         </div>
-        <div class="field"><label>Variante</label><input type="text" id="i-variante" placeholder="Ej: Arena 500ml"/></div>
-        <div class="field"><label>Unidad</label>
-          <select id="i-unidad">
-            <option value="unidad">Unidad</option>
-            <option value="metro">Metro</option>
-            <option value="kg">Kg</option>
+        <div class="field">
+          <label>Color</label>
+          <select id="i-color" onchange="generarCodigo()">
+            <option value="">Seleccionar</option>
+            <option value="BL|Blanco">Blanco</option>
+            <option value="NE|Negro">Negro</option>
+            <option value="GR|Gris">Gris</option>
+            <option value="BE|Beige">Beige</option>
+            <option value="RO|Rojo">Rojo</option>
+            <option value="AZ|Azul">Azul</option>
+            <option value="VE|Verde">Verde</option>
+            <option value="AM|Amarillo">Amarillo</option>
+            <option value="MO|Morado">Morado</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Talla / Tamaño</label>
+          <select id="i-talla" onchange="generarCodigo()">
+            <option value="">Seleccionar producto primero</option>
           </select>
         </div>
       </div>
-      <div class="form-grid g3">
+
+      <!-- CÓDIGO GENERADO -->
+      <div style="background:var(--bg);border:1.5px solid var(--borde);border-radius:8px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Código generado</div>
+          <div style="font-family:monospace;font-size:16px;font-weight:700;color:var(--black);" id="codigoGenerado">—</div>
+          <div style="font-size:11px;color:var(--gris);margin-top:3px;" id="nombreGenerado">Completa los campos para generar el código</div>
+        </div>
+        <div id="codigoEstado"></div>
+      </div>
+
+      <!-- FILA 2: Stock + Seguridad + Proveedor -->
+      <div class="form-grid g3" style="margin-bottom:14px;">
         <div class="field"><label>Stock inicial</label><input type="number" id="i-stock" min="0" value="0"/></div>
         <div class="field"><label>Stock de seguridad (mínimo)</label><input type="number" id="i-seguridad" min="0" value="5"/></div>
         <div class="field"><label>Proveedor (opcional)</label><input type="text" id="i-proveedor" placeholder="Nombre del proveedor"/></div>
       </div>
+
       <div class="form-actions">
         <button class="btn-guardar" id="btnGuardarIns" onclick="guardarInsumo()">+ Agregar insumo</button>
       </div>
     </div>
+
     <div class="block">
       <div class="block-header"><div class="block-title">Insumos registrados</div></div>
       <div id="listaInsumos"><div class="empty-msg">Cargando...</div></div>
@@ -218,7 +252,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 <script type="module">
 import { initPage, db } from './nav.js';
 import {
-  collection, onSnapshot, doc,
+  collection, onSnapshot, doc, getDoc,
   addDoc, setDoc, deleteDoc, updateDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -270,21 +304,103 @@ window.eliminarRep = async (id) => {
   await deleteDoc(doc(db,`empresas/${EMPRESA}/repartidores`,id));
 };
 
-// INSUMOS
+// CATÁLOGO DE INSUMOS — estructura por código compuesto
+const TALLAS = {
+  prendas: ['XS','S','M','L','XL','UNICA'],
+  bebibles: ['16OZ','24OZ','1LT'],
+  libreria: ['A4','A5','UNICA'],
+};
+const TIPO_TALLA = {
+  POL:'prendas',PLE:'prendas',GOR:'prendas',MAN:'prendas',MAD:'prendas',
+  TAZ:'bebibles',VAS:'bebibles',
+  LIB:'libreria',MOU:'libreria',
+};
+
+let codigoActual = '';
+let existeEnFirestore = false;
+
+window.generarCodigo = async () => {
+  const prodVal = document.getElementById('i-producto').value;
+  const colorVal = document.getElementById('i-color').value;
+
+  // Actualizar tallas según producto
+  if (prodVal) {
+    const prefijo = prodVal.split('|')[0];
+    const tipo = TIPO_TALLA[prefijo] || 'prendas';
+    const tallaSel = document.getElementById('i-talla');
+    tallaSel.innerHTML = '<option value="">Seleccionar</option>' +
+      TALLAS[tipo].map(t => `<option value="${t}">${t}</option>`).join('');
+  }
+
+  const tallaVal = document.getElementById('i-talla').value;
+  const codigoEl = document.getElementById('codigoGenerado');
+  const nombreEl = document.getElementById('nombreGenerado');
+  const estadoEl = document.getElementById('codigoEstado');
+  const btn = document.getElementById('btnGuardarIns');
+
+  if (!prodVal || !colorVal || !tallaVal) {
+    codigoEl.textContent = '—';
+    nombreEl.textContent = 'Completa los campos para generar el código';
+    estadoEl.innerHTML = '';
+    codigoActual = '';
+    return;
+  }
+
+  const [prefijo, nombreProd, categoria] = prodVal.split('|');
+  const [codColor, nombreColor] = colorVal.split('|');
+  const codigo = `${prefijo}_${codColor}_${tallaVal}`;
+  const nombre = `${nombreProd} · ${nombreColor} · ${tallaVal}`;
+
+  codigoEl.textContent = codigo;
+  nombreEl.textContent = nombre;
+  codigoActual = codigo;
+
+  // Verificar si ya existe
+  const snap = await getDoc(doc(db,`empresas/${EMPRESA}/inventario_crudos`, codigo));
+  existeEnFirestore = snap.exists();
+
+  if (existeEnFirestore) {
+    const d = snap.data();
+    estadoEl.innerHTML = `<span style="background:#faeeda;color:var(--naranja);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;">Ya existe · Stock: ${d.disponible||0}</span>`;
+    btn.textContent = 'Actualizar stock';
+    document.getElementById('i-stock').value = d.disponible || 0;
+    document.getElementById('i-seguridad').value = d.stock_seguridad || 5;
+    document.getElementById('i-proveedor').value = d.proveedor || '';
+  } else {
+    estadoEl.innerHTML = `<span style="background:#e8f5e0;color:var(--verde);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;">Nuevo insumo</span>`;
+    btn.textContent = '+ Agregar insumo';
+    document.getElementById('i-stock').value = 0;
+    document.getElementById('i-seguridad').value = 5;
+    document.getElementById('i-proveedor').value = '';
+  }
+};
+
 onSnapshot(collection(db,`empresas/${EMPRESA}/inventario_crudos`), snap => {
   const el = document.getElementById('listaInsumos');
   if (snap.empty) { el.innerHTML = '<div class="empty-msg">Sin insumos registrados</div>'; return; }
   const docs = snap.docs.map(d=>({id:d.id,...d.data()}));
-  docs.sort((a,b)=>(a.categoria||'').localeCompare(b.categoria||'')||(a.nombre||'').localeCompare(b.nombre||''));
+  docs.sort((a,b)=>(a.categoria||'').localeCompare(b.categoria||'')||(a.id||'').localeCompare(b.id||''));
+  const CAT_COLOR = {'Prendas':'background:#FBEAF0;color:#993556;','Para beber':'background:#E6F1FB;color:#0C447C;','Librería':'background:#EAF3DE;color:#27500A;'};
   el.innerHTML = docs.map(p => {
     const bajo = (p.disponible||0) <= (p.stock_seguridad||0);
     return `<div class="item-row">
       <div class="item-info">
-        <div class="item-nombre">${p.nombre||'—'}${p.variante?' · '+p.variante:''}<span class="badge-cat">${p.categoria||'—'}</span></div>
-        <div class="item-sub">Disponible: <span class="stock-pill${bajo?' bajo':''}"><b>${p.disponible||0}</b> ${p.unidad||''}</span> · Mínimo: ${p.stock_seguridad||0} · Proveedor: ${p.proveedor||'—'}</div>
+        <div class="item-nombre" style="display:flex;align-items:center;gap:8px;">
+          <span style="font-family:monospace;font-size:12px;font-weight:700;background:var(--bg);padding:2px 8px;border-radius:5px;border:1px solid var(--borde);">${p.id}</span>
+          <span>${p.nombre||'—'}</span>
+          <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;${CAT_COLOR[p.categoria]||''}">${p.categoria||'—'}</span>
+        </div>
+        <div class="item-sub" style="margin-top:4px;">
+          Disponible: <span class="stock-pill${bajo?' bajo':''}"><b>${p.disponible||0}</b> und</span>
+          · Reservado: ${p.reservado||0}
+          · Mínimo: ${p.stock_seguridad||0}
+          · Proveedor: ${p.proveedor||'—'}
+        </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;">
-        <input type="number" value="${p.stock_seguridad||0}" min="0" style="width:60px;border:1px solid var(--borde);border-radius:5px;padding:4px 6px;font-size:11px;font-family:Poppins,sans-serif;" onchange="actualizarSeguridad('${p.id}',this.value)" title="Stock de seguridad"/>
+        <input type="number" value="${p.stock_seguridad||0}" min="0"
+          style="width:60px;border:1px solid var(--borde);border-radius:5px;padding:4px 6px;font-size:11px;font-family:Poppins,sans-serif;"
+          onchange="actualizarSeguridad('${p.id}',this.value)" title="Stock de seguridad"/>
         <button class="btn-eliminar" onclick="eliminarInsumo('${p.id}')">✕</button>
       </div>
     </div>`;
@@ -292,28 +408,49 @@ onSnapshot(collection(db,`empresas/${EMPRESA}/inventario_crudos`), snap => {
 });
 
 window.guardarInsumo = async () => {
-  const nombre = document.getElementById('i-nombre').value.trim();
-  const categoria = document.getElementById('i-categoria').value;
-  const variante = document.getElementById('i-variante').value.trim();
-  const unidad = document.getElementById('i-unidad').value;
+  if (!codigoActual) { alert('Selecciona producto, color y talla para generar el código.'); return; }
+
+  const prodVal = document.getElementById('i-producto').value;
+  const colorVal = document.getElementById('i-color').value;
+  const tallaVal = document.getElementById('i-talla').value;
   const stock = parseInt(document.getElementById('i-stock').value)||0;
   const seguridad = parseInt(document.getElementById('i-seguridad').value)||5;
   const proveedor = document.getElementById('i-proveedor').value.trim();
-  if (!nombre) { alert('El nombre del insumo es obligatorio.'); return; }
+
+  const [prefijo, nombreProd, categoria] = prodVal.split('|');
+  const [codColor, nombreColor] = colorVal.split('|');
+  const nombre = `${nombreProd} · ${nombreColor} · ${tallaVal}`;
+
   const btn = document.getElementById('btnGuardarIns');
   btn.disabled=true; btn.textContent='Guardando...';
+
   try {
-    await addDoc(collection(db,`empresas/${EMPRESA}/inventario_crudos`),{
-      nombre,categoria,variante,unidad,
-      total:stock,disponible:stock,reservado:0,consumido:0,
-      stock_seguridad:seguridad,proveedor,
-      creadoEn:serverTimestamp()
-    });
-    ['i-nombre','i-variante','i-proveedor'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('i-stock').value='0';
-    document.getElementById('i-seguridad').value='5';
-  } catch(e){ console.error(e); alert('Error.'); }
-  finally{ btn.disabled=false; btn.textContent='+ Agregar insumo'; }
+    await setDoc(doc(db,`empresas/${EMPRESA}/inventario_crudos`, codigoActual), {
+      nombre, categoria,
+      color: nombreColor, talla: tallaVal, prefijo,
+      total: stock, disponible: stock, reservado: 0, consumido: 0,
+      stock_seguridad: seguridad, proveedor,
+      shopify_variant_id: '',
+      actualizadoEn: serverTimestamp(),
+      ...(existeEnFirestore ? {} : { creadoEn: serverTimestamp() })
+    }, { merge: existeEnFirestore });
+
+    // Reset form
+    document.getElementById('i-producto').value = '';
+    document.getElementById('i-color').value = '';
+    document.getElementById('i-talla').innerHTML = '<option value="">Seleccionar producto primero</option>';
+    document.getElementById('i-stock').value = '0';
+    document.getElementById('i-seguridad').value = '5';
+    document.getElementById('i-proveedor').value = '';
+    document.getElementById('codigoGenerado').textContent = '—';
+    document.getElementById('nombreGenerado').textContent = 'Completa los campos para generar el código';
+    document.getElementById('codigoEstado').innerHTML = '';
+    document.getElementById('btnGuardarIns').textContent = '+ Agregar insumo';
+    codigoActual = '';
+
+    alert(existeEnFirestore ? '✓ Stock actualizado correctamente' : '✓ Insumo agregado correctamente');
+  } catch(e){ console.error(e); alert('Error al guardar.'); }
+  finally{ btn.disabled=false; }
 };
 
 window.actualizarSeguridad = async (id, val) => {
@@ -321,7 +458,7 @@ window.actualizarSeguridad = async (id, val) => {
 };
 
 window.eliminarInsumo = async (id) => {
-  if (!confirm('¿Eliminar este insumo? Esta acción no se puede deshacer.')) return;
+  if (!confirm(`¿Eliminar el insumo ${id}? Esta acción no se puede deshacer.`)) return;
   await deleteDoc(doc(db,`empresas/${EMPRESA}/inventario_crudos`,id));
 };
 
