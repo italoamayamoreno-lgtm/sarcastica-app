@@ -293,7 +293,7 @@ async function cargarProductos(){
   productos=[];snap.forEach(d=>productos.push({id:d.id,...d.data()}));
 }
 function calcTotal(){let t=0;document.querySelectorAll('.item-precio').forEach(i=>{const v=parseFloat(i.value);if(!isNaN(v))t+=v;});document.getElementById('totalLabel').textContent=`Total: S/ ${t.toFixed(2)}`;}
-function getCats(){const c=[...new Set(productos.map(p=>p.categoria).filter(Boolean))];return c.length?c:['Para beber','Librería','Prendas','Bebés'];}
+function getCats(){const c=[...new Set(productos.map(p=>p.categoria).filter(Boolean))];c.sort();return c.length?c:['Prendas','Bebés','Accesorios','Para beber','Librería','Hogar'];}
 
 function addItem(){
   itemCount++;const idx=itemCount;const cats=getCats();
