@@ -155,8 +155,11 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
           <select id="i-categoria" onchange="onCategoriaChange()">
             <option value="">Seleccionar</option>
             <option value="Prendas">Prendas</option>
+            <option value="Bebés">Bebés</option>
+            <option value="Accesorios">Accesorios</option>
             <option value="Para beber">Para beber</option>
             <option value="Librería">Librería</option>
+            <option value="Hogar">Hogar</option>
           </select>
         </div>
         <div class="field">
@@ -312,15 +315,35 @@ window.eliminarRep = async (id) => {
 
 // CATÁLOGO DE INSUMOS
 const PRODUCTOS = {
-  POL: { nombre:'Polo',         categoria:'Prendas',    color:true,  tallas:['XS','S','M','L','XL'] },
-  PLE: { nombre:'Polera',       categoria:'Prendas',    color:true,  tallas:['XS','S','M','L','XL'] },
-  GOR: { nombre:'Gorro',        categoria:'Prendas',    color:true,  tallas:['UNICA'] },
-  MAN: { nombre:'Manta',        categoria:'Prendas',    color:true,  tallas:['UNICA'] },
-  MAD: { nombre:'Mandil',       categoria:'Prendas',    color:true,  tallas:['XS','S','M','L','XL'] },
-  TAZ: { nombre:'Taza',         categoria:'Para beber', color:true,  tallas:['16OZ','24OZ','1LT'] },
-  VAS: { nombre:'Vaso térmico', categoria:'Para beber', color:true,  tallas:['16OZ','24OZ','1LT'] },
-  LIB: { nombre:'Libreta',      categoria:'Librería',   color:true,  tallas:null },
-  MOU: { nombre:'Mouse pad',    categoria:'Librería',   color:false, tallas:['12CM','24CM','36CM','48CM'] },
+  // Prendas
+  POF: { nombre:'Polo Mujer',   categoria:'Prendas',    color:true,  tallas:['XS','S','M','L'] },
+  POH: { nombre:'Polo Hombre',  categoria:'Prendas',    color:true,  tallas:['XS','S','M','L','XL'] },
+  PON: { nombre:'Polo Niño',    categoria:'Prendas',    color:true,  tallas:['1','2','4','6','8','10','12','14'] },
+  PLE: { nombre:'Polera',       categoria:'Prendas',    color:true,  tallas:['UNICA'] },
+  GOR: { nombre:'Gorra',        categoria:'Prendas',    color:true,  tallas:['UNICA'] },
+  TOT: { nombre:'Totebag',      categoria:'Prendas',    color:true,  tallas:['UNICA'] },
+  MAN: { nombre:'Mandil',       categoria:'Prendas',    color:true,  tallas:['UNICA'] },
+  // Bebés
+  BOD: { nombre:'Body Bebé',    categoria:'Bebés',      color:true,  tallas:['T0-MC','T1-MC','T2-MC','T4-MC','T6-MC','T0-ML','T1-ML','T2-ML','T4-ML','T6-ML'] },
+  // Accesorios
+  BAN: { nombre:'Bandana Mascota', categoria:'Accesorios', color:false, tallas:['S','M','L'] },
+  // Para beber
+  TAZ:  { nombre:'Taza Blanca',        categoria:'Para beber', color:false, tallas:['11OZ','15OZ'] },
+  TAZN: { nombre:'Taza Fondo Negro',   categoria:'Para beber', color:false, tallas:['11OZ'] },
+  TAZT: { nombre:'Taza Térmica',       categoria:'Para beber', color:false, tallas:['UNICA'] },
+  VAS:  { nombre:'Vaso Térmico',       categoria:'Para beber', color:true,  tallas:['1LT'] },
+  // Librería
+  LIB: { nombre:'Libreta',         categoria:'Librería', color:false, tallas:['UNICA'] },
+  PLN: { nombre:'Planner',         categoria:'Librería', color:false, tallas:['UNICA'] },
+  POS: { nombre:'Postal',          categoria:'Librería', color:false, tallas:['UNICA'] },
+  AGE: { nombre:'Agenda',          categoria:'Librería', color:false, tallas:['UNICA'] },
+  CUA: { nombre:'Cuadro',          categoria:'Librería', color:true,  tallas:['A4','A5'] },
+  MOU: { nombre:'Mouse Pad',       categoria:'Librería', color:false, tallas:['UNICA'] },
+  LBC: { nombre:'Libro Colorear',  categoria:'Librería', color:false, tallas:['UNICA'] },
+  // Hogar
+  POR: { nombre:'Porta Corchos',   categoria:'Hogar',    color:false, tallas:['REG','GRD'] },
+  VEL: { nombre:'Vela',            categoria:'Hogar',    color:false, tallas:['UNICA'] },
+  CHO: { nombre:'Chocolate',       categoria:'Hogar',    color:false, tallas:['UNICA'] },
 };
 
 const COLORES = [
