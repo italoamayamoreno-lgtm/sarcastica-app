@@ -148,21 +148,21 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
     <div class="block">
       <div class="block-header"><div class="block-title">Agregar insumo crudo</div></div>
 
-      <!-- Producto -->
-      <div class="form-grid" style="grid-template-columns:1fr;margin-bottom:10px;">
+      <!-- Categoría + Producto -->
+      <div class="form-grid g2" style="margin-bottom:10px;">
+        <div class="field">
+          <label>Categoría</label>
+          <select id="i-categoria" onchange="onCategoriaChange()">
+            <option value="">Seleccionar</option>
+            <option value="Prendas">Prendas</option>
+            <option value="Para beber">Para beber</option>
+            <option value="Librería">Librería</option>
+          </select>
+        </div>
         <div class="field">
           <label>Producto base</label>
-          <select id="i-producto" onchange="onProductoChange()">
-            <option value="">Seleccionar</option>
-            <option value="POL">Polo</option>
-            <option value="PLE">Polera</option>
-            <option value="GOR">Gorro</option>
-            <option value="MAN">Manta</option>
-            <option value="MAD">Mandil</option>
-            <option value="TAZ">Taza</option>
-            <option value="VAS">Vaso térmico</option>
-            <option value="LIB">Libreta</option>
-            <option value="MOU">Mouse pad</option>
+          <select id="i-producto" onchange="onProductoChange()" disabled>
+            <option value="">Selecciona categoría primero</option>
           </select>
         </div>
       </div>
@@ -217,7 +217,6 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
     <div class="block">
       <div class="block-header">
         <div class="block-title">Insumos registrados</div>
-        <button onclick="limpiarLegacy()" style="background:none;border:1.5px solid var(--rojo);color:var(--rojo);padding:5px 12px;border-radius:6px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;cursor:pointer;" title="Elimina insumos con IDs automáticos de Firestore">🧹 Limpiar insumos legacy</button>
       </div>
       <div id="listaInsumos"><div class="empty-msg">Cargando...</div></div>
     </div>
@@ -332,6 +331,33 @@ const COLORES = [
 let codigoActual = '';
 let existeEnFirestore = false;
 let productoActual = null;
+
+window.onCategoriaChange = () => {
+  const cat = document.getElementById('i-categoria').value;
+  const prodSel = document.getElementById('i-producto');
+
+  // Reset producto y variantes
+  prodSel.innerHTML = '<option value="">Seleccionar</option>';
+  prodSel.disabled = !cat;
+  document.getElementById('filaVariantes').style.display = 'none';
+  document.getElementById('i-color').value = '';
+  document.getElementById('codigoGenerado').textContent = '—';
+  document.getElementById('nombreGenerado').textContent = 'Selecciona el producto para comenzar';
+  document.getElementById('codigoEstado').innerHTML = '';
+  document.getElementById('btnGuardarIns').textContent = '+ Agregar insumo';
+  codigoActual = ''; productoActual = null;
+
+  if (!cat) return;
+
+  // Filtrar productos por categoría
+  const filtrados = Object.entries(PRODUCTOS).filter(([,p]) => p.categoria === cat);
+  filtrados.forEach(([prefijo, p]) => {
+    const opt = document.createElement('option');
+    opt.value = prefijo;
+    opt.textContent = p.nombre;
+    prodSel.appendChild(opt);
+  });
+};
 
 window.onProductoChange = () => {
   const prefijo = document.getElementById('i-producto').value;
@@ -495,7 +521,9 @@ window.guardarInsumo = async () => {
       ...(existeEnFirestore ? {} : { creadoEn: serverTimestamp() })
     }, { merge: existeEnFirestore });
     // Reset
-    document.getElementById('i-producto').value = '';
+    document.getElementById('i-categoria').value = '';
+    document.getElementById('i-producto').innerHTML = '<option value="">Selecciona categoría primero</option>';
+    document.getElementById('i-producto').disabled = true;
     document.getElementById('i-color').value = '';
     document.getElementById('i-talla').innerHTML = '<option value="">Seleccionar</option>';
     document.getElementById('filaVariantes').style.display = 'none';
@@ -521,17 +549,6 @@ window.eliminarInsumo = async (id) => {
   await deleteDoc(doc(db,`empresas/${EMPRESA}/inventario_crudos`,id));
 };
 
-// Patrón válido: 3 letras _ 2 letras _ algo (ej: POL_BL_S) o 3 letras _ algo (ej: MOU_24CM) o 3 letras _ 2 letras (ej: LIB_NE)
-const CODIGO_VALIDO = /^[A-Z]{2,4}_[A-Z0-9]{1,6}(_[A-Z0-9]{1,6})?$/;
-
-window.limpiarLegacy = async () => {
-  const snap = await getDocs(collection(db,`empresas/${EMPRESA}/inventario_crudos`));
-  const legacy = snap.docs.filter(d => !CODIGO_VALIDO.test(d.id));
-  if (legacy.length === 0) { alert('No hay insumos legacy. Todo está limpio.'); return; }
-  if (!confirm(`Se eliminarán ${legacy.length} insumo(s) con código automático de Firestore:\n\n${legacy.map(d=>d.id.slice(0,20)+'...').join('\n')}\n\n¿Continuar?`)) return;
-  for (const d of legacy) await deleteDoc(doc(db,`empresas/${EMPRESA}/inventario_crudos`,d.id));
-  alert(`✓ ${legacy.length} insumo(s) legacy eliminados.`);
-};
 
 // USUARIOS
 onSnapshot(collection(db,'usuarios'), snap => {
