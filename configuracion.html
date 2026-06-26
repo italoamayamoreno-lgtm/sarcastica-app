@@ -215,7 +215,10 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
     </div>
 
     <div class="block">
-      <div class="block-header"><div class="block-title">Insumos registrados</div></div>
+      <div class="block-header">
+        <div class="block-title">Insumos registrados</div>
+        <button onclick="limpiarLegacy()" style="background:none;border:1.5px solid var(--rojo);color:var(--rojo);padding:5px 12px;border-radius:6px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;cursor:pointer;" title="Elimina insumos con IDs automáticos de Firestore">🧹 Limpiar insumos legacy</button>
+      </div>
       <div id="listaInsumos"><div class="empty-msg">Cargando...</div></div>
     </div>
   </div>
@@ -256,7 +259,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 <script type="module">
 import { initPage, db } from './nav.js';
 import {
-  collection, onSnapshot, doc, getDoc,
+  collection, onSnapshot, doc, getDoc, getDocs,
   addDoc, setDoc, deleteDoc, updateDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -516,6 +519,18 @@ window.actualizarSeguridad = async (id, val) => {
 window.eliminarInsumo = async (id) => {
   if (!confirm(`¿Eliminar el insumo ${id}? Esta acción no se puede deshacer.`)) return;
   await deleteDoc(doc(db,`empresas/${EMPRESA}/inventario_crudos`,id));
+};
+
+// Patrón válido: 3 letras _ 2 letras _ algo (ej: POL_BL_S) o 3 letras _ algo (ej: MOU_24CM) o 3 letras _ 2 letras (ej: LIB_NE)
+const CODIGO_VALIDO = /^[A-Z]{2,4}_[A-Z0-9]{1,6}(_[A-Z0-9]{1,6})?$/;
+
+window.limpiarLegacy = async () => {
+  const snap = await getDocs(collection(db,`empresas/${EMPRESA}/inventario_crudos`));
+  const legacy = snap.docs.filter(d => !CODIGO_VALIDO.test(d.id));
+  if (legacy.length === 0) { alert('No hay insumos legacy. Todo está limpio.'); return; }
+  if (!confirm(`Se eliminarán ${legacy.length} insumo(s) con código automático de Firestore:\n\n${legacy.map(d=>d.id.slice(0,20)+'...').join('\n')}\n\n¿Continuar?`)) return;
+  for (const d of legacy) await deleteDoc(doc(db,`empresas/${EMPRESA}/inventario_crudos`,d.id));
+  alert(`✓ ${legacy.length} insumo(s) legacy eliminados.`);
 };
 
 // USUARIOS
