@@ -222,9 +222,19 @@ function render() {
     </div>`;
   }).join('');
 
-  const addFormHtml = canEdit ? `
+  // Detectar escenario según estado del pedido
+const estadosAvanzados = ['en_produccion','en_empaque','empaquetado','en_ruta','entregado'];
+const esEscenarioB = estadosAvanzados.includes(pedido.estado);
+
+const addFormHtml = canEdit ? `
     <button class="add-item-toggle" id="btnToggleAdd" onclick="toggleAddForm()">+ Agregar ítem al pedido</button>
     <div class="add-item-form" id="addItemForm">
+
+      ${esEscenarioB ? `
+      <div style="background:#faeeda;border:1px solid #e8c99a;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--naranja);">
+        ⚠ El pedido ya está en <strong>${pedido.estado.replace(/_/g,' ')}</strong>. El ítem nuevo requerirá validación de pago independiente antes de entrar a producción.
+      </div>` : ''}
+
       <div class="g3">
         <div class="field"><label>Categoría</label>
           <select id="new-cat" onchange="onNewCatChange()">
@@ -235,7 +245,7 @@ function render() {
           <select id="new-prod"><option value="">— elige categoría —</option></select>
         </div>
         <div class="field"><label>Variante</label>
-          <input type="text" id="new-variante" placeholder="Ej: Blanco 350ml"/>
+          <input type="text" id="new-variante" placeholder="Ej: Blanco S"/>
         </div>
       </div>
       <div class="g2">
@@ -246,14 +256,26 @@ function render() {
           <input type="number" id="new-precio" placeholder="0.00" step="0.01" min="0"/>
         </div>
       </div>
+
+      <!-- VOUCHER ADICIONAL -->
+      <div class="field" style="margin-top:8px;">
+        <label>${esEscenarioB ? 'Voucher de pago del ítem adicional (obligatorio)' : 'Voucher de pago adicional (opcional)'}</label>
+        <div class="voucher-box" id="newVoucherBox" onclick="document.getElementById('newVoucherInput').click()">
+          📎 ${esEscenarioB ? 'Adjuntar voucher del pago adicional' : 'Adjuntar voucher si el pago es por separado'}
+        </div>
+        <input type="file" id="newVoucherInput" accept="image/*" style="display:none"/>
+      </div>
+
+      <!-- REPROGRAMAR FECHA -->
       <div class="reprog-box" id="reprogBox">
-        <div class="reprog-title">⚠ ¿Necesitas reprogramar la entrega?</div>
-        <div class="reprog-sub">Si el nuevo ítem no puede estar listo para la fecha actual (${pedido.fechaEntrega}), elige una nueva fecha. Solo cambia la fecha — los ítems ya en producción no se tocan.</div>
+        <div class="reprog-title">⚠ ¿Necesitas cambiar la fecha de entrega?</div>
+        <div class="reprog-sub">Si el nuevo ítem no puede estar listo para <strong>${pedido.fechaEntrega}</strong>, elige una nueva fecha. <strong>La fecha cambia para toda la orden.</strong></div>
         <div class="field">
           <label>Nueva fecha de entrega</label>
           <input type="date" id="new-fecha" min="${new Date().toISOString().split('T')[0]}"/>
         </div>
       </div>
+
       <div class="form-actions">
         <button class="btn-cancelar-form" onclick="toggleAddForm()">Cancelar</button>
         <button class="btn-guardar-item" id="btnGuardarItem" onclick="guardarItem()">Guardar ítem</button>
@@ -344,22 +366,37 @@ window.guardarItem = async () => {
   if (!prod) { alert('Producto no encontrado.'); return; }
   if ((prod.disponible||0) <= 0) { alert('Sin stock disponible para este producto.'); return; }
 
+  // Escenario B: voucher obligatorio si pedido ya está en producción o más
+  const estadosAvanzados = ['en_produccion','en_empaque','empaquetado','en_ruta','entregado'];
+  const esEscenarioB = estadosAvanzados.includes(pedido.estado);
+  if (esEscenarioB && !nuevoVoucherBase64) {
+    alert('Este pedido ya está en producción. Debes adjuntar el voucher del pago adicional.');
+    return;
+  }
+
   const btn = document.getElementById('btnGuardarItem');
   btn.disabled=true; btn.textContent='Guardando...';
 
   try {
-    // Agregar ítem al pedido
+    // Estado del ítem según escenario
+    // Escenario A (pendiente_validacion): entra como 'pendiente' — va a producción junto con los demás
+    // Escenario B (en_produccion o más): entra como 'pendiente_validacion_adicional' — requiere validación propia
+    const estadoItem = esEscenarioB ? 'pendiente_validacion_adicional' : 'pendiente';
+
     await addDoc(collection(db,`empresas/${EMPRESA}/pedidos/${pedidoId}/items`), {
       categoria: cat,
       productoId: prodId,
       productoNombre: prod.nombre||'—',
       variante, diseno, precio,
-      estado: 'pendiente',
+      estado: estadoItem,
+      esAdicional: esEscenarioB,
+      voucherAdicional: nuevoVoucherBase64||'',
+      voucherAdicionalNombre: nuevoVoucherNombre||'',
       agregadoEn: serverTimestamp(),
       agregadoPor: user.nombre||user.email,
     });
 
-    // Reservar inventario solo del ítem nuevo
+    // Reservar inventario
     const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,prodId);
     const invSnap = await getDoc(invRef);
     if (invSnap.exists()) {
@@ -370,24 +407,45 @@ window.guardarItem = async () => {
       });
     }
 
-    // Actualizar total y fecha si cambió
+    // Actualizar total y fecha
     const nuevoTotal = items.reduce((s,i)=>s+(i.precio||0),0) + precio;
-    const updateData = {
-      total: nuevoTotal,
-      total_items: items.length + 1,
-    };
+    const updateData = { total: nuevoTotal, total_items: items.length + 1 };
     if (nuevaFecha && nuevaFecha !== pedido.fechaEntrega) {
       updateData.fechaEntrega = nuevaFecha;
     }
+    // Si escenario A: agregar segundo voucher al pedido
+    if (!esEscenarioB && nuevoVoucherBase64) {
+      updateData.voucherAdicional = nuevoVoucherBase64;
+      updateData.voucherAdicionalNombre = nuevoVoucherNombre;
+    }
     await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pedidoId), updateData);
 
+    nuevoVoucherBase64 = ''; nuevoVoucherNombre = '';
     await cargar();
+    alert(esEscenarioB
+      ? '✓ Ítem adicional agregado. Aparecerá en Validar Pagos para revisión independiente.'
+      : '✓ Ítem agregado al pedido.');
   } catch(e) {
     console.error(e);
-    alert('Error al agregar ítem. Intenta de nuevo.');
+    alert('Error al agregar ítem.');
   } finally {
     btn.disabled=false; btn.textContent='Guardar ítem';
   }
+};
+
+window.verVoucherItem = function(itemCardId) {
+  const el = document.getElementById(itemCardId);
+  if (!el) return;
+  const src = el.dataset.voucher;
+  if (!src) return;
+  const w = window.open();
+  w.document.write(`<img src="${src}" style="max-width:100%;"/>`);
+};
+
+window.verNuevoVoucher = function() {
+  if (!nuevoVoucherBase64) return;
+  const w = window.open();
+  w.document.write(`<img src="${nuevoVoucherBase64}" style="max-width:100%;"/>`);
 };
 
 window.eliminarItem = async (itemId) => {
@@ -443,6 +501,10 @@ document.addEventListener('input', e => {
 });
 
 await cargarProductos();
+
+// Voucher del ítem adicional
+let nuevoVoucherBase64 = '';
+let nuevoVoucherNombre = '';
 await cargar();
 </script>
 </body>
