@@ -36,54 +36,40 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 .page-header{margin-bottom:24px;}
 .page-title{font-size:20px;font-weight:800;}
 .page-sub{font-size:12px;color:var(--gris);margin-top:3px;}
-
-/* MÉTRICAS */
 .metricas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
-.metrica{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:16px 20px;}
-.metrica .ml{font-size:11px;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;font-weight:500;margin-bottom:6px;}
-.metrica .mv{font-size:28px;font-weight:800;line-height:1;}
-.metrica .ms{font-size:11px;color:var(--gris);margin-top:4px;}
-
-/* FILTROS */
+.metrica{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:14px 16px;}
+.metrica .ml{font-size:11px;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;font-weight:500;margin-bottom:4px;}
+.metrica .mv{font-size:26px;font-weight:800;line-height:1;}
 .filtros{display:flex;gap:8px;margin-bottom:16px;}
-.filtro-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-family:"Poppins",sans-serif;font-size:12px;font-weight:500;color:var(--gris);cursor:pointer;transition:all .15s;}
+.filtro-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-family:"Poppins",sans-serif;font-size:12px;font-weight:500;color:var(--gris);cursor:pointer;}
 .filtro-btn.active,.filtro-btn:hover{background:var(--black);color:#fff;border-color:var(--black);}
-
-/* CARDS */
 .card{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:18px;margin-bottom:12px;}
-.card.aprobado{border-color:#b8dcb8;background:#f8fff5;}
-.card.rechazado{border-color:#f0c0c0;background:#fff8f8;}
-.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
-.card-nombre{font-size:14px;font-weight:700;color:var(--black);}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.card-nombre{font-size:14px;font-weight:700;}
 .card-meta{font-size:11px;color:var(--gris);margin-top:2px;}
 .badge{display:inline-flex;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;}
 .badge-pend{background:#faeeda;color:var(--naranja);}
 .badge-prod{background:#e8f5e0;color:var(--verde);}
 .badge-rech{background:#fcebeb;color:var(--rojo);}
-
-/* ITEMS */
+.badge-adic{background:#e0eaf8;color:var(--azul);}
 .items-box{background:var(--bg);border-radius:8px;padding:12px;margin-bottom:10px;}
 .items-header{display:grid;grid-template-columns:2fr 1fr 80px;font-size:10px;font-weight:600;color:var(--borde);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
-.items-header span:last-child{text-align:right;}
-.item-row{display:grid;grid-template-columns:2fr 1fr 80px;font-size:12px;color:var(--gris);padding:6px 0;border-top:1px solid #e6dddb;align-items:center;}
-.item-row span:last-child{text-align:right;font-weight:600;color:var(--black);}
+.item-row{display:grid;grid-template-columns:2fr 1fr 80px;font-size:12px;padding:7px 0;border-top:1px solid #e6dddb;align-items:center;}
+.item-row.bloqueado{opacity:.5;}
+.item-row .item-nombre{font-size:12px;font-weight:500;}
+.item-row .item-estado{font-size:10px;color:var(--gris);font-style:italic;}
+.item-row .item-precio{text-align:right;font-weight:600;}
+.item-adic-badge{background:#fff3cd;color:#856404;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:600;margin-left:4px;}
+.voucher-link{font-size:11px;color:var(--azul);cursor:pointer;margin-top:3px;display:block;}
 .items-total{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--borde);font-size:13px;}
-.items-total .label{color:var(--gris);}
-.items-total .monto{font-weight:700;color:var(--black);}
-
-/* VOUCHER */
+.items-total .monto{font-weight:700;}
 .voucher-box{background:#fff;border:1px solid var(--borde);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--gris);display:flex;align-items:center;gap:8px;}
-.voucher-link{color:var(--azul);cursor:pointer;font-weight:500;}
-
-/* ACCIONES */
 .card-actions{display:flex;justify-content:flex-end;gap:8px;}
-.btn-rechazar{background:#fff;border:1.5px solid var(--rojo);color:var(--rojo);padding:8px 16px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-rechazar{background:#fff;border:1.5px solid var(--rojo);color:var(--rojo);padding:8px 16px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
 .btn-rechazar:hover{background:var(--rojo);color:#fff;}
-.btn-aprobar{background:var(--black);color:#fff;border:none;padding:8px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+.btn-aprobar{background:var(--black);color:#fff;border:none;padding:8px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
 .btn-aprobar:hover{opacity:.8;}
 .btn-aprobar:disabled,.btn-rechazar:disabled{opacity:.4;cursor:not-allowed;}
-
-/* MOTIVO RECHAZO */
 .rechazo-wrap{background:#fcebeb;border:1px solid #f0c0c0;border-radius:8px;padding:12px;margin-bottom:12px;display:none;}
 .rechazo-wrap.open{display:block;}
 .rechazo-wrap label{font-size:11px;font-weight:600;color:var(--rojo);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:6px;}
@@ -91,13 +77,11 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 .rechazo-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px;}
 .btn-cancelar{background:#fff;border:1px solid var(--borde);color:var(--gris);padding:7px 14px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;cursor:pointer;}
 .btn-confirmar-rechazo{background:var(--rojo);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
-
 .empty{text-align:center;padding:60px 0;color:var(--borde);font-size:13px;}
 .estado-label{font-size:11px;color:var(--gris);font-style:italic;}
 </style>
 </head>
 <body>
-
 <nav id="app-nav">
   <a href="inventario.html" class="nav-logo">
     <svg viewBox="0 0 200 36" xmlns="http://www.w3.org/2000/svg" height="20"><text x="0" y="29" font-family="Georgia,serif" font-size="29" font-weight="400" fill="#ffffff" letter-spacing="-0.5">sarcástica.</text></svg>
@@ -133,228 +117,138 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
     <div class="page-title">Validar pagos</div>
     <div class="page-sub" id="pageSub"></div>
   </div>
-
   <div class="metricas">
-    <div class="metrica">
-      <div class="ml">Pendientes</div>
-      <div class="mv" style="color:var(--naranja)" id="m-pend">0</div>
-      <div class="ms">esperando revisión</div>
-    </div>
-    <div class="metrica">
-      <div class="ml">A producción</div>
-      <div class="mv" style="color:var(--verde)" id="m-apro">0</div>
-      <div class="ms">aprobados hoy</div>
-    </div>
-    <div class="metrica">
-      <div class="ml">Rechazados</div>
-      <div class="mv" style="color:var(--rojo)" id="m-rech">0</div>
-      <div class="ms">reserva liberada</div>
-    </div>
+    <div class="metrica"><div class="ml">Pendientes</div><div class="mv" style="color:var(--naranja)" id="m-pend">0</div></div>
+    <div class="metrica"><div class="ml">A producción</div><div class="mv" style="color:var(--verde)" id="m-apro">0</div></div>
+    <div class="metrica"><div class="ml">Rechazados</div><div class="mv" style="color:var(--rojo)" id="m-rech">0</div></div>
   </div>
-
   <div class="filtros">
-    <button class="filtro-btn active" data-filtro="pendiente_validacion">Pendientes</button>
-    <button class="filtro-btn" data-filtro="en_produccion">A producción</button>
-    <button class="filtro-btn" data-filtro="cancelado">Rechazados</button>
+    <button class="filtro-btn active" data-filtro="pendiente">Pendientes</button>
+    <button class="filtro-btn" data-filtro="aprobado">A producción</button>
+    <button class="filtro-btn" data-filtro="rechazado">Rechazados</button>
   </div>
-
-  <div id="seccionAdicionales" style="margin-bottom:16px;"></div>
   <div id="listaPedidos"><div class="empty">Cargando...</div></div>
 </div>
 
 <script type="module">
 import { initPage, db } from './nav.js';
 import {
-  collection, query, where, orderBy, onSnapshot,
+  collection, query, where, onSnapshot,
   doc, getDoc, getDocs, updateDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const EMPRESA = 'sarcastica';
 const user = await initPage(['directora','operaciones']);
-
 const hoy = new Date();
 const hoyStr = hoy.toISOString().split('T')[0];
-document.getElementById('pageSub').textContent =
-  (user.nombre||user.email) + ' · ' + hoy.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'});
+document.getElementById('pageSub').textContent = (user.nombre||user.email) + ' · ' + hoy.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'});
 
-const CANAL_LABEL = {WhatsApp:'WA',Instagram:'IG',Web:'Web'};
+const col = collection(db,`empresas/${EMPRESA}/pedidos`);
 
 // Contadores
-const col = collection(db,`empresas/${EMPRESA}/pedidos`);
-onSnapshot(query(col,where('estado','==','pendiente_validacion')), s => {
-  document.getElementById('m-pend').textContent = s.size;
-});
-onSnapshot(query(col,where('estado','==','en_produccion')), s => {
-  document.getElementById('m-apro').textContent = s.size;
-});
-onSnapshot(query(col,where('estado','==','cancelado')), s => {
-  document.getElementById('m-rech').textContent = s.size;
-});
+onSnapshot(query(col,where('estado','==','pendiente_validacion')), s => document.getElementById('m-pend').textContent = s.size);
+onSnapshot(query(col,where('estado','==','en_produccion')), s => document.getElementById('m-apro').textContent = s.size);
+onSnapshot(query(col,where('estado','==','cancelado')), s => document.getElementById('m-rech').textContent = s.size);
 
-let filtroActual = 'pendiente_validacion';
+let filtroActual = 'pendiente';
 let unsubLista = null;
 
-// Sección de ítems adicionales (pedidos en estados avanzados con ítems por validar)
-async function cargarAdicionales() {
-  const snap = await getDocs(col);
-  const adicDiv = document.getElementById('seccionAdicionales');
-  if (!adicDiv) return;
-  const pedidosConAdicionales = [];
-  for (const d of snap.docs) {
-    if (d.data().estado === 'pendiente_validacion') continue;
-    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${d.id}/items`));
-    const adicionales = [];
-    itemsSnap.forEach(i => {
-      if (i.data().estado === 'pendiente_validacion_adicional') adicionales.push({id:i.id,...i.data()});
-    });
-    if (adicionales.length > 0) pedidosConAdicionales.push({pedido:d.data(),pid:d.id,adicionales});
-  }
-  if (pedidosConAdicionales.length === 0) { adicDiv.innerHTML=''; return; }
-  adicDiv.innerHTML = `
-    <div style="font-size:13px;font-weight:700;margin-bottom:12px;padding-left:10px;border-left:3px solid var(--azul);">
-      📦 Ítems adicionales pendientes de validación
-    </div>
-    ${pedidosConAdicionales.map(({pedido,pid,adicionales}) => `
-      <div class="card" style="border-color:var(--azul);border-width:2px;margin-bottom:12px;">
-        <div class="card-header">
-          <div>
-            <div class="card-nombre">${pedido.cliente_nombre||'—'} <span style="font-size:11px;font-weight:400;color:var(--gris);">— #${pid.slice(-5).toUpperCase()}</span></div>
-            <div class="card-meta">Pedido principal: <strong>${(pedido.estado||'').replace(/_/g,' ')}</strong></div>
-          </div>
-          <span class="badge badge-prod">Adicionales</span>
-        </div>
-        <div class="items-box">
-          <div class="items-header"><span>Producto</span><span>Diseño</span><span>Precio</span></div>
-          ${adicionales.map(i=>`
-            <div class="item-row">
-              <span>${i.productoNombre||'—'}</span>
-              <span>${i.diseno||'—'}</span>
-              <span>S/ ${(i.precio||0).toFixed(2)}${i.medioPagoAdicional?' · '+i.medioPagoAdicional:''}</span>
-            </div>
-            <div style="padding:2px 0 6px;">
-              ${i.voucherAdicional?`<span style="font-size:11px;color:var(--azul);cursor:pointer;" onclick="verVAd('${i.voucherAdicional}')">📎 Ver voucher</span>`:'<span style="font-size:11px;color:var(--rojo);">Sin voucher</span>'}
-            </div>`).join('')}
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
-          <button class="btn-rechazar" onclick="rechazarAdicionales('${pid}')">Rechazar ítems</button>
-          <button class="btn-aprobar" onclick="aprobarAdicionales('${pid}')">✓ Aprobar → Producción</button>
-        </div>
-      </div>`).join('')}`;
-}
-
-window.verVAd = function(src) {
-  if (!src) return;
-  const w = window.open();
-  w.document.write(`<img src="${src}" style="max-width:100%;"/>`);
-};
-
-window.rechazarAdicionales = async (pid) => {
-  const motivo = prompt('Motivo del rechazo:');
-  if (!motivo) return;
-  try {
-    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
-    for (const iDoc of itemsSnap.docs) {
-      if (iDoc.data().estado !== 'pendiente_validacion_adicional') continue;
-      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id),{estado:'cancelado_adicional',motivoRechazo:motivo});
-      const item = iDoc.data();
-      if (item.productoId) {
-        const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
-        const invSnap = await getDoc(invRef);
-        if (invSnap.exists()) {
-          const inv = invSnap.data();
-          await updateDoc(invRef,{reservado:Math.max(0,(inv.reservado||0)-1),disponible:(inv.disponible||0)+1});
-        }
-      }
-    }
-    alert('✓ Rechazado. Inventario liberado.');
-    cargarAdicionales();
-  } catch(e) { console.error(e); alert('Error.'); }
+// Estado legible para trazabilidad
+const ESTADO_ITEM = {
+  pendiente: 'Pendiente',
+  pendiente_validacion_adicional: '⏳ Pendiente validación',
+  produccion: 'En producción',
+  listo_empaque: 'Listo ✓',
+  empaquetado: 'Empaquetado',
+  en_ruta: 'En ruta',
+  entregado: 'Entregado',
+  cancelado_adicional: 'Cancelado',
 };
 
 function cargar() {
   if (unsubLista) unsubLista();
-  const q = query(col, where('estado','==',filtroActual));
+
+  // Determinar qué pedidos mostrar según filtro
+  let estadoPedido;
+  if (filtroActual === 'pendiente') estadoPedido = 'pendiente_validacion';
+  else if (filtroActual === 'aprobado') estadoPedido = 'en_produccion';
+  else estadoPedido = 'cancelado';
+
+  const q = query(col, where('estado','==', estadoPedido));
   unsubLista = onSnapshot(q, async snap => {
     const lista = document.getElementById('listaPedidos');
-    if (snap.empty) {
-      lista.innerHTML = '<div class="empty">No hay pedidos en este estado</div>';
-      return;
+
+    // Para pendientes: también incluir pedidos en cualquier estado con ítems adicionales pendientes
+    let docs = [...snap.docs];
+    if (filtroActual === 'pendiente') {
+      const allSnap = await getDocs(col);
+      for (const d of allSnap.docs) {
+        if (d.data().estado === 'pendiente_validacion') continue; // ya incluido
+        const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${d.id}/items`));
+        let tieneAdicPend = false;
+        itemsSnap.forEach(i => { if (i.data().estado === 'pendiente_validacion_adicional') tieneAdicPend = true; });
+        if (tieneAdicPend) docs.push(d);
+      }
     }
 
-    const htmls = await Promise.all(snap.docs.map(async d => {
+    if (docs.length === 0) { lista.innerHTML = '<div class="empty">No hay pedidos en este estado</div>'; return; }
+
+    const htmls = await Promise.all(docs.map(async d => {
       const p = d.data();
       const pid = d.id;
+      const esAdicional = p.estado !== 'pendiente_validacion';
 
-      // Cargar items
       const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
       const items = [];
-      itemsSnap.forEach(i => items.push(i.data()));
+      itemsSnap.forEach(i => items.push({id:i.id,...i.data()}));
 
-      // Cache voucher for viewer
-      if (p.voucher) voucherCache[pid] = p.voucher;
+      const tiempoAtras = p.creadoEn?.toDate ? Math.round((Date.now()-p.creadoEn.toDate().getTime())/60000)+' min' : '—';
 
-      const tiempoAtras = p.creadoEn?.toDate
-        ? Math.round((Date.now() - p.creadoEn.toDate().getTime()) / 60000) + ' min'
-        : '—';
+      const itemsHtml = items.map(i => {
+        const esPendVal = i.estado === 'pendiente_validacion_adicional' || (i.estado === 'pendiente' && !esAdicional);
+        const bloqueado = esAdicional ? i.estado !== 'pendiente_validacion_adicional' : false;
+        const adicBadge = i.esAdicional ? `<span class="item-adic-badge">+ Adicional</span>` : '';
+        const estadoLabel = bloqueado ? `<span class="item-estado">${ESTADO_ITEM[i.estado]||i.estado}</span>` : '';
+        const voucherLink = i.voucherAdicional ? `<span class="voucher-link" onclick="verVoucher('${i.voucherAdicional.substring(0,10)}','${pid}','${i.id}')">📎 Ver voucher</span>` : '';
 
-      const canal = CANAL_LABEL[p.canal] || p.canal || '—';
-      const esPend = p.estado === 'pendiente_validacion';
-      const esApro = p.estado === 'en_produccion';
-      const cardClass = esApro ? 'card aprobado' : p.estado === 'cancelado' ? 'card rechazado' : 'card';
-      const badgeHtml = esPend
-        ? '<span class="badge badge-pend">Pendiente</span>'
-        : esApro
-          ? '<span class="badge badge-prod">✓ A producción</span>'
-          : '<span class="badge badge-rech">✗ Rechazado</span>';
-
-      const itemsHtml = items.map(i => `
-        <div class="item-row">
-          <span>${i.productoNombre||'—'}${i.variante?' · '+i.variante:''}</span>
-          <span>${i.diseno||'—'}</span>
-          <span>S/ ${(i.precio||0).toFixed(2)}</span>
-        </div>`).join('');
-
-      const voucherHtml = p.voucher
-        ? `<div class="voucher-box">📎 ${p.voucherNombre||'Voucher adjunto'} · <span class="voucher-link" onclick="verVoucher('${pid}','${(p.voucher||'').substring(0,30)}')">ver imagen</span></div>`
-        : `<div class="voucher-box" style="color:var(--rojo)">📎 Sin voucher adjunto</div>`;
-
-      // Ítems adicionales pendientes de validación
-      const itemsAdicionales = items.filter(i => i.estado === 'pendiente_validacion_adicional');
-      const adiccionalesHtml = itemsAdicionales.length ? `
-        <div style="background:#e0eaf8;border:1px solid #a0c0e8;border-radius:8px;padding:10px 14px;margin-bottom:10px;">
-          <div style="font-size:11px;font-weight:700;color:var(--azul);margin-bottom:8px;">📦 Ítems adicionales por validar (${itemsAdicionales.length})</div>
-          ${itemsAdicionales.map(i => `
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid #c0d8f0;">
-              <div>
-                <div style="font-size:12px;font-weight:600;">${i.productoNombre||'—'}</div>
-                <div style="font-size:11px;color:var(--gris);">${i.diseno||'—'} · S/ ${(i.precio||0).toFixed(2)}${i.medioPagoAdicional?' · '+i.medioPagoAdicional:''}</div>
-              </div>
-              ${i.voucherAdicional ? `<span style="font-size:11px;color:var(--azul);cursor:pointer;" onclick="verVoucherAdicional('${pid}','${i.id}')">📎 Ver voucher</span>` : '<span style="font-size:11px;color:var(--rojo);">Sin voucher</span>'}
-            </div>`).join('')}
-          <div style="display:flex;margin-top:10px;">
-            <button onclick="aprobarAdicionales('${pid}')" style="flex:1;background:var(--verde);color:#fff;border:none;padding:8px;border-radius:6px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">✓ Validar ítems adicionales → Producción</button>
+        return `<div class="item-row${bloqueado?' bloqueado':''}">
+          <div>
+            <div class="item-nombre">${i.productoNombre||'—'}${adicBadge}</div>
+            <div class="item-diseno" style="font-size:11px;color:var(--gris);">${i.diseno||''}</div>
+            ${estadoLabel}${voucherLink}
           </div>
-        </div>` : '';
+          <div style="font-size:11px;color:var(--gris);">${i.diseno||'—'}</div>
+          <div class="item-precio">S/ ${(i.precio||0).toFixed(2)}</div>
+        </div>`;
+      }).join('');
 
-      const accionesHtml = esPend ? `
+      const badgeHtml = esAdicional
+        ? '<span class="badge badge-adic">Ítem adicional</span>'
+        : '<span class="badge badge-pend">Pendiente</span>';
+
+      const voucherPrincipal = p.voucher
+        ? `<div class="voucher-box">📎 ${p.voucherNombre||'Voucher'} · <span class="voucher-link" style="cursor:pointer;" onclick="verVoucherPrincipal('${pid}')">ver imagen</span></div>`
+        : `<div class="voucher-box" style="color:var(--rojo);">📎 Sin voucher adjunto</div>`;
+
+      const accionHtml = filtroActual === 'pendiente' ? `
         <div class="rechazo-wrap" id="rechazo-${pid}">
           <label>Motivo del rechazo *</label>
           <textarea rows="2" id="motivo-${pid}" placeholder="Ej: el voucher no corresponde al monto..."></textarea>
           <div class="rechazo-actions">
             <button class="btn-cancelar" onclick="cancelarRechazo('${pid}')">Cancelar</button>
-            <button class="btn-confirmar-rechazo" onclick="confirmarRechazo('${pid}')">Confirmar rechazo</button>
+            <button class="btn-confirmar-rechazo" onclick="confirmarRechazo('${pid}',${esAdicional})">Confirmar rechazo</button>
           </div>
         </div>
         <div class="card-actions">
           <button class="btn-rechazar" id="btnR-${pid}" onclick="iniciarRechazo('${pid}')">Rechazar</button>
-          <button class="btn-aprobar" id="btnA-${pid}" onclick="aprobar('${pid}')">Enviar a producción →</button>
-        </div>` : `<div class="estado-label">${esApro ? '✓ Aprobado y enviado a producción' : '✗ Rechazado — ' + (p.motivoRechazo||'sin motivo')}</div>`;
+          <button class="btn-aprobar" id="btnA-${pid}" onclick="aprobar('${pid}',${esAdicional})">${esAdicional ? '✓ Aprobar ítems adicionales → Producción' : 'Enviar a producción →'}</button>
+        </div>` : `<div class="estado-label">${filtroActual==='aprobado'?'✓ Aprobado y enviado a producción':'✗ Rechazado'}</div>`;
 
-      return `<div class="${cardClass}" id="card-${pid}" data-items='${JSON.stringify(itemsAdicionales.map(i=>({id:i.id,v:i.voucherAdicional||''})))}'>
+      return `<div class="card" id="card-${pid}" data-voucher="${p.voucher||''}">
         <div class="card-header">
           <div>
             <div class="card-nombre">${p.cliente_nombre||'—'}</div>
-            <div class="card-meta">Pedido #${pid.slice(-5).toUpperCase()} · ${canal} · ${p.vendedor||'—'} · hace ${tiempoAtras}</div>
+            <div class="card-meta">Pedido #${pid.slice(-5).toUpperCase()} · ${p.canal||'—'} · ${p.vendedor||'—'} · hace ${tiempoAtras}</div>
           </div>
           ${badgeHtml}
         </div>
@@ -362,13 +256,12 @@ function cargar() {
           <div class="items-header"><span>Producto</span><span>Diseño</span><span>Precio</span></div>
           ${itemsHtml}
           <div class="items-total">
-            <span class="label">Total · ${p.medioPago||'—'}</span>
+            <span>Total · ${p.medioPago||'—'}</span>
             <span class="monto">S/ ${(p.total||0).toFixed(2)}</span>
           </div>
         </div>
-        ${adiccionalesHtml}
-        ${voucherHtml}
-        ${accionesHtml}
+        ${voucherPrincipal}
+        ${accionHtml}
       </div>`;
     }));
 
@@ -376,99 +269,75 @@ function cargar() {
   });
 }
 
-// Ver voucher ítem adicional
-window.verVoucherAdicional = function(pid, itemId) {
+// Ver voucher principal
+window.verVoucherPrincipal = function(pid) {
   const card = document.getElementById(`card-${pid}`);
   if (!card) return;
-  try {
-    const itemsData = JSON.parse(card.dataset.items || '[]');
-    const item = itemsData.find(i => i.id === itemId);
-    if (item?.v) {
-      const w = window.open();
-      w.document.write(`<img src="${item.v}" style="max-width:100%;"/>`);
-    }
-  } catch(e) { console.error(e); }
+  const src = card.dataset.voucher;
+  if (!src) return;
+  const w = window.open(); w.document.write(`<img src="${src}" style="max-width:100%;"/>`);
 };
 
-// Aprobar ítems adicionales — pasan a producción
-window.aprobarAdicionales = async (pid) => {
-  if (!confirm('¿Validar los ítems adicionales y enviarlos a producción?')) return;
+// Ver voucher ítem adicional
+const voucherItemCache = {};
+window.verVoucher = function(preview, pid, itemId) {
+  const key = `${pid}_${itemId}`;
+  if (voucherItemCache[key]) {
+    const w = window.open(); w.document.write(`<img src="${voucherItemCache[key]}" style="max-width:100%;"/>`);
+    return;
+  }
+  alert('Recarga la página para ver el voucher del ítem.');
+};
+
+// APROBAR
+window.aprobar = async (pid, esAdicional) => {
+  const btnA = document.getElementById(`btnA-${pid}`);
+  const btnR = document.getElementById(`btnR-${pid}`);
+  if (btnA) { btnA.disabled=true; btnA.textContent='Procesando...'; }
+  if (btnR) btnR.disabled=true;
   try {
     const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
-    for (const iDoc of itemsSnap.docs) {
-      if (iDoc.data().estado === 'pendiente_validacion_adicional') {
-        await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {
-          estado: 'pendiente'
-        });
-        // Consumir inventario: reservado → consumido
+
+    if (esAdicional) {
+      // Solo aprobar ítems adicionales pendientes
+      for (const iDoc of itemsSnap.docs) {
+        if (iDoc.data().estado === 'pendiente_validacion_adicional') {
+          await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), { estado:'pendiente' });
+          // consumido + 1, reservado - 1
+          const item = iDoc.data();
+          if (item.productoId) {
+            const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
+            const invSnap = await getDoc(invRef);
+            if (invSnap.exists()) {
+              const inv = invSnap.data();
+              await updateDoc(invRef,{reservado:Math.max(0,(inv.reservado||0)-1),consumido:(inv.consumido||0)+1});
+            }
+          }
+        }
+      }
+      alert('✓ Ítems adicionales aprobados. Ya aparecen en Producción.');
+    } else {
+      // Aprobar pedido completo
+      for (const iDoc of itemsSnap.docs) {
         const item = iDoc.data();
+        await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), { estado:'pendiente' });
         if (item.productoId) {
           const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
           const invSnap = await getDoc(invRef);
           if (invSnap.exists()) {
             const inv = invSnap.data();
-            await updateDoc(invRef, {
-              reservado: Math.max(0,(inv.reservado||0)-1),
-              consumido: (inv.consumido||0)+1,
-            });
+            await updateDoc(invRef,{reservado:Math.max(0,(inv.reservado||0)-1),consumido:(inv.consumido||0)+1});
           }
         }
       }
-    }
-    alert('✓ Ítems adicionales validados. Ya aparecen en Producción.');
-  } catch(e) { console.error(e); alert('Error al validar.'); }
-};
-
-// Ver voucher
-const voucherCache = {};
-window.verVoucher = function(pid, preview) {
-  const src = voucherCache[pid];
-  if (!src) { alert('Voucher no disponible en caché. Recarga la página.'); return; }
-  const w = window.open();
-  w.document.write(`<html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;"><img src="${src}" style="max-width:100%;max-height:100vh;"/></body></html>`);
-};
-
-// APROBAR
-window.aprobar = async (pid) => {
-  const btnA = document.getElementById(`btnA-${pid}`);
-  const btnR = document.getElementById(`btnR-${pid}`);
-  if (btnA) { btnA.disabled = true; btnA.textContent = 'Procesando...'; }
-  if (btnR) btnR.disabled = true;
-  try {
-    // Obtener items del pedido
-    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
-
-    // Actualizar inventario: reservado→consumido (disponible ya se descontó al reservar)
-    for (const iDoc of itemsSnap.docs) {
-      const item = iDoc.data();
-      if (!item.productoId) continue;
-      const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
-      const invSnap = await getDoc(invRef);
-      if (invSnap.exists()) {
-        const inv = invSnap.data();
-        await updateDoc(invRef, {
-          reservado: Math.max(0, (inv.reservado||0) - 1),
-          consumido: (inv.consumido||0) + 1,
-        });
-      }
-      // Actualizar estado del ítem
-      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {
-        estado: 'pendiente'
+      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
+        estado:'en_produccion', fechaValidacion:hoyStr, validadoPor:user.nombre||user.email, validadoEn:serverTimestamp()
       });
     }
-
-    // Actualizar pedido
-    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
-      estado: 'en_produccion',
-      fechaValidacion: hoyStr,
-      validadoPor: user.nombre||user.email,
-      validadoEn: serverTimestamp(),
-    });
   } catch(e) {
-    console.error(e);
-    alert('Error al aprobar. Intenta de nuevo.');
-    if (btnA) { btnA.disabled = false; btnA.textContent = 'Enviar a producción →'; }
-    if (btnR) btnR.disabled = false;
+    console.error(e); alert('Error al aprobar.');
+    if (btnA) { btnA.disabled=false; btnA.textContent='Enviar a producción →'; }
+    if (btnR) btnR.disabled=false;
   }
 };
 
@@ -478,48 +347,44 @@ window.iniciarRechazo = (pid) => {
   document.getElementById(`btnA-${pid}`)?.setAttribute('disabled','');
   document.getElementById(`btnR-${pid}`)?.setAttribute('disabled','');
 };
-
 window.cancelarRechazo = (pid) => {
   document.getElementById(`rechazo-${pid}`)?.classList.remove('open');
   document.getElementById(`btnA-${pid}`)?.removeAttribute('disabled');
   document.getElementById(`btnR-${pid}`)?.removeAttribute('disabled');
 };
-
-window.confirmarRechazo = async (pid) => {
+window.confirmarRechazo = async (pid, esAdicional) => {
   const motivo = document.getElementById(`motivo-${pid}`)?.value.trim();
   if (!motivo) { alert('El motivo de rechazo es obligatorio.'); return; }
   try {
-    // Liberar reserva: reservado→disponible
     const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
     for (const iDoc of itemsSnap.docs) {
       const item = iDoc.data();
-      if (!item.productoId) continue;
-      const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
-      const invSnap = await getDoc(invRef);
-      if (invSnap.exists()) {
-        const inv = invSnap.data();
-        await updateDoc(invRef, {
-          reservado:  Math.max(0, (inv.reservado||0) - 1),
-          disponible: (inv.disponible||0) + 1,
-        });
+      const esPendAd = item.estado === 'pendiente_validacion_adicional';
+      if (esAdicional && !esPendAd) continue;
+      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {
+        estado: esAdicional ? 'cancelado_adicional' : 'cancelado'
+      });
+      if (item.productoId) {
+        const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
+        const invSnap = await getDoc(invRef);
+        if (invSnap.exists()) {
+          const inv = invSnap.data();
+          await updateDoc(invRef,{reservado:Math.max(0,(inv.reservado||0)-1),disponible:(inv.disponible||0)+1});
+        }
       }
     }
-    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
-      estado: 'cancelado',
-      motivoRechazo: motivo,
-      rechazadoPor: user.nombre||user.email,
-      rechazadoEn: serverTimestamp(),
-    });
-  } catch(e) {
-    console.error(e);
-    alert('Error al rechazar. Intenta de nuevo.');
-  }
+    if (!esAdicional) {
+      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid),{
+        estado:'cancelado', motivoRechazo:motivo, rechazadoPor:user.nombre||user.email, rechazadoEn:serverTimestamp()
+      });
+    }
+    alert('✓ Rechazado. Inventario liberado.');
+  } catch(e) { console.error(e); alert('Error.'); }
 };
 
-// Filtros
 document.querySelectorAll('.filtro-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     filtroActual = btn.dataset.filtro;
     cargar();
@@ -527,7 +392,6 @@ document.querySelectorAll('.filtro-btn').forEach(btn => {
 });
 
 cargar();
-cargarAdicionales();
 </script>
 </body>
 </html>
