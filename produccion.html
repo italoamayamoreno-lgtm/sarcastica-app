@@ -286,7 +286,9 @@ function scheduleRender() {
 
 function renderAll() {
   const lista = document.getElementById('listaPedidos');
+  const estadosExcluidos = ['en_empaque','empaquetado','en_ruta','entregado','cancelado'];
   const activos = Object.values(pedidosMap).filter(p =>
+    !estadosExcluidos.includes(p.estado) &&
     (p.items||[]).some(i => ['pendiente','produccion','listo_empaque'].includes(i.estado))
   );
 
