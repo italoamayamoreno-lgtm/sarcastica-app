@@ -257,13 +257,25 @@ const addFormHtml = canEdit ? `
         </div>
       </div>
 
-      <!-- VOUCHER ADICIONAL -->
-      <div class="field" style="margin-top:8px;">
-        <label>${esEscenarioB ? 'Voucher de pago del ítem adicional (obligatorio)' : 'Voucher de pago adicional (opcional)'}</label>
-        <div class="voucher-box" id="newVoucherBox" onclick="triggerNuevoVoucher()">
-          📎 ${esEscenarioB ? 'Adjuntar voucher del pago adicional' : 'Adjuntar voucher si el pago es por separado'}
+      <!-- PAGO ADICIONAL -->
+      <div class="g2" style="margin-top:8px;">
+        <div class="field">
+          <label>${esEscenarioB ? 'Medio de pago adicional (obligatorio)' : 'Medio de pago adicional (opcional)'}</label>
+          <select id="newMedioPago">
+            <option value="">Seleccionar</option>
+            <option>Yape</option>
+            <option>Plin</option>
+            <option>Transferencia</option>
+            <option>MercadoPago</option>
+          </select>
         </div>
-        <input type="file" id="newVoucherInput" accept="image/*" style="display:none" onchange="onNuevoVoucherChange(this)"/>
+        <div class="field">
+          <label>${esEscenarioB ? 'Voucher de pago (obligatorio)' : 'Voucher de pago (opcional)'}</label>
+          <div class="voucher-box" id="newVoucherBox" onclick="triggerNuevoVoucher()">
+            📎 ${esEscenarioB ? 'Adjuntar voucher del pago adicional' : 'Adjuntar voucher si el pago es por separado'}
+          </div>
+          <input type="file" id="newVoucherInput" accept="image/*" style="display:none" onchange="onNuevoVoucherChange(this)"/>
+        </div>
       </div>
 
       <!-- REPROGRAMAR FECHA -->
@@ -383,6 +395,13 @@ window.guardarItem = async () => {
     // Escenario B (en_produccion o más): entra como 'pendiente_validacion_adicional' — requiere validación propia
     const estadoItem = esEscenarioB ? 'pendiente_validacion_adicional' : 'pendiente';
 
+    const medioPagoAdicional = document.getElementById('newMedioPago')?.value || '';
+    if (esEscenarioB && !medioPagoAdicional) {
+      alert('Selecciona el medio de pago adicional.');
+      btn.disabled=false; btn.textContent='Guardar ítem';
+      return;
+    }
+
     await addDoc(collection(db,`empresas/${EMPRESA}/pedidos/${pedidoId}/items`), {
       categoria: cat,
       productoId: prodId,
@@ -390,6 +409,7 @@ window.guardarItem = async () => {
       variante, diseno, precio,
       estado: estadoItem,
       esAdicional: esEscenarioB,
+      medioPagoAdicional,
       voucherAdicional: nuevoVoucherBase64||'',
       voucherAdicionalNombre: nuevoVoucherNombre||'',
       agregadoEn: serverTimestamp(),
@@ -420,7 +440,7 @@ window.guardarItem = async () => {
     }
     await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pedidoId), updateData);
 
-    nuevoVoucherBase64 = ''; nuevoVoucherNombre = '';
+    nuevoVoucherBase64 = ''; nuevoVoucherNombre = ''; document.getElementById('newMedioPago') && (document.getElementById('newMedioPago').value = '');
     await cargar();
     alert(esEscenarioB
       ? '✓ Ítem adicional agregado. Aparecerá en Validar Pagos para revisión independiente.'
