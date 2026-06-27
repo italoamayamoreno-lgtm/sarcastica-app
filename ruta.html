@@ -252,11 +252,29 @@ async function cargarRepartidores() {
   snap.forEach(d => repartidores.push({id:d.id,...d.data()}));
 }
 
-// Cargar pedidos en_ruta en tiempo real
+// Cargar pedidos en_ruta en tiempo real — solo si TODOS los ítems están empaquetados
 onSnapshot(query(col, where('estado','==','en_ruta')), async snap => {
-  pedidos = snap.docs.map(d => ({id:d.id,...d.data()}));
+  pedidos = [];
+  for (const d of snap.docs) {
+    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${d.id}/items`));
+    let todosEmpaquetados = true;
+    itemsSnap.forEach(i => {
+      if (i.data().estado !== 'empaquetado') todosEmpaquetados = false;
+    });
+    if (todosEmpaquetados) pedidos.push({id:d.id,...d.data()});
+  }
   await cargarRepartidores();
   renderMain();
+});
+
+// También escuchar pedidos empaquetados listos para despacho (todos los ítems empaquetados)
+onSnapshot(query(col, where('estado','==','empaquetado')), async snap => {
+  // actualizar métricas
+  const lima = snap.docs.filter(d => (d.data().provincia||'').toLowerCase().includes('lima')).length;
+  const olva = snap.size - lima;
+  document.getElementById('m-total').textContent = snap.size;
+  document.getElementById('m-lima').textContent = lima;
+  document.getElementById('m-olva').textContent = olva;
 });
 
 function ordenarPedidos(lista) {
