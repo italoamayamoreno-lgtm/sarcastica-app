@@ -249,7 +249,7 @@ function cargar() {
             <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid #c0d8f0;">
               <div>
                 <div style="font-size:12px;font-weight:600;">${i.productoNombre||'—'}</div>
-                <div style="font-size:11px;color:var(--gris);">${i.diseno||'—'} · S/ ${(i.precio||0).toFixed(2)}</div>
+                <div style="font-size:11px;color:var(--gris);">${i.diseno||'—'} · S/ ${(i.precio||0).toFixed(2)}${i.medioPagoAdicional?' · '+i.medioPagoAdicional:''}</div>
               </div>
               ${i.voucherAdicional ? `<span style="font-size:11px;color:var(--azul);cursor:pointer;" onclick="verVoucherAdicional('${pid}','${i.id}')">📎 Ver voucher</span>` : '<span style="font-size:11px;color:var(--rojo);">Sin voucher</span>'}
             </div>`).join('')}
