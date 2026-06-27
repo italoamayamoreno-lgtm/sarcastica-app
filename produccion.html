@@ -243,10 +243,16 @@ onSnapshot(q, async snap => {
       else if (i.estado==='listo_empaque') totalListo++;
     });
 
-    const listos = items.filter(i=>i.estado==='listo_empaque').length;
+    // Item counts — originales deben estar en listo_empaque o más avanzado
+    // Adicionales deben estar en listo_empaque
+    const listos = items.filter(i => i.estado === 'listo_empaque').length;
+    const avanzados = items.filter(i =>
+      ['listo_empaque','empaquetado','en_ruta','entregado'].includes(i.estado)
+    ).length;
     const total = items.length;
-    const pct = total > 0 ? Math.round((listos/total)*100) : 0;
-    const todosListos = listos === total && total > 0;
+    const pct = total > 0 ? Math.round((avanzados/total)*100) : 0;
+    // Todos listos = todos los ítems están en listo_empaque o más avanzado
+    const todosListos = avanzados === total && total > 0;
     const barColor = todosListos ? 'var(--verde)' : pct > 0 ? 'var(--azul)' : 'var(--borde)';
 
     const itemsHtml = items.map(item => {
