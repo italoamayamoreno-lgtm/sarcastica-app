@@ -302,36 +302,62 @@ window.aprobar = async (pid, esAdicional) => {
       // Solo aprobar ítems adicionales pendientes
       for (const iDoc of itemsSnap.docs) {
         if (iDoc.data().estado === 'pendiente_validacion_adicional') {
-          await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), { estado:'pendiente' });
-          // consumido + 1, reservado - 1
           const item = iDoc.data();
-          if (item.productoId) {
-            const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
-            const invSnap = await getDoc(invRef);
-            if (invSnap.exists()) {
-              const inv = invSnap.data();
-              await updateDoc(invRef,{reservado:Math.max(0,(inv.reservado||0)-1),consumido:(inv.consumido||0)+1});
+          try {
+            // Primero actualizar inventario — si falla, el ítem no cambia de estado
+            if (item.productoId) {
+              const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
+              const invSnap = await getDoc(invRef);
+              if (invSnap.exists()) {
+                const inv = invSnap.data();
+                await updateDoc(invRef,{
+                  reservado: Math.max(0,(inv.reservado||0)-1),
+                  consumido: (inv.consumido||0)+1
+                });
+              }
             }
+            // Solo después de confirmar inventario, cambiar estado del ítem
+            await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {
+              estado:'pendiente',
+              validadoEn: serverTimestamp(),
+              validadoPor: user.nombre||user.email
+            });
+          } catch(itemErr) {
+            console.error('Error al aprobar ítem adicional:', item.productoNombre, itemErr);
+            throw itemErr; // Re-lanzar para que el catch externo lo capture
           }
         }
       }
       alert('✓ Ítems adicionales aprobados. Ya aparecen en Producción.');
     } else {
-      // Aprobar pedido completo
+      // Aprobar pedido completo — inventario primero, estado después
       for (const iDoc of itemsSnap.docs) {
         const item = iDoc.data();
-        await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), { estado:'pendiente' });
-        if (item.productoId) {
-          const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
-          const invSnap = await getDoc(invRef);
-          if (invSnap.exists()) {
-            const inv = invSnap.data();
-            await updateDoc(invRef,{reservado:Math.max(0,(inv.reservado||0)-1),consumido:(inv.consumido||0)+1});
+        try {
+          if (item.productoId) {
+            const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
+            const invSnap = await getDoc(invRef);
+            if (invSnap.exists()) {
+              const inv = invSnap.data();
+              await updateDoc(invRef,{
+                reservado: Math.max(0,(inv.reservado||0)-1),
+                consumido: (inv.consumido||0)+1
+              });
+            }
           }
+          await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {
+            estado:'pendiente',
+            validadoEn: serverTimestamp(),
+            validadoPor: user.nombre||user.email
+          });
+        } catch(itemErr) {
+          console.error('Error al aprobar ítem:', item.productoNombre, itemErr);
+          throw itemErr;
         }
       }
       await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
-        estado:'en_produccion', fechaValidacion:hoyStr, validadoPor:user.nombre||user.email, validadoEn:serverTimestamp()
+        estado:'en_produccion', fechaValidacion:hoyStr,
+        validadoPor:user.nombre||user.email, validadoEn:serverTimestamp()
       });
     }
   } catch(e) {
