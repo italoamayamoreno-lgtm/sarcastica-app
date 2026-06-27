@@ -213,110 +213,259 @@ document.getElementById('pageSub').textContent =
 let mermaActual = { pedidoId:'', itemId:'', productoId:'', productoNombre:'', diseno:'', disponible:0 };
 let causaSeleccionada = '';
 
-// Pedidos en producción
-const q = query(collection(db,`empresas/${EMPRESA}/pedidos`), where('estado','==','en_produccion'));
+// Buscar pedidos con ítems activos en producción (incluyendo adicionales)
+const col = collection(db,`empresas/${EMPRESA}/pedidos`);
 
-onSnapshot(q, async snap => {
+onSnapshot(col, async snap => {
   const lista = document.getElementById('listaPedidos');
-  if (snap.empty) {
+  const pedidos = [];
+
+  for (const d of snap.docs) {
+    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${d.id}/items`));
+    const items = [];
+    itemsSnap.forEach(i => items.push({id:i.id,...i.data()}));
+    const tieneActivos = items.some(i => ['pendiente','produccion','listo_empaque'].includes(i.estado));
+    if (tieneActivos) pedidos.push({id:d.id,...d.data(),items});
+  }
+
+  if (pedidos.length === 0) {
     lista.innerHTML = '<div class="empty">No hay pedidos en producción</div>';
-    document.getElementById('m-total').textContent = 0;
-    document.getElementById('m-pend').textContent = 0;
-    document.getElementById('m-prod').textContent = 0;
-    document.getElementById('m-listo').textContent = 0;
+    actualizarMetricas([]);
     return;
   }
 
-  let totalPend=0, totalProd=0, totalListo=0;
-  const cards = [];
+  actualizarMetricas(pedidos);
+  lista.innerHTML = pedidos.map(p => renderCard(p)).join('');
+});width=device-width, initial-scale=1.0"/>
+<title>Producción · Sarcástica OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#f1e8df;--black:#000;--rosa:#e1c4c1;--borde:#cca99d;--gris:#50504f;--verde:#3B6D11;--azul:#185FA5;--naranja:#854F0B;--rojo:#A32D2D;}
+#app-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:#000;display:flex;align-items:center;padding:0 20px;height:52px;border-bottom:2px solid #e1c4c1;font-family:"Poppins",sans-serif;}
+#app-nav .nav-logo{display:flex;align-items:center;margin-right:16px;flex-shrink:0;text-decoration:none;}
+#app-nav .nav-divider{width:1px;height:20px;background:#333;margin-right:8px;flex-shrink:0;}
+#app-nav .nav-items{display:flex;gap:2px;flex:1;overflow-x:auto;}
+#app-nav .nav-items::-webkit-scrollbar{display:none;}
+#app-nav a.nav-link{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#888;text-decoration:none;white-space:nowrap;transition:background .15s,color .15s;}
+#app-nav a.nav-link:hover{background:#111;color:#f1e8df;}
+#app-nav a.nav-link.active{background:#e1c4c1;color:#000;font-weight:600;}
+#app-nav .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+#app-nav .nav-powered{font-size:10px;color:#444;letter-spacing:.04em;white-space:nowrap;}
+#app-nav .nav-powered strong{color:#cca99d;}
+#app-nav .nav-username{font-size:11px;color:#888;white-space:nowrap;}
+#app-nav .btn-salir{background:none;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:"Poppins",sans-serif;font-size:11px;white-space:nowrap;}
+#app-nav .btn-salir:hover{border-color:#e1c4c1;color:#f1e8df;}
+.nav-user-wrap{position:relative;}
+#nav-menu-btn{display:flex;width:28px;height:28px;border-radius:50%;background:#e1c4c1;border:none;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;flex-shrink:0;}
+#nav-menu-btn span{display:block;width:12px;height:1.5px;background:#000;border-radius:2px;}
+#nav-menu-dropdown{display:none;position:absolute;top:38px;right:0;background:#fff;border:1.5px solid var(--borde);border-radius:10px;min-width:180px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:500;}
+#nav-menu-dropdown.open{display:block;}
+#nav-menu-dropdown a{display:block;padding:11px 16px;font-size:13px;color:var(--black);text-decoration:none;font-family:"Poppins",sans-serif;white-space:nowrap;}
+#nav-menu-dropdown a:hover{background:var(--bg);}
+#nav-menu-dropdown .menu-sep{height:1px;background:var(--borde);margin:4px 0;}
+body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
 
+.page{max-width:900px;margin:0 auto;padding:28px 24px;}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.page-title{font-size:20px;font-weight:800;}
+.page-sub{font-size:12px;color:var(--gris);margin-top:3px;}
+
+.metricas{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.metrica{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:14px 16px;}
+.metrica .ml{font-size:11px;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;font-weight:500;margin-bottom:4px;}
+.metrica .mv{font-size:26px;font-weight:800;line-height:1;}
+
+.card{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:18px;margin-bottom:12px;}
+.card.listo{border-color:#b8dcb8;background:#f8fff5;}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.card-nombre{font-size:14px;font-weight:700;}
+.card-meta{font-size:11px;color:var(--gris);margin-top:2px;}
+.progress-wrap{background:var(--bg);border-radius:20px;height:5px;margin-bottom:12px;}
+.progress-bar{border-radius:20px;height:5px;transition:width .3s;}
+
+.item-row{display:flex;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid #f0e8e0;gap:8px;}
+.item-info{flex:1;}
+.item-nombre{font-size:13px;font-weight:600;}
+.item-diseno{font-size:11px;color:var(--gris);margin-top:1px;}
+/* item-acciones removed — pipeline is inline */
+.pipeline{display:flex;align-items:center;gap:4px;margin-top:6px;}
+.pip-step{display:flex;align-items:center;gap:4px;}
+.pip-btn{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid transparent;font-family:"Poppins",sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.pip-btn.done{background:#e8f5e0;color:var(--verde);border-color:#b8dcb8;cursor:default;}
+.pip-btn.current{background:#e0eaf8;color:var(--azul);border-color:#a0c0e8;cursor:pointer;}
+.pip-btn.current:hover{background:var(--azul);color:#fff;}
+.pip-btn.pending{background:#fff;color:var(--gris);border-color:var(--borde);cursor:default;opacity:.5;}
+.pip-arrow{font-size:10px;color:var(--borde);}
+.btn-merma-item{background:none;border:none;font-size:10px;color:var(--rojo);cursor:pointer;font-family:"Poppins",sans-serif;padding:0;margin-top:4px;display:block;}
+.btn-merma-item:hover{text-decoration:underline;}
+.item-adicional{border-left:3px solid #ffc107;padding-left:8px;background:#fffdf0;}
+
+.btn-empaque{background:var(--black);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-top:12px;float:right;}
+.btn-empaque:hover{opacity:.8;}
+.clearfix::after{content:'';display:block;clear:both;}
+.empty{text-align:center;padding:60px 0;color:var(--borde);font-size:13px;}
+
+/* MODAL MERMA */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;padding:20px;overflow-y:auto;}
+.modal-overlay.open{display:flex;justify-content:center;align-items:flex-start;}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:500px;margin:auto;}
+.modal-header{background:#000;border-radius:16px 16px 0 0;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-title{font-size:15px;font-weight:700;color:#fff;}
+.modal-close{background:none;border:none;color:#666;font-size:22px;cursor:pointer;line-height:1;}
+.modal-close:hover{color:#fff;}
+.modal-body{padding:20px;}
+.modal-item-info{background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.modal-item-info strong{display:block;font-weight:700;margin-bottom:2px;}
+.modal-item-info span{font-size:11px;color:var(--gris);}
+.sec-label{font-size:9px;font-weight:600;color:var(--borde);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.causas{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.causa-btn{padding:5px 12px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-family:"Poppins",sans-serif;font-size:11px;color:var(--gris);cursor:pointer;}
+.causa-btn.active{background:var(--rojo);color:#fff;border-color:var(--rojo);}
+.field{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;}
+.field label{font-size:10px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.04em;}
+.field input,.field select{background:#fff;border:1px solid var(--borde);border-radius:6px;padding:7px 10px;font-family:"Poppins",sans-serif;font-size:12px;color:var(--black);outline:none;width:100%;}
+.reasignar-box{background:#faeeda;border:1px solid #e8c99a;border-radius:8px;padding:12px;margin-top:12px;}
+.reasignar-title{font-size:11px;font-weight:600;color:var(--naranja);margin-bottom:8px;}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--borde);background:#faf5f0;border-radius:0 0 16px 16px;}
+.btn-sec{background:#fff;border:1.5px solid var(--borde);color:var(--gris);padding:9px 16px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-danger{background:var(--rojo);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-danger:disabled{opacity:.4;cursor:not-allowed;}
+</style>
+</head>
+<body>
+
+<nav id="app-nav">
+  <a href="inventario.html" class="nav-logo">
+    <svg viewBox="0 0 200 36" xmlns="http://www.w3.org/2000/svg" height="20"><text x="0" y="29" font-family="Georgia,serif" font-size="29" font-weight="400" fill="#ffffff" letter-spacing="-0.5">sarcástica.</text></svg>
+  </a>
+  <div class="nav-divider"></div>
+  <div class="nav-items">
+    <a href="inventario.html" class="nav-link" data-page="inventario">Inventario</a>
+    <a href="pedidos.html"    class="nav-link" data-page="pedidos">Pedidos</a>
+    <a href="validar.html"    class="nav-link" data-page="validar">Validar Pagos</a>
+    <a href="produccion.html" class="nav-link active" data-page="produccion">Producción</a>
+    <a href="empaque.html"    class="nav-link" data-page="empaque">Empaque</a>
+    <a href="ruta.html"       class="nav-link" data-page="ruta">Ruta</a>
+    <a href="clientes.html"   class="nav-link" data-page="clientes">CRM</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-powered">powered by <strong>Etrazia</strong></span>
+    <span class="nav-username" id="nav-rol"></span>
+    <div class="nav-user-wrap">
+      <button id="nav-menu-btn"><span></span><span></span><span></span></button>
+      <div id="nav-menu-dropdown">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="clientes.html">CRM Clientes</a>
+        <div class="menu-sep"></div>
+        <a href="configuracion.html">Configuración</a>
+      </div>
+    </div>
+    <button class="btn-salir" id="btn-salir">Salir</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Producción</div>
+      <div class="page-sub" id="pageSub"></div>
+    </div>
+  </div>
+
+  <div class="metricas">
+    <div class="metrica"><div class="ml">Pedidos</div><div class="mv" id="m-total">0</div></div>
+    <div class="metrica"><div class="ml">Ítems pendientes</div><div class="mv" style="color:var(--naranja)" id="m-pend">0</div></div>
+    <div class="metrica"><div class="ml">En producción</div><div class="mv" style="color:var(--azul)" id="m-prod">0</div></div>
+    <div class="metrica"><div class="ml">Listos</div><div class="mv" style="color:var(--verde)" id="m-listo">0</div></div>
+  </div>
+
+  <div id="listaPedidos"><div class="empty">Cargando pedidos...</div></div>
+</div>
+
+<!-- MODAL MERMA -->
+<div class="modal-overlay" id="modalMerma">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">⚠ Registrar merma</div>
+      <button class="modal-close" id="btnCerrarMerma">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-item-info" id="mermaItemInfo">
+        <strong id="mermaItemNombre">—</strong>
+        <span id="mermaItemDiseno">—</span>
+      </div>
+
+      <div class="sec-label">Causa de la merma</div>
+      <div class="causas" id="causas">
+        <button class="causa-btn" data-causa="Falla de sublimado">Falla de sublimado</button>
+        <button class="causa-btn" data-causa="Falla de estampado">Falla de estampado</button>
+        <button class="causa-btn" data-causa="Defecto del insumo">Defecto del insumo</button>
+        <button class="causa-btn" data-causa="Error de troquelado">Error de troquelado</button>
+        <button class="causa-btn" data-causa="Otro">Otro</button>
+      </div>
+
+      <div class="field">
+        <label>Detalle adicional (opcional)</label>
+        <input type="text" id="mermaDetalle" placeholder="Describe el daño..."/>
+      </div>
+
+      <div class="reasignar-box">
+        <div class="reasignar-title">¿Reasignar nuevo insumo para este ítem?</div>
+        <div class="field">
+          <label>Stock disponible del mismo insumo</label>
+          <div id="mermaStockInfo" style="font-size:13px;font-weight:600;color:var(--black);padding:4px 0;"></div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" id="mermaReasignar" style="width:16px;height:16px;"/>
+          Sí, reasignar insumo disponible para continuar producción
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sec" id="btnCancelarMerma">Cancelar</button>
+      <button class="btn-danger" id="btnConfirmarMerma">Confirmar merma</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initPage, db } from './nav.js';
+import {
+  collection, query, where, onSnapshot,
+  doc, getDoc, getDocs, updateDoc, addDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const EMPRESA = 'sarcastica';
+const user = await initPage(['directora','operaciones','produccion']);
+
+const hoy = new Date();
+document.getElementById('pageSub').textContent =
+  hoy.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'});
+
+// Estado merma actual
+let mermaActual = { pedidoId:'', itemId:'', productoId:'', productoNombre:'', diseno:'', disponible:0 };
+let causaSeleccionada = '';
+
+// Buscar pedidos con ítems activos en producción (incluye adicionales)
+const col = collection(db,`empresas/${EMPRESA}/pedidos`);
+onSnapshot(col, async snap => {
+  const lista = document.getElementById('listaPedidos');
+  const pedidos = [];
   for (const d of snap.docs) {
-    const p = d.data();
-    const pid = d.id;
-    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${d.id}/items`));
     const items = [];
     itemsSnap.forEach(i => items.push({id:i.id,...i.data()}));
-
-    items.forEach(i => {
-      if (i.estado==='pendiente') totalPend++;
-      else if (i.estado==='produccion') totalProd++;
-      else if (i.estado==='listo_empaque') totalListo++;
-    });
-
-    // Item counts — originales deben estar en listo_empaque o más avanzado
-    // Adicionales deben estar en listo_empaque
-    const listos = items.filter(i => i.estado === 'listo_empaque').length;
-    const avanzados = items.filter(i =>
-      ['listo_empaque','empaquetado','en_ruta','entregado'].includes(i.estado)
-    ).length;
-    const total = items.length;
-    const pct = total > 0 ? Math.round((avanzados/total)*100) : 0;
-    // Todos listos = todos los ítems están en listo_empaque o más avanzado
-    const todosListos = avanzados === total && total > 0;
-    const barColor = todosListos ? 'var(--verde)' : pct > 0 ? 'var(--azul)' : 'var(--borde)';
-
-    const itemsHtml = items.map(item => {
-      const esListo = item.estado === 'listo_empaque';
-      const esProd  = item.estado === 'produccion';
-      const esPend  = !esProd && !esListo;
-
-      const steps = [
-        { label:'Pendiente',     done: esProd||esListo, current: esPend   },
-        { label:'En producción', done: esListo,         current: esProd   },
-        { label:'Listo ✓',      done: false,            current: esListo  },
-      ];
-
-      const pipelineHtml = steps.map((s,i) => `
-        <div class="pip-step">
-          <button class="pip-btn ${s.done?'done':s.current?'current':'pending'}"
-            ${s.current && !esListo ? `onclick="avanzarItem('${pid}','${item.id}','${item.estado}',this)"` : ''}>
-            ${s.label}
-          </button>
-          ${i < 2 ? '<span class="pip-arrow">→</span>' : ''}
-        </div>`).join('');
-
-      const adicionalBadge = item.esAdicional ? `
-        <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:5px 10px;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
-          <span style="font-size:13px;">⚡</span>
-          <span style="font-size:11px;font-weight:600;color:#856404;">Ítem adicional — llegó después del pedido original. Agregado por ${item.agregadoPor||'ventas'}.</span>
-        </div>` : '';
-
-      return `<div class="item-row${item.esAdicional?' item-adicional':''}" id="itemrow-${pid}-${item.id}">
-        <div class="item-info">
-          ${adicionalBadge}
-          <div class="item-nombre">${item.productoNombre||'—'}</div>
-          <div class="item-diseno">${item.diseno||''}</div>
-          <div class="pipeline">${pipelineHtml}</div>
-          ${!esListo ? `<button class="btn-merma-item" onclick="abrirMerma('${pid}','${item.id}','${item.productoId||''}','${(item.productoNombre||'').replace(/'/g,"\'")}','${(item.diseno||'').replace(/'/g,"\'")}')">⚠ Registrar merma en este ítem</button>` : ''}
-        </div>
-      </div>`;
-    }).join('');
-
-    const btnEmpaqueHtml = todosListos
-      ? `<button class="btn-empaque" onclick="confirmarEmpaque('${pid}','${(p.cliente_nombre||'').replace(/'/g,"\'")}')">Pasar a empaque →</button>`
-      : '';
-
-    cards.push(`<div class="card${todosListos?' listo':''}" id="card-${pid}">
-      <div class="card-header">
-        <div>
-          <div class="card-nombre">${p.cliente_nombre||'—'}</div>
-          <div class="card-meta">${[p.distrito,p.provincia].filter(Boolean).join(' · ')} · Entrega: ${p.fechaEntrega||'—'}</div>
-        </div>
-        <span style="font-size:12px;color:var(--gris);">${listos}/${total} listos</span>
-      </div>
-      <div class="progress-wrap">
-        <div class="progress-bar" style="background:${barColor};width:${pct}%"></div>
-      </div>
-      ${itemsHtml}
-      <div class="clearfix">${btnEmpaqueHtml}</div>
-    </div>`);
+    const tieneActivos = items.some(i => ['pendiente','produccion','listo_empaque'].includes(i.estado));
+    if (tieneActivos) pedidos.push({id:d.id,...d.data(),items});
   }
-
-  document.getElementById('m-total').textContent = snap.size;
-  document.getElementById('m-pend').textContent = totalPend;
-  document.getElementById('m-prod').textContent = totalProd;
-  document.getElementById('m-listo').textContent = totalListo;
-  lista.innerHTML = cards.join('');
+  if (pedidos.length === 0) {
+    lista.innerHTML = '<div class="empty">No hay pedidos en producción</div>';
+    actualizarMetricas([]);
+    return;
+  }
+  actualizarMetricas(pedidos);
+  lista.innerHTML = pedidos.map(p => renderCard(p)).join('');
 });
 
 // Avanzar estado ítem
