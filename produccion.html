@@ -106,13 +106,13 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
   </a>
   <div class="nav-divider"></div>
   <div class="nav-items">
-    <a href="inventario.html" class="nav-link">Inventario</a>
-    <a href="pedidos.html"    class="nav-link">Pedidos</a>
-    <a href="validar.html"    class="nav-link">Validar Pagos</a>
-    <a href="produccion.html" class="nav-link active">Producción</a>
-    <a href="empaque.html"    class="nav-link">Empaque</a>
-    <a href="ruta.html"       class="nav-link">Ruta</a>
-    <a href="clientes.html"   class="nav-link">CRM</a>
+    <a href="inventario.html" class="nav-link" data-page="inventario">Inventario</a>
+    <a href="pedidos.html"    class="nav-link" data-page="pedidos">Pedidos</a>
+    <a href="validar.html"    class="nav-link" data-page="validar">Validar Pagos</a>
+    <a href="produccion.html" class="nav-link active" data-page="produccion">Producción</a>
+    <a href="empaque.html"    class="nav-link" data-page="empaque">Empaque</a>
+    <a href="ruta.html"       class="nav-link" data-page="ruta">Ruta</a>
+    <a href="clientes.html"   class="nav-link" data-page="clientes">CRM</a>
   </div>
   <div class="nav-right">
     <span class="nav-powered">powered by <strong>Etrazia</strong></span>
@@ -377,11 +377,14 @@ window.confirmarEmpaque = (pedidoId, clienteNombre) => {
   div.querySelector('#bNo').onclick = () => div.remove();
   div.querySelector('#bSi').onclick = async () => {
     div.remove();
-    const pedDoc = await getDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pedidoId));
-    if (pedDoc.exists() && pedDoc.data().estado === 'en_produccion') {
+    try {
+      // Siempre actualizar a en_empaque independientemente del estado actual
       await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pedidoId), {
         estado:'en_empaque', pasadoEmpaqueEn:serverTimestamp()
       });
+      // Marcar ítems listo_empaque → mantenemos como listo_empaque para que empaque los procese
+    } catch(e) {
+      console.error(e); alert('Error al pasar a empaque.');
     }
   };
 };
