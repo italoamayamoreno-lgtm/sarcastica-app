@@ -240,6 +240,24 @@ function cargar() {
         ? `<div class="voucher-box">📎 ${p.voucherNombre||'Voucher adjunto'} · <span class="voucher-link" onclick="verVoucher('${pid}','${(p.voucher||'').substring(0,30)}')">ver imagen</span></div>`
         : `<div class="voucher-box" style="color:var(--rojo)">📎 Sin voucher adjunto</div>`;
 
+      // Ítems adicionales pendientes de validación
+      const itemsAdicionales = items.filter(i => i.estado === 'pendiente_validacion_adicional');
+      const adiccionalesHtml = itemsAdicionales.length ? `
+        <div style="background:#e0eaf8;border:1px solid #a0c0e8;border-radius:8px;padding:10px 14px;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--azul);margin-bottom:8px;">📦 Ítems adicionales por validar (${itemsAdicionales.length})</div>
+          ${itemsAdicionales.map(i => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid #c0d8f0;">
+              <div>
+                <div style="font-size:12px;font-weight:600;">${i.productoNombre||'—'}</div>
+                <div style="font-size:11px;color:var(--gris);">${i.diseno||'—'} · S/ ${(i.precio||0).toFixed(2)}</div>
+              </div>
+              ${i.voucherAdicional ? `<span style="font-size:11px;color:var(--azul);cursor:pointer;" onclick="verVoucherAdicional('${pid}','${i.id}')">📎 Ver voucher</span>` : '<span style="font-size:11px;color:var(--rojo);">Sin voucher</span>'}
+            </div>`).join('')}
+          <div style="display:flex;margin-top:10px;">
+            <button onclick="aprobarAdicionales('${pid}')" style="flex:1;background:var(--verde);color:#fff;border:none;padding:8px;border-radius:6px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">✓ Validar ítems adicionales → Producción</button>
+          </div>
+        </div>` : '';
+
       const accionesHtml = esPend ? `
         <div class="rechazo-wrap" id="rechazo-${pid}">
           <label>Motivo del rechazo *</label>
@@ -254,7 +272,7 @@ function cargar() {
           <button class="btn-aprobar" id="btnA-${pid}" onclick="aprobar('${pid}')">Enviar a producción →</button>
         </div>` : `<div class="estado-label">${esApro ? '✓ Aprobado y enviado a producción' : '✗ Rechazado — ' + (p.motivoRechazo||'sin motivo')}</div>`;
 
-      return `<div class="${cardClass}" id="card-${pid}">
+      return `<div class="${cardClass}" id="card-${pid}" data-items='${JSON.stringify(itemsAdicionales.map(i=>({id:i.id,v:i.voucherAdicional||''})))}'>
         <div class="card-header">
           <div>
             <div class="card-nombre">${p.cliente_nombre||'—'}</div>
@@ -270,6 +288,7 @@ function cargar() {
             <span class="monto">S/ ${(p.total||0).toFixed(2)}</span>
           </div>
         </div>
+        ${adiccionalesHtml}
         ${voucherHtml}
         ${accionesHtml}
       </div>`;
@@ -278,6 +297,49 @@ function cargar() {
     lista.innerHTML = htmls.join('');
   });
 }
+
+// Ver voucher ítem adicional
+window.verVoucherAdicional = function(pid, itemId) {
+  const card = document.getElementById(`card-${pid}`);
+  if (!card) return;
+  try {
+    const itemsData = JSON.parse(card.dataset.items || '[]');
+    const item = itemsData.find(i => i.id === itemId);
+    if (item?.v) {
+      const w = window.open();
+      w.document.write(`<img src="${item.v}" style="max-width:100%;"/>`);
+    }
+  } catch(e) { console.error(e); }
+};
+
+// Aprobar ítems adicionales — pasan a producción
+window.aprobarAdicionales = async (pid) => {
+  if (!confirm('¿Validar los ítems adicionales y enviarlos a producción?')) return;
+  try {
+    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+    for (const iDoc of itemsSnap.docs) {
+      if (iDoc.data().estado === 'pendiente_validacion_adicional') {
+        await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {
+          estado: 'pendiente'
+        });
+        // Consumir inventario: reservado → consumido
+        const item = iDoc.data();
+        if (item.productoId) {
+          const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
+          const invSnap = await getDoc(invRef);
+          if (invSnap.exists()) {
+            const inv = invSnap.data();
+            await updateDoc(invRef, {
+              reservado: Math.max(0,(inv.reservado||0)-1),
+              consumido: (inv.consumido||0)+1,
+            });
+          }
+        }
+      }
+    }
+    alert('✓ Ítems adicionales validados. Ya aparecen en Producción.');
+  } catch(e) { console.error(e); alert('Error al validar.'); }
+};
 
 // Ver voucher
 const voucherCache = {};
