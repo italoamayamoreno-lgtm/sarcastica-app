@@ -257,11 +257,13 @@ onSnapshot(query(col, where('estado','==','en_ruta')), async snap => {
   pedidos = [];
   for (const d of snap.docs) {
     const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${d.id}/items`));
+    const items = [];
     let todosEmpaquetados = true;
     itemsSnap.forEach(i => {
-      if (i.data().estado !== 'empaquetado') todosEmpaquetados = false;
+      items.push({id:i.id,...i.data()});
+      if (!['empaquetado','en_ruta','entregado'].includes(i.data().estado)) todosEmpaquetados = false;
     });
-    if (todosEmpaquetados) pedidos.push({id:d.id,...d.data()});
+    if (todosEmpaquetados) pedidos.push({id:d.id,...d.data(),items});
   }
   await cargarRepartidores();
   renderMain();
@@ -305,12 +307,24 @@ function renderMain() {
     const esOlva = p.esOlva || !((p.provincia||'').toLowerCase().includes('lima'));
     const obsHtml = p.observacion ? `<div class="parada-obs">📝 ${p.observacion}</div>` : '';
     const olvaBadge = esOlva ? '<span class="badge-olva">Olva Courier</span>' : '';
+
+    // Ítems del pedido para trazabilidad
+    const items = p.items || [];
+    const itemsHtml = items.length > 0 ? `
+      <div style="margin-top:6px;padding-top:6px;border-top:1px solid #333;">
+        ${items.map(item => {
+          const adicBadge = item.esAdicional ? ' ⚡' : '';
+          return `<div style="font-size:10px;color:#888;padding:1px 0;">${item.productoNombre||'—'}${adicBadge} · <em>${item.diseno||'sin diseño'}</em></div>`;
+        }).join('')}
+      </div>` : '';
+
     return `<div class="parada-row" id="parada-${p.id}" data-idx="${i}">
       <div class="parada-num${esOlva?' olva':''}">${i+1}</div>
       <div class="parada-info">
         <div class="parada-nombre">${p.cliente_nombre||'—'} ${olvaBadge}</div>
         <div class="parada-dir">${p.direccion||[p.distrito,p.provincia].filter(Boolean).join(', ')||'Sin dirección'}</div>
         ${obsHtml}
+        ${itemsHtml}
       </div>
       <div class="parada-actions">
         <button class="btn-orden" onclick="moverParada('${p.id}','up')" title="Subir">↑</button>
