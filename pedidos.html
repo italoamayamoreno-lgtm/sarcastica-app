@@ -359,13 +359,19 @@ document.getElementById('voucherInput').addEventListener('change', function(){
     const img = new Image();
     img.onload = function() {
       const canvas = document.createElement('canvas');
-      const MAX = 800;
+      const MAX = 400;
       let w = img.width, h = img.height;
       if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
       if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      voucherBase64 = canvas.toDataURL('image/jpeg', 0.7);
+      let quality = 0.5;
+      let result = canvas.toDataURL('image/jpeg', quality);
+      while (result.length > 700000 && quality > 0.1) {
+        quality -= 0.1;
+        result = canvas.toDataURL('image/jpeg', quality);
+      }
+      voucherBase64 = result;
       document.getElementById('voucherBox').innerHTML =
         `📎 ${f.name} · adjuntado · <span style="color:var(--azul);cursor:pointer;" onclick="verVoucher()">ver imagen</span>`;
     };
