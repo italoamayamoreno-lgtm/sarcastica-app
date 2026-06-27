@@ -164,9 +164,12 @@ const col = collection(db,`empresas/${EMPRESA}/pedidos`);
 // Contadores
 onSnapshot(query(col, where('estado','==','en_empaque')), s =>
   document.getElementById('m-pend').textContent = s.size);
-onSnapshot(query(col, where('estado','==','empaquetado')), s => {
-  document.getElementById('m-emp').textContent = s.size;
-  document.getElementById('m-desp').textContent = s.size;
+onSnapshot(query(col, where('estado','==','empaquetado')), s1 => {
+  onSnapshot(query(col, where('estado','==','en_ruta')), s2 => {
+    const total = s1.size + s2.size;
+    document.getElementById('m-emp').textContent = total;
+    document.getElementById('m-desp').textContent = total;
+  });
 });
 
 let filtroActual = 'en_empaque';
@@ -190,7 +193,8 @@ function cargar() {
 
       if (filtroActual === 'en_empaque' && tieneListos) {
         pedidosToShow.push({id:d.id,...d.data(),items});
-      } else if (filtroActual === 'empaquetado' && d.data().estado === 'empaquetado' && !tieneListos) {
+      } else if (filtroActual === 'empaquetado' &&
+        ['empaquetado','en_ruta'].includes(d.data().estado) && !tieneListos) {
         pedidosToShow.push({id:d.id,...d.data(),items});
       }
     }
@@ -255,7 +259,7 @@ function cargar() {
         accionHtml = `<div class="card-actions"><span style="font-size:12px;color:var(--verde);font-weight:600;">✓ Listo para despacho</span></div>`;
       } else if (tieneAdicListos) {
         badgeHtml = '<span class="badge badge-pend">⚡ Ítem adicional listo</span>';
-        accionHtml = `<div class="card-actions"><button class="btn-avanzar" onclick="confirmarEmpaqueItems('${pid}')">Empaquetar ítems listos ✓</button></div>`;
+        accionHtml = `<div class="card-actions"><button class="btn-avanzar" onclick="confirmarEmpaqueItems('${pid}','${(p.cliente_nombre||'').replace(/'/g,"\'")}')">Empaquetar ítems listos ✓</button></div>`;
       } else {
         badgeHtml = '<span class="badge badge-pend">Pendiente empaque</span>';
         accionHtml = `<div class="card-actions"><button class="btn-avanzar" onclick="confirmarEmpaqueItems('${pid}','${(p.cliente_nombre||'').replace(/'/g,"\'")}')">Confirmar empaque ✓</button></div>`;
