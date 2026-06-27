@@ -212,6 +212,9 @@ function cargar() {
       const items = [];
       itemsSnap.forEach(i => items.push(i.data()));
 
+      // Cache voucher for viewer
+      if (p.voucher) voucherCache[pid] = p.voucher;
+
       const tiempoAtras = p.creadoEn?.toDate
         ? Math.round((Date.now() - p.creadoEn.toDate().getTime()) / 60000) + ' min'
         : '—';
@@ -234,8 +237,8 @@ function cargar() {
         </div>`).join('');
 
       const voucherHtml = p.voucher
-        ? `<div class="voucher-box">📎 Voucher adjunto · <span class="voucher-link">ver imagen</span></div>`
-        : `<div class="voucher-box">📎 Sin voucher adjunto</div>`;
+        ? `<div class="voucher-box">📎 ${p.voucherNombre||'Voucher adjunto'} · <span class="voucher-link" onclick="verVoucher('${pid}','${(p.voucher||'').substring(0,30)}')">ver imagen</span></div>`
+        : `<div class="voucher-box" style="color:var(--rojo)">📎 Sin voucher adjunto</div>`;
 
       const accionesHtml = esPend ? `
         <div class="rechazo-wrap" id="rechazo-${pid}">
@@ -275,6 +278,15 @@ function cargar() {
     lista.innerHTML = htmls.join('');
   });
 }
+
+// Ver voucher
+const voucherCache = {};
+window.verVoucher = function(pid, preview) {
+  const src = voucherCache[pid];
+  if (!src) { alert('Voucher no disponible en caché. Recarga la página.'); return; }
+  const w = window.open();
+  w.document.write(`<html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;"><img src="${src}" style="max-width:100%;max-height:100vh;"/></body></html>`);
+};
 
 // APROBAR
 window.aprobar = async (pid) => {
