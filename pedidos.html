@@ -292,7 +292,15 @@ async function cargarProductos(){
   const snap=await getDocs(collection(db,`empresas/${EMPRESA}/inventario_crudos`));
   productos=[];snap.forEach(d=>productos.push({id:d.id,...d.data()}));
 }
-function calcTotal(){let t=0;document.querySelectorAll('.item-precio').forEach(i=>{const v=parseFloat(i.value);if(!isNaN(v))t+=v;});document.getElementById('totalLabel').textContent=`Total: S/ ${t.toFixed(2)}`;}
+function calcTotal(){
+  let t=0;
+  document.querySelectorAll('.item-precio').forEach(i=>{const v=parseFloat(i.value);if(!isNaN(v))t+=v;});
+  document.getElementById('totalLabel').textContent=`Total: S/ ${t.toFixed(2)}`;
+}
+// Event delegation for dynamically created price inputs
+document.getElementById('itemsContainer').addEventListener('input', e=>{
+  if(e.target.classList.contains('item-precio')) calcTotal();
+});
 function getCats(){const c=[...new Set(productos.map(p=>p.categoria).filter(Boolean))];c.sort();return c.length?c:['Prendas','Bebés','Accesorios','Para beber','Librería','Hogar'];}
 
 function addItem(){
@@ -339,9 +347,27 @@ document.getElementById('dni').addEventListener('input',function(){
   },600);
 });
 
-document.getElementById('voucherInput').addEventListener('change',function(){
-  const f=this.files[0];if(f)document.getElementById('voucherBox').innerHTML=`📎 ${f.name} · adjuntado · <span style="color:var(--azul)">ver imagen</span>`;
+let voucherBase64 = '';
+let voucherNombre = '';
+
+document.getElementById('voucherInput').addEventListener('change', function(){
+  const f = this.files[0];
+  if (!f) return;
+  voucherNombre = f.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    voucherBase64 = e.target.result; // data:image/jpeg;base64,...
+    document.getElementById('voucherBox').innerHTML =
+      `📎 ${f.name} · adjuntado · <span style="color:var(--azul);cursor:pointer;" onclick="verVoucher()">ver imagen</span>`;
+  };
+  reader.readAsDataURL(f);
 });
+
+window.verVoucher = function() {
+  if (!voucherBase64) return;
+  const w = window.open();
+  w.document.write(`<img src="${voucherBase64}" style="max-width:100%;"/>`);
+};
 
 document.getElementById('btnNuevo').onclick=async()=>{
   await cargarProductos();itemCount=0;document.getElementById('itemsContainer').innerHTML='';
@@ -350,6 +376,7 @@ document.getElementById('btnNuevo').onclick=async()=>{
   document.getElementById('clienteAlert').className='cliente-alert';document.getElementById('clienteAlert').textContent='';
   document.getElementById('clienteFields').style.display='none';
   document.getElementById('voucherBox').innerHTML='📎 Toca para adjuntar pantallazo del pago';
+  voucherBase64=''; voucherNombre='';
   document.getElementById('totalLabel').textContent='Total: S/ 0.00';
   addItem();document.getElementById('modalOverlay').classList.add('open');
 };
@@ -378,7 +405,7 @@ document.getElementById('btnRegistrar').onclick=async()=>{
       cliente_dni:dni,cliente_nombre:nombre,correo:document.getElementById('correo').value.trim(),telefono:document.getElementById('telefono').value.trim(),
       canal,distrito:document.getElementById('distrito').value.trim(),provincia:document.getElementById('provincia').value.trim(),direccion:document.getElementById('direccion').value.trim(),
       medioPago,fechaEntrega,observacion:document.getElementById('observacion').value.trim(),
-      estado:'pendiente_validacion',total,total_items:items.length,vendedor:user.nombre||user.email,creadoEn:serverTimestamp(),
+      estado:'pendiente_validacion',total,total_items:items.length,vendedor:user.nombre||user.email,creadoEn:serverTimestamp(),voucher:voucherBase64||'',voucherNombre:voucherNombre||'',
     });
     for(const item of items){
       await addDoc(collection(db,`empresas/${EMPRESA}/pedidos/${pedidoRef.id}/items`),item);
