@@ -252,13 +252,13 @@ function cargar() {
       let badgeHtml, accionHtml;
       if (todosEmpaquetados) {
         badgeHtml = '<span class="badge badge-emp">✓ Todo empaquetado</span>';
-        accionHtml = `<div class="card-actions"><button class="btn-despacho" onclick="pasarDespacho('${pid}')">Pasar a despacho →</button></div>`;
+        accionHtml = `<div class="card-actions"><span style="font-size:12px;color:var(--verde);font-weight:600;">✓ Listo para despacho</span></div>`;
       } else if (tieneAdicListos) {
         badgeHtml = '<span class="badge badge-pend">⚡ Ítem adicional listo</span>';
         accionHtml = `<div class="card-actions"><button class="btn-avanzar" onclick="confirmarEmpaqueItems('${pid}')">Empaquetar ítems listos ✓</button></div>`;
       } else {
         badgeHtml = '<span class="badge badge-pend">Pendiente empaque</span>';
-        accionHtml = `<div class="card-actions"><button class="btn-avanzar" onclick="confirmarEmpaqueItems('${pid}')">Confirmar empaque ✓</button></div>`;
+        accionHtml = `<div class="card-actions"><button class="btn-avanzar" onclick="confirmarEmpaqueItems('${pid}','${(p.cliente_nombre||'').replace(/'/g,"\'")}')">Confirmar empaque ✓</button></div>`;
       }
 
       return `<div class="card${todosEmpaquetados?' empaquetado':''}" id="card-${pid}">
@@ -281,29 +281,49 @@ function cargar() {
 
 
 // Empaquetar todos los ítems en listo_empaque
-window.confirmarEmpaqueItems = async (pid) => {
-  const btn = document.querySelector(`#card-${pid} .btn-avanzar`);
-  if (btn) { btn.disabled=true; btn.textContent='Procesando...'; }
-  try {
-    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
-    for (const iDoc of itemsSnap.docs) {
-      if (iDoc.data().estado === 'listo_empaque') {
-        await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), { estado:'empaquetado' });
+window.confirmarEmpaqueItems = async (pid, clienteNombre) => {
+  // Modal de confirmación
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:600;display:flex;align-items:center;justify-content:center;';
+  div.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px;max-width:380px;width:90%;text-align:center;font-family:'Poppins',sans-serif;">
+    <div style="font-size:32px;margin-bottom:10px;">📦</div>
+    <div style="font-size:15px;font-weight:700;margin-bottom:8px;">¿Confirmar empaque?</div>
+    <div style="font-size:13px;color:#50504f;margin-bottom:20px;">Pedido de <strong>${clienteNombre}</strong><br>¿Todos los ítems listos están bien empaquetados?</div>
+    <div style="display:flex;gap:8px;justify-content:center;">
+      <button id="bNo" style="background:#fff;border:1.5px solid #cca99d;color:#50504f;padding:9px 18px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
+      <button id="bSi" style="background:#000;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Sí, confirmar ✓</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+  div.querySelector('#bNo').onclick = () => div.remove();
+  div.querySelector('#bSi').onclick = async () => {
+    div.remove();
+    try {
+      // Empaquetar todos los ítems en listo_empaque
+      const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+      for (const iDoc of itemsSnap.docs) {
+        if (iDoc.data().estado === 'listo_empaque') {
+          await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {estado:'empaquetado'});
+        }
       }
-    }
-    // Verificar si TODOS los ítems están empaquetados
-    const allSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
-    let todos = true;
-    allSnap.forEach(i => { if (!['empaquetado','en_ruta','entregado'].includes(i.data().estado)) todos = false; });
-    if (todos) {
-      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
-        estado:'empaquetado', empaquetadoEn:serverTimestamp(), empaquetadoPor:user.nombre||user.email
+      // Verificar si TODOS los ítems están empaquetados
+      const allSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+      let todos = true;
+      allSnap.forEach(i => {
+        if (!['empaquetado','en_ruta','entregado'].includes(i.data().estado)) todos = false;
       });
+      // Si todos empaquetados → pasar a en_ruta para que aparezca en Ruta
+      if (todos) {
+        await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
+          estado:'en_ruta',
+          empaquetadoEn: serverTimestamp(),
+          empaquetadoPor: user.nombre||user.email
+        });
+      }
+    } catch(e) {
+      console.error(e); alert('Error al confirmar empaque.');
     }
-  } catch(e) {
-    console.error(e); alert('Error.');
-    if (btn) { btn.disabled=false; btn.textContent='Confirmar empaque ✓'; }
-  }
+  };
 };
 
 // Pasar a despacho → estado: en_ruta (pasa a bandeja de Ruta)
