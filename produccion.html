@@ -65,6 +65,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 .pip-arrow{font-size:10px;color:var(--borde);}
 .btn-merma-item{background:none;border:none;font-size:10px;color:var(--rojo);cursor:pointer;font-family:"Poppins",sans-serif;padding:0;margin-top:4px;display:block;}
 .btn-merma-item:hover{text-decoration:underline;}
+.item-adicional{border-left:3px solid #ffc107;padding-left:8px;background:#fffdf0;}
 
 .btn-empaque{background:var(--black);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-top:12px;float:right;}
 .btn-empaque:hover{opacity:.8;}
@@ -268,8 +269,15 @@ onSnapshot(q, async snap => {
           ${i < 2 ? '<span class="pip-arrow">→</span>' : ''}
         </div>`).join('');
 
-      return `<div class="item-row" id="itemrow-${pid}-${item.id}">
+      const adicionalBadge = item.esAdicional ? `
+        <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:5px 10px;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+          <span style="font-size:13px;">⚡</span>
+          <span style="font-size:11px;font-weight:600;color:#856404;">Ítem adicional — llegó después del pedido original. Agregado por ${item.agregadoPor||'ventas'}.</span>
+        </div>` : '';
+
+      return `<div class="item-row${item.esAdicional?' item-adicional':''}" id="itemrow-${pid}-${item.id}">
         <div class="item-info">
+          ${adicionalBadge}
           <div class="item-nombre">${item.productoNombre||'—'}</div>
           <div class="item-diseno">${item.diseno||''}</div>
           <div class="pipeline">${pipelineHtml}</div>
