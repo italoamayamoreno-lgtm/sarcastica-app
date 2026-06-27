@@ -175,94 +175,97 @@ let unsubLista = null;
 function cargar() {
   if (unsubLista) unsubLista();
 
-  // Para filtro 'en_empaque': pedidos en ese estado
-  // Para filtro 'empaquetado': pedidos empaquetados PERO que tengan ítems adicionales aún no empaquetados
-  const q = query(col, where('estado','==', filtroActual));
-  unsubLista = onSnapshot(q, async snap => {
+  // Buscar pedidos con ítems en estado listo_empaque (incluye adicionales de pedidos ya empaquetados)
+  unsubLista = onSnapshot(collection(db,`empresas/${EMPRESA}/pedidos`), async snap => {
     const lista = document.getElementById('listaPedidos');
+    const pedidosToShow = [];
 
-    // También buscar pedidos empaquetados con ítems adicionales pendientes
-    let docsToShow = [...snap.docs];
+    for (const d of snap.docs) {
+      const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${d.id}/items`));
+      const items = [];
+      itemsSnap.forEach(i => items.push({id:i.id,...i.data()}));
 
-    if (filtroActual === 'en_empaque') {
-      // Agregar pedidos empaquetados que tienen ítems adicionales listo_empaque
-      const snapEmp = await getDocs(query(col, where('estado','==','empaquetado')));
-      for (const d of snapEmp.docs) {
-        const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${d.id}/items`));
-        let tieneAdicionalPendiente = false;
-        itemsSnap.forEach(i => {
-          if (i.data().esAdicional && i.data().estado === 'listo_empaque') tieneAdicionalPendiente = true;
-        });
-        if (tieneAdicionalPendiente) docsToShow.push(d);
+      // Incluir si tiene ítems en listo_empaque
+      const tieneListos = items.some(i => i.estado === 'listo_empaque');
+
+      if (filtroActual === 'en_empaque' && tieneListos) {
+        pedidosToShow.push({id:d.id,...d.data(),items});
+      } else if (filtroActual === 'empaquetado' && d.data().estado === 'empaquetado' && !tieneListos) {
+        pedidosToShow.push({id:d.id,...d.data(),items});
       }
     }
 
-    if (docsToShow.length === 0) {
+    if (pedidosToShow.length === 0) {
       lista.innerHTML = '<div class="empty-wrap"><p>No hay pedidos en este estado</p></div>';
       return;
     }
 
-    const htmls = await Promise.all(docsToShow.map(async d => {
-      const p = d.data();
-      const pid = d.id;
+    const ESTADO_LABEL_EMP = {
+      pendiente:'Pendiente', produccion:'En producción', listo_empaque:'Listo para empaquetar',
+      empaquetado:'Empaquetado ✓', en_ruta:'En ruta', entregado:'Entregado',
+    };
 
-      // Cargar ítems
-      const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
-      const items = [];
-      itemsSnap.forEach(i => items.push({id:i.id,...i.data()}));
-
-      // Separar ítems originales de adicionales
-      const itemsOriginales = items.filter(i => !i.esAdicional);
-      const itemsAdicionales = items.filter(i => i.esAdicional);
-      const adicNoPack = itemsAdicionales.filter(i => i.estado === 'listo_empaque');
+    const htmls = pedidosToShow.map(p => {
+      const pid = p.id;
+      const items = p.items || [];
 
       const itemsHtml = items.map(i => {
-        const esListoEmpaque = i.estado === 'listo_empaque';
+        const esListo = i.estado === 'listo_empaque';
         const esEmpaquetado = i.estado === 'empaquetado';
-        const esAdicional = i.esAdicional;
-        const adicBadge = esAdicional ? '<span style="background:#fff3cd;color:#856404;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:600;margin-left:4px;">+ Adicional</span>' : '';
+        const adicBadge = i.esAdicional ? '<span style="background:#fff3cd;color:#856404;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:600;margin-left:4px;">⚡ Adicional</span>' : '';
 
-        if (esEmpaquetado && !esAdicional) {
-          return `<div class="item-row" style="opacity:.6;">
+        if (esEmpaquetado) {
+          return `<div class="item-row" style="opacity:.45;">
             <div>
               <div class="item-nombre">${i.productoNombre||'—'}${adicBadge}</div>
               <div class="item-diseno">${i.diseno||''}</div>
             </div>
-            <span class="item-listo" style="color:var(--gris);">Ya empaquetado</span>
+            <span style="font-size:11px;color:var(--gris);font-style:italic;">Ya empaquetado ✓</span>
           </div>`;
         }
-        return `<div class="item-row">
+        if (esListo) {
+          return `<div class="item-row">
+            <div>
+              <div class="item-nombre">${i.productoNombre||'—'}${adicBadge}</div>
+              <div class="item-diseno">${i.diseno||''}</div>
+            </div>
+            <span class="item-listo">✓ Listo</span>
+          </div>`;
+        }
+        // Bloqueado (en producción u otro estado)
+        return `<div class="item-row" style="opacity:.4;">
           <div>
             <div class="item-nombre">${i.productoNombre||'—'}${adicBadge}</div>
             <div class="item-diseno">${i.diseno||''}</div>
           </div>
-          <span class="item-listo">✓ Listo</span>
+          <span style="font-size:10px;color:var(--gris);font-style:italic;">${ESTADO_LABEL_EMP[i.estado]||i.estado}</span>
         </div>`;
       }).join('');
 
-      const obsHtml = p.observacion
-        ? `<div class="obs-box">📝 Observación: <strong>${p.observacion}</strong></div>`
-        : '';
+      const obsHtml = p.observacion ? `<div class="obs-box">📝 Observación: <strong>${p.observacion}</strong></div>` : '';
 
-      // Badge y acción según situación
+      // Ítems listos para empaquetar
+      const itemsListos = items.filter(i => i.estado === 'listo_empaque');
+      const todosEmpaquetados = items.every(i => ['empaquetado','en_ruta','entregado'].includes(i.estado));
+      const tieneAdicListos = items.some(i => i.esAdicional && i.estado === 'listo_empaque');
+
       let badgeHtml, accionHtml;
-      if (adicNoPack.length > 0) {
-        // Tiene ítems adicionales listos para empaquetar
-        badgeHtml = '<span class="badge badge-pend">⚡ Ítem adicional listo</span>';
-        accionHtml = `<div class="card-actions"><button class="btn-avanzar" onclick="confirmarEmpaqueAdicional('${pid}')">Empaquetar ítem adicional ✓</button></div>`;
-      } else if (p.estado === 'empaquetado') {
-        badgeHtml = '<span class="badge badge-emp">✓ Empaquetado</span>';
+      if (todosEmpaquetados) {
+        badgeHtml = '<span class="badge badge-emp">✓ Todo empaquetado</span>';
         accionHtml = `<div class="card-actions"><button class="btn-despacho" onclick="pasarDespacho('${pid}')">Pasar a despacho →</button></div>`;
+      } else if (tieneAdicListos) {
+        badgeHtml = '<span class="badge badge-pend">⚡ Ítem adicional listo</span>';
+        accionHtml = `<div class="card-actions"><button class="btn-avanzar" onclick="confirmarEmpaqueItems('${pid}')">Empaquetar ítems listos ✓</button></div>`;
       } else {
-        badgeHtml = '<span class="badge badge-pend">Pendiente</span>';
-        accionHtml = `<div class="card-actions"><button class="btn-avanzar" onclick="confirmarEmpaque('${pid}')">Confirmar empaque ✓</button></div>`;
+        badgeHtml = '<span class="badge badge-pend">Pendiente empaque</span>';
+        accionHtml = `<div class="card-actions"><button class="btn-avanzar" onclick="confirmarEmpaqueItems('${pid}')">Confirmar empaque ✓</button></div>`;
       }
 
-      return `<div class="card${p.estado==='empaquetado'&&adicNoPack.length===0?' empaquetado':''}" id="card-${pid}">
+      return `<div class="card${todosEmpaquetados?' empaquetado':''}" id="card-${pid}">
         <div class="card-header">
           <div>
             <div class="card-nombre">${p.cliente_nombre||'—'}</div>
-            <div class="card-meta">${[p.distrito, p.provincia].filter(Boolean).join(' · ')} · ${p.fechaEntrega||'—'} · ${p.canal||'—'}</div>
+            <div class="card-meta">${[p.distrito,p.provincia].filter(Boolean).join(' · ')} · ${p.fechaEntrega||'—'} · ${p.canal||'—'}</div>
           </div>
           ${badgeHtml}
         </div>
@@ -270,57 +273,36 @@ function cargar() {
         ${obsHtml}
         ${accionHtml}
       </div>`;
-    }));
+    });
 
     lista.innerHTML = htmls.join('');
   });
 }
 
-// Confirmar empaque → estado: empaquetado
-window.confirmarEmpaque = async (pid) => {
-  const btn = document.querySelector(`#card-${pid} .btn-avanzar`);
-  if (btn) { btn.disabled = true; btn.textContent = 'Procesando...'; }
-  try {
-    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
-      estado: 'empaquetado',
-      empaquetadoEn: serverTimestamp(),
-      empaquetadoPor: user.nombre||user.email,
-    });
-  } catch(e) {
-    console.error(e);
-    alert('Error. Intenta de nuevo.');
-    if (btn) { btn.disabled = false; btn.textContent = 'Confirmar empaque ✓'; }
-  }
-};
 
-// Empaquetar solo ítems adicionales
-window.confirmarEmpaqueAdicional = async (pid) => {
+// Empaquetar todos los ítems en listo_empaque
+window.confirmarEmpaqueItems = async (pid) => {
   const btn = document.querySelector(`#card-${pid} .btn-avanzar`);
   if (btn) { btn.disabled=true; btn.textContent='Procesando...'; }
   try {
     const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
-    let todosEmpaquetados = true;
     for (const iDoc of itemsSnap.docs) {
-      const item = iDoc.data();
-      if (item.esAdicional && item.estado === 'listo_empaque') {
-        await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {
-          estado: 'empaquetado'
-        });
-      }
-      if (item.estado !== 'empaquetado' && !(item.esAdicional && item.estado === 'listo_empaque')) {
-        todosEmpaquetados = false;
+      if (iDoc.data().estado === 'listo_empaque') {
+        await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), { estado:'empaquetado' });
       }
     }
-    // Si todos los ítems (originales + adicionales) están empaquetados → pedido listo para ruta
-    if (todosEmpaquetados) {
+    // Verificar si TODOS los ítems están empaquetados
+    const allSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+    let todos = true;
+    allSnap.forEach(i => { if (!['empaquetado','en_ruta','entregado'].includes(i.data().estado)) todos = false; });
+    if (todos) {
       await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
-        estado: 'empaquetado',
-        empaquetadoCompletoEn: serverTimestamp(),
+        estado:'empaquetado', empaquetadoEn:serverTimestamp(), empaquetadoPor:user.nombre||user.email
       });
     }
   } catch(e) {
-    console.error(e); alert('Error. Intenta de nuevo.');
-    if (btn) { btn.disabled=false; btn.textContent='Empaquetar ítem adicional ✓'; }
+    console.error(e); alert('Error.');
+    if (btn) { btn.disabled=false; btn.textContent='Confirmar empaque ✓'; }
   }
 };
 
