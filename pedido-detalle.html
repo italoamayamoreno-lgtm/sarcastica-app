@@ -260,10 +260,10 @@ const addFormHtml = canEdit ? `
       <!-- VOUCHER ADICIONAL -->
       <div class="field" style="margin-top:8px;">
         <label>${esEscenarioB ? 'Voucher de pago del ítem adicional (obligatorio)' : 'Voucher de pago adicional (opcional)'}</label>
-        <div class="voucher-box" id="newVoucherBox" onclick="document.getElementById('newVoucherInput').click()">
+        <div class="voucher-box" id="newVoucherBox" onclick="triggerNuevoVoucher()">
           📎 ${esEscenarioB ? 'Adjuntar voucher del pago adicional' : 'Adjuntar voucher si el pago es por separado'}
         </div>
-        <input type="file" id="newVoucherInput" accept="image/*" style="display:none"/>
+        <input type="file" id="newVoucherInput" accept="image/*" style="display:none" onchange="onNuevoVoucherChange(this)"/>
       </div>
 
       <!-- REPROGRAMAR FECHA -->
@@ -431,6 +431,25 @@ window.guardarItem = async () => {
   } finally {
     btn.disabled=false; btn.textContent='Guardar ítem';
   }
+};
+
+// Voucher nuevo ítem — funciones globales (no dependen del DOM)
+window.triggerNuevoVoucher = function() {
+  const inp = document.getElementById('newVoucherInput');
+  if (inp) inp.click();
+};
+
+window.onNuevoVoucherChange = function(input) {
+  const f = input.files[0];
+  if (!f) return;
+  nuevoVoucherNombre = f.name;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    nuevoVoucherBase64 = e.target.result;
+    const box = document.getElementById('newVoucherBox');
+    if (box) box.innerHTML = `📎 ${f.name} · adjuntado · <span style="color:var(--azul);cursor:pointer;" onclick="verNuevoVoucher()">ver imagen</span>`;
+  };
+  reader.readAsDataURL(f);
 };
 
 window.verVoucherItem = function(itemCardId) {
