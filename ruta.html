@@ -505,6 +505,7 @@ window.exportarPDF = () => {
             <div style="font-size:15px;font-weight:700;color:#000;">${p.cliente_nombre||'—'}${olvaBadge}</div>
             <div style="font-size:12px;color:#50504f;margin-top:2px;">
               📍 ${p.direccion||[p.distrito,p.provincia].filter(Boolean).join(', ')||'Sin dirección'}
+              &nbsp;·&nbsp;<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((p.direccion||'')+' '+( p.distrito||'')+' Lima Peru')}" target="_blank" style="color:#185FA5;font-size:11px;">Ver en Maps</a>
             </div>
             <div style="font-size:12px;color:#50504f;">📞 ${p.telefono||'—'}</div>
           </div>
