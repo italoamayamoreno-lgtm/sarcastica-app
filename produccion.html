@@ -54,14 +54,16 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 .item-info{flex:1;}
 .item-nombre{font-size:13px;font-weight:600;}
 .item-diseno{font-size:11px;color:var(--gris);margin-top:1px;}
-.item-acciones{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
-.btn-estado{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:"Poppins",sans-serif;}
-.btn-pend{background:#faeeda;color:var(--naranja);}
-.btn-pend:hover{background:var(--naranja);color:#fff;}
-.btn-prod{background:#e0eaf8;color:var(--azul);}
-.btn-prod:hover{background:var(--azul);color:#fff;}
-.btn-listo{background:#e8f5e0;color:var(--verde);cursor:default;}
-.btn-merma-item{background:none;border:none;font-size:10px;color:var(--rojo);cursor:pointer;font-family:"Poppins",sans-serif;padding:0;}
+/* item-acciones removed — pipeline is inline */
+.pipeline{display:flex;align-items:center;gap:4px;margin-top:6px;}
+.pip-step{display:flex;align-items:center;gap:4px;}
+.pip-btn{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid transparent;font-family:"Poppins",sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.pip-btn.done{background:#e8f5e0;color:var(--verde);border-color:#b8dcb8;cursor:default;}
+.pip-btn.current{background:#e0eaf8;color:var(--azul);border-color:#a0c0e8;cursor:pointer;}
+.pip-btn.current:hover{background:var(--azul);color:#fff;}
+.pip-btn.pending{background:#fff;color:var(--gris);border-color:var(--borde);cursor:default;opacity:.5;}
+.pip-arrow{font-size:10px;color:var(--borde);}
+.btn-merma-item{background:none;border:none;font-size:10px;color:var(--rojo);cursor:pointer;font-family:"Poppins",sans-serif;padding:0;margin-top:4px;display:block;}
 .btn-merma-item:hover{text-decoration:underline;}
 
 .btn-empaque{background:var(--black);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-top:12px;float:right;}
@@ -247,29 +249,37 @@ onSnapshot(q, async snap => {
     const barColor = todosListos ? 'var(--verde)' : pct > 0 ? 'var(--azul)' : 'var(--borde)';
 
     const itemsHtml = items.map(item => {
-      const esPend  = item.estado === 'pendiente';
-      const esProd  = item.estado === 'produccion';
       const esListo = item.estado === 'listo_empaque';
-      const btnClass = esPend ? 'btn-estado btn-pend' : esProd ? 'btn-estado btn-prod' : 'btn-estado btn-listo';
-      const btnLabel = esPend ? 'Pendiente — iniciar' : esProd ? 'En producción — marcar listo' : '✓ Listo';
+      const esProd  = item.estado === 'produccion';
+      const esPend  = !esProd && !esListo;
+
+      const steps = [
+        { label:'Pendiente',     done: esProd||esListo, current: esPend   },
+        { label:'En producción', done: esListo,         current: esProd   },
+        { label:'Listo ✓',      done: false,            current: esListo  },
+      ];
+
+      const pipelineHtml = steps.map((s,i) => `
+        <div class="pip-step">
+          <button class="pip-btn ${s.done?'done':s.current?'current':'pending'}"
+            ${s.current && !esListo ? `onclick="avanzarItem('${pid}','${item.id}','${item.estado}',this)"` : ''}>
+            ${s.label}
+          </button>
+          ${i < 2 ? '<span class="pip-arrow">→</span>' : ''}
+        </div>`).join('');
 
       return `<div class="item-row" id="itemrow-${pid}-${item.id}">
         <div class="item-info">
           <div class="item-nombre">${item.productoNombre||'—'}</div>
           <div class="item-diseno">${item.diseno||''}</div>
-        </div>
-        <div class="item-acciones">
-          <button class="${btnClass}"
-            ${esListo ? '' : `onclick="avanzarItem('${pid}','${item.id}','${item.estado}',this)"`}>
-            ${btnLabel}
-          </button>
-          ${!esListo ? `<button class="btn-merma-item" onclick="abrirMerma('${pid}','${item.id}','${item.productoId||''}','${(item.productoNombre||'').replace(/'/g,"\\'")}','${(item.diseno||'').replace(/'/g,"\\'")}')">⚠ Registrar merma</button>` : ''}
+          <div class="pipeline">${pipelineHtml}</div>
+          ${!esListo ? `<button class="btn-merma-item" onclick="abrirMerma('${pid}','${item.id}','${item.productoId||''}','${(item.productoNombre||'').replace(/'/g,"\'")}','${(item.diseno||'').replace(/'/g,"\'")}')">⚠ Registrar merma en este ítem</button>` : ''}
         </div>
       </div>`;
     }).join('');
 
     const btnEmpaqueHtml = todosListos
-      ? `<button class="btn-empaque" onclick="pasarEmpaque('${pid}')">Pasar a empaque →</button>`
+      ? `<button class="btn-empaque" onclick="confirmarEmpaque('${pid}','${(p.cliente_nombre||'').replace(/'/g,"\'")}')">Pasar a empaque →</button>`
       : '';
 
     cards.push(`<div class="card${todosListos?' listo':''}" id="card-${pid}">
@@ -307,11 +317,33 @@ window.avanzarItem = async (pedidoId, itemId, estadoActual, btn) => {
   }
 };
 
-// Pasar a empaque
-window.pasarEmpaque = async (pedidoId) => {
-  await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pedidoId), {
-    estado: 'en_empaque', pasadoEmpaqueEn: serverTimestamp()
-  });
+// Confirmar y pasar a empaque
+window.confirmarEmpaque = async (pedidoId, clienteNombre) => {
+  // Modal de confirmación
+  const confirmEl = document.createElement('div');
+  confirmEl.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:600;display:flex;align-items:center;justify-content:center;';
+  confirmEl.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:28px;max-width:400px;width:90%;text-align:center;">
+      <div style="font-size:32px;margin-bottom:12px;">📦</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:8px;">¿Pasar a empaque?</div>
+      <div style="font-size:13px;color:var(--gris);margin-bottom:20px;">
+        Pedido de <strong>${clienteNombre}</strong><br>
+        ¿Confirmas que <strong>todos los ítems están listos</strong> para empaque?
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;">
+        <button id="btnNoEmpaque" style="background:#fff;border:1.5px solid var(--borde);color:var(--gris);padding:10px 20px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
+        <button id="btnSiEmpaque" style="background:var(--black);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Sí, pasar a empaque →</button>
+      </div>
+    </div>`;
+  document.body.appendChild(confirmEl);
+
+  document.getElementById('btnNoEmpaque').onclick = () => confirmEl.remove();
+  document.getElementById('btnSiEmpaque').onclick = async () => {
+    confirmEl.remove();
+    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pedidoId), {
+      estado: 'en_empaque', pasadoEmpaqueEn: serverTimestamp()
+    });
+  };
 };
 
 // ---- MERMA POR ÍTEM ----
