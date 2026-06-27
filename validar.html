@@ -158,6 +158,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
     <button class="filtro-btn" data-filtro="cancelado">Rechazados</button>
   </div>
 
+  <div id="seccionAdicionales" style="margin-bottom:16px;"></div>
   <div id="listaPedidos"><div class="empty">Cargando...</div></div>
 </div>
 
@@ -192,6 +193,83 @@ onSnapshot(query(col,where('estado','==','cancelado')), s => {
 
 let filtroActual = 'pendiente_validacion';
 let unsubLista = null;
+
+// Sección de ítems adicionales (pedidos en estados avanzados con ítems por validar)
+async function cargarAdicionales() {
+  const snap = await getDocs(col);
+  const adicDiv = document.getElementById('seccionAdicionales');
+  if (!adicDiv) return;
+  const pedidosConAdicionales = [];
+  for (const d of snap.docs) {
+    if (d.data().estado === 'pendiente_validacion') continue;
+    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${d.id}/items`));
+    const adicionales = [];
+    itemsSnap.forEach(i => {
+      if (i.data().estado === 'pendiente_validacion_adicional') adicionales.push({id:i.id,...i.data()});
+    });
+    if (adicionales.length > 0) pedidosConAdicionales.push({pedido:d.data(),pid:d.id,adicionales});
+  }
+  if (pedidosConAdicionales.length === 0) { adicDiv.innerHTML=''; return; }
+  adicDiv.innerHTML = `
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px;padding-left:10px;border-left:3px solid var(--azul);">
+      📦 Ítems adicionales pendientes de validación
+    </div>
+    ${pedidosConAdicionales.map(({pedido,pid,adicionales}) => `
+      <div class="card" style="border-color:var(--azul);border-width:2px;margin-bottom:12px;">
+        <div class="card-header">
+          <div>
+            <div class="card-nombre">${pedido.cliente_nombre||'—'} <span style="font-size:11px;font-weight:400;color:var(--gris);">— #${pid.slice(-5).toUpperCase()}</span></div>
+            <div class="card-meta">Pedido principal: <strong>${(pedido.estado||'').replace(/_/g,' ')}</strong></div>
+          </div>
+          <span class="badge badge-prod">Adicionales</span>
+        </div>
+        <div class="items-box">
+          <div class="items-header"><span>Producto</span><span>Diseño</span><span>Precio</span></div>
+          ${adicionales.map(i=>`
+            <div class="item-row">
+              <span>${i.productoNombre||'—'}</span>
+              <span>${i.diseno||'—'}</span>
+              <span>S/ ${(i.precio||0).toFixed(2)}${i.medioPagoAdicional?' · '+i.medioPagoAdicional:''}</span>
+            </div>
+            <div style="padding:2px 0 6px;">
+              ${i.voucherAdicional?`<span style="font-size:11px;color:var(--azul);cursor:pointer;" onclick="verVAd('${i.voucherAdicional}')">📎 Ver voucher</span>`:'<span style="font-size:11px;color:var(--rojo);">Sin voucher</span>'}
+            </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+          <button class="btn-rechazar" onclick="rechazarAdicionales('${pid}')">Rechazar ítems</button>
+          <button class="btn-aprobar" onclick="aprobarAdicionales('${pid}')">✓ Aprobar → Producción</button>
+        </div>
+      </div>`).join('')}`;
+}
+
+window.verVAd = function(src) {
+  if (!src) return;
+  const w = window.open();
+  w.document.write(`<img src="${src}" style="max-width:100%;"/>`);
+};
+
+window.rechazarAdicionales = async (pid) => {
+  const motivo = prompt('Motivo del rechazo:');
+  if (!motivo) return;
+  try {
+    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+    for (const iDoc of itemsSnap.docs) {
+      if (iDoc.data().estado !== 'pendiente_validacion_adicional') continue;
+      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id),{estado:'cancelado_adicional',motivoRechazo:motivo});
+      const item = iDoc.data();
+      if (item.productoId) {
+        const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
+        const invSnap = await getDoc(invRef);
+        if (invSnap.exists()) {
+          const inv = invSnap.data();
+          await updateDoc(invRef,{reservado:Math.max(0,(inv.reservado||0)-1),disponible:(inv.disponible||0)+1});
+        }
+      }
+    }
+    alert('✓ Rechazado. Inventario liberado.');
+    cargarAdicionales();
+  } catch(e) { console.error(e); alert('Error.'); }
+};
 
 function cargar() {
   if (unsubLista) unsubLista();
@@ -449,6 +527,7 @@ document.querySelectorAll('.filtro-btn').forEach(btn => {
 });
 
 cargar();
+cargarAdicionales();
 </script>
 </body>
 </html>
