@@ -36,65 +36,60 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
 .page-title{font-size:20px;font-weight:800;}
 .page-sub{font-size:12px;color:var(--gris);margin-top:3px;}
-.btn-merma{background:#fff;border:1.5px solid var(--rojo);color:var(--rojo);padding:8px 16px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
-.btn-merma:hover{background:var(--rojo);color:#fff;}
 
-/* MÉTRICAS */
 .metricas{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
 .metrica{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:14px 16px;}
 .metrica .ml{font-size:11px;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;font-weight:500;margin-bottom:4px;}
 .metrica .mv{font-size:26px;font-weight:800;line-height:1;}
-.metrica .ms{font-size:11px;color:var(--gris);margin-top:3px;}
 
-/* CARDS PEDIDO */
 .card{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:18px;margin-bottom:12px;}
 .card.listo{border-color:#b8dcb8;background:#f8fff5;}
 .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
 .card-nombre{font-size:14px;font-weight:700;}
 .card-meta{font-size:11px;color:var(--gris);margin-top:2px;}
-.card-progreso-label{font-size:12px;color:var(--gris);white-space:nowrap;}
-
-/* BARRA DE PROGRESO */
 .progress-wrap{background:var(--bg);border-radius:20px;height:5px;margin-bottom:12px;}
 .progress-bar{border-radius:20px;height:5px;transition:width .3s;}
 
-/* ITEMS */
-.item-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #f0e8e0;}
-.item-info .item-nombre{font-size:13px;font-weight:600;}
-.item-info .item-diseno{font-size:11px;color:var(--gris);margin-top:1px;}
-.item-estado-btn{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:"Poppins",sans-serif;transition:all .15s;}
-.item-btn-pend{background:#faeeda;color:var(--naranja);}
-.item-btn-pend:hover{background:var(--naranja);color:#fff;}
-.item-btn-prod{background:#e0eaf8;color:var(--azul);}
-.item-btn-prod:hover{background:var(--azul);color:#fff;}
-.item-btn-listo{background:#e8f5e0;color:var(--verde);cursor:default;}
+.item-row{display:flex;align-items:flex-start;justify-content:space-between;padding:10px 0;border-top:1px solid #f0e8e0;gap:8px;}
+.item-info{flex:1;}
+.item-nombre{font-size:13px;font-weight:600;}
+.item-diseno{font-size:11px;color:var(--gris);margin-top:1px;}
+.item-acciones{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.btn-estado{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:"Poppins",sans-serif;}
+.btn-pend{background:#faeeda;color:var(--naranja);}
+.btn-pend:hover{background:var(--naranja);color:#fff;}
+.btn-prod{background:#e0eaf8;color:var(--azul);}
+.btn-prod:hover{background:var(--azul);color:#fff;}
+.btn-listo{background:#e8f5e0;color:var(--verde);cursor:default;}
+.btn-merma-item{background:none;border:none;font-size:10px;color:var(--rojo);cursor:pointer;font-family:"Poppins",sans-serif;padding:0;}
+.btn-merma-item:hover{text-decoration:underline;}
 
-/* BTN EMPAQUE */
 .btn-empaque{background:var(--black);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-top:12px;float:right;}
 .btn-empaque:hover{opacity:.8;}
 .clearfix::after{content:'';display:block;clear:both;}
-
 .empty{text-align:center;padding:60px 0;color:var(--borde);font-size:13px;}
 
 /* MODAL MERMA */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;padding:20px;overflow-y:auto;}
 .modal-overlay.open{display:flex;justify-content:center;align-items:flex-start;}
-.modal{background:#fff;border-radius:16px;width:100%;max-width:520px;margin:auto;}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:500px;margin:auto;}
 .modal-header{background:#000;border-radius:16px 16px 0 0;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}
 .modal-title{font-size:15px;font-weight:700;color:#fff;}
 .modal-close{background:none;border:none;color:#666;font-size:22px;cursor:pointer;line-height:1;}
 .modal-close:hover{color:#fff;}
 .modal-body{padding:20px;}
-.sec-label{font-size:9px;font-weight:600;color:var(--borde);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
-.form-card{background:var(--bg);border:1px solid var(--borde);border-radius:10px;padding:14px;margin-bottom:12px;}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-.field{display:flex;flex-direction:column;gap:3px;}
-.field label{font-size:10px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.04em;}
-.field input,.field select,.field textarea{background:#fff;border:1px solid var(--borde);border-radius:6px;padding:7px 10px;font-family:"Poppins",sans-serif;font-size:12px;color:var(--black);outline:none;width:100%;}
-.causas{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.modal-item-info{background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;}
+.modal-item-info strong{display:block;font-weight:700;margin-bottom:2px;}
+.modal-item-info span{font-size:11px;color:var(--gris);}
+.sec-label{font-size:9px;font-weight:600;color:var(--borde);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.causas{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
 .causa-btn{padding:5px 12px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-family:"Poppins",sans-serif;font-size:11px;color:var(--gris);cursor:pointer;}
 .causa-btn.active{background:var(--rojo);color:#fff;border-color:var(--rojo);}
-.alerta-merma{background:#fcebeb;border:1px solid #f0c0c0;border-radius:8px;padding:10px 14px;font-size:12px;color:var(--rojo);margin-bottom:12px;display:none;}
+.field{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;}
+.field label{font-size:10px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.04em;}
+.field input,.field select{background:#fff;border:1px solid var(--borde);border-radius:6px;padding:7px 10px;font-family:"Poppins",sans-serif;font-size:12px;color:var(--black);outline:none;width:100%;}
+.reasignar-box{background:#faeeda;border:1px solid #e8c99a;border-radius:8px;padding:12px;margin-top:12px;}
+.reasignar-title{font-size:11px;font-weight:600;color:var(--naranja);margin-bottom:8px;}
 .modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--borde);background:#faf5f0;border-radius:0 0 16px 16px;}
 .btn-sec{background:#fff;border:1.5px solid var(--borde);color:var(--gris);padding:9px 16px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
 .btn-danger{background:var(--rojo);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
@@ -139,30 +134,13 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
       <div class="page-title">Producción</div>
       <div class="page-sub" id="pageSub"></div>
     </div>
-    <button class="btn-merma" id="btnMerma">⚠ Registrar merma</button>
   </div>
 
   <div class="metricas">
-    <div class="metrica">
-      <div class="ml">Pedidos hoy</div>
-      <div class="mv" id="m-total">0</div>
-      <div class="ms">en producción</div>
-    </div>
-    <div class="metrica">
-      <div class="ml">Ítems pendientes</div>
-      <div class="mv" style="color:var(--naranja)" id="m-pend">0</div>
-      <div class="ms">sin iniciar</div>
-    </div>
-    <div class="metrica">
-      <div class="ml">En producción</div>
-      <div class="mv" style="color:var(--azul)" id="m-prod">0</div>
-      <div class="ms">fabricando</div>
-    </div>
-    <div class="metrica">
-      <div class="ml">Listos</div>
-      <div class="mv" style="color:var(--verde)" id="m-listo">0</div>
-      <div class="ms">terminados</div>
-    </div>
+    <div class="metrica"><div class="ml">Pedidos</div><div class="mv" id="m-total">0</div></div>
+    <div class="metrica"><div class="ml">Ítems pendientes</div><div class="mv" style="color:var(--naranja)" id="m-pend">0</div></div>
+    <div class="metrica"><div class="ml">En producción</div><div class="mv" style="color:var(--azul)" id="m-prod">0</div></div>
+    <div class="metrica"><div class="ml">Listos</div><div class="mv" style="color:var(--verde)" id="m-listo">0</div></div>
   </div>
 
   <div id="listaPedidos"><div class="empty">Cargando pedidos...</div></div>
@@ -172,44 +150,44 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 <div class="modal-overlay" id="modalMerma">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">Registrar merma</div>
+      <div class="modal-title">⚠ Registrar merma</div>
       <button class="modal-close" id="btnCerrarMerma">×</button>
     </div>
     <div class="modal-body">
-      <div class="form-card">
-        <div class="sec-label">Ítem dañado</div>
-        <div class="g2">
-          <div class="field">
-            <label>Producto y variante</label>
-            <select id="m-producto">
-              <option value="">Seleccionar insumo</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Cantidad dañada</label>
-            <input type="number" id="m-cantidad" min="1" value="1"/>
-          </div>
-        </div>
-        <div class="field">
-          <label>Causa de la merma</label>
-          <div class="causas" id="causas">
-            <button class="causa-btn" data-causa="Falla de sublimado">Falla de sublimado</button>
-            <button class="causa-btn" data-causa="Falla de estampado">Falla de estampado</button>
-            <button class="causa-btn" data-causa="Defecto del insumo">Defecto del insumo</button>
-            <button class="causa-btn" data-causa="Error de troquelado">Error de troquelado</button>
-            <button class="causa-btn" data-causa="Otro">Otro</button>
-          </div>
-        </div>
-        <div class="field" style="margin-top:10px;">
-          <label>Detalle adicional (opcional)</label>
-          <input type="text" id="m-detalle" placeholder="Ej: burbuja en la cara del vaso"/>
-        </div>
+      <div class="modal-item-info" id="mermaItemInfo">
+        <strong id="mermaItemNombre">—</strong>
+        <span id="mermaItemDiseno">—</span>
       </div>
-      <div class="alerta-merma" id="alertaMerma"></div>
+
+      <div class="sec-label">Causa de la merma</div>
+      <div class="causas" id="causas">
+        <button class="causa-btn" data-causa="Falla de sublimado">Falla de sublimado</button>
+        <button class="causa-btn" data-causa="Falla de estampado">Falla de estampado</button>
+        <button class="causa-btn" data-causa="Defecto del insumo">Defecto del insumo</button>
+        <button class="causa-btn" data-causa="Error de troquelado">Error de troquelado</button>
+        <button class="causa-btn" data-causa="Otro">Otro</button>
+      </div>
+
+      <div class="field">
+        <label>Detalle adicional (opcional)</label>
+        <input type="text" id="mermaDetalle" placeholder="Describe el daño..."/>
+      </div>
+
+      <div class="reasignar-box">
+        <div class="reasignar-title">¿Reasignar nuevo insumo para este ítem?</div>
+        <div class="field">
+          <label>Stock disponible del mismo insumo</label>
+          <div id="mermaStockInfo" style="font-size:13px;font-weight:600;color:var(--black);padding:4px 0;"></div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" id="mermaReasignar" style="width:16px;height:16px;"/>
+          Sí, reasignar insumo disponible para continuar producción
+        </label>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-sec" id="btnCancelarMerma">Cancelar</button>
-      <button class="btn-danger" id="btnConfirmarMerma">Confirmar merma — descontar inventario</button>
+      <button class="btn-danger" id="btnConfirmarMerma">Confirmar merma</button>
     </div>
   </div>
 </div>
@@ -217,7 +195,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 <script type="module">
 import { initPage, db } from './nav.js';
 import {
-  collection, query, where, onSnapshot, orderBy,
+  collection, query, where, onSnapshot,
   doc, getDoc, getDocs, updateDoc, addDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -226,135 +204,137 @@ const user = await initPage(['directora','operaciones','produccion']);
 
 const hoy = new Date();
 document.getElementById('pageSub').textContent =
-  hoy.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'}) + ' · un pedido por cliente';
+  hoy.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'});
 
+// Estado merma actual
+let mermaActual = { pedidoId:'', itemId:'', productoId:'', productoNombre:'', diseno:'', disponible:0 };
 let causaSeleccionada = '';
-let todosItems = []; // para métricas
 
-// Cargar pedidos en_produccion en tiempo real
-const q = query(
-  collection(db,`empresas/${EMPRESA}/pedidos`),
-  where('estado','==','en_produccion')
-);
+// Pedidos en producción
+const q = query(collection(db,`empresas/${EMPRESA}/pedidos`), where('estado','==','en_produccion'));
 
 onSnapshot(q, async snap => {
   const lista = document.getElementById('listaPedidos');
   if (snap.empty) {
     lista.innerHTML = '<div class="empty">No hay pedidos en producción</div>';
-    actualizarMetricas([]);
+    document.getElementById('m-total').textContent = 0;
+    document.getElementById('m-pend').textContent = 0;
+    document.getElementById('m-prod').textContent = 0;
+    document.getElementById('m-listo').textContent = 0;
     return;
   }
 
-  // Cargar items de todos los pedidos
-  const pedidos = [];
+  let totalPend=0, totalProd=0, totalListo=0;
+  const cards = [];
+
   for (const d of snap.docs) {
-    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${d.id}/items`));
+    const p = d.data();
+    const pid = d.id;
+    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
     const items = [];
-    itemsSnap.forEach(i => items.push({ id:i.id, ...i.data() }));
-    pedidos.push({ id:d.id, ...d.data(), items });
+    itemsSnap.forEach(i => items.push({id:i.id,...i.data()}));
+
+    items.forEach(i => {
+      if (i.estado==='pendiente') totalPend++;
+      else if (i.estado==='produccion') totalProd++;
+      else if (i.estado==='listo_empaque') totalListo++;
+    });
+
+    const listos = items.filter(i=>i.estado==='listo_empaque').length;
+    const total = items.length;
+    const pct = total > 0 ? Math.round((listos/total)*100) : 0;
+    const todosListos = listos === total && total > 0;
+    const barColor = todosListos ? 'var(--verde)' : pct > 0 ? 'var(--azul)' : 'var(--borde)';
+
+    const itemsHtml = items.map(item => {
+      const esPend  = item.estado === 'pendiente';
+      const esProd  = item.estado === 'produccion';
+      const esListo = item.estado === 'listo_empaque';
+      const btnClass = esPend ? 'btn-estado btn-pend' : esProd ? 'btn-estado btn-prod' : 'btn-estado btn-listo';
+      const btnLabel = esPend ? 'Pendiente — iniciar' : esProd ? 'En producción — marcar listo' : '✓ Listo';
+
+      return `<div class="item-row" id="itemrow-${pid}-${item.id}">
+        <div class="item-info">
+          <div class="item-nombre">${item.productoNombre||'—'}</div>
+          <div class="item-diseno">${item.diseno||''}</div>
+        </div>
+        <div class="item-acciones">
+          <button class="${btnClass}"
+            ${esListo ? '' : `onclick="avanzarItem('${pid}','${item.id}','${item.estado}',this)"`}>
+            ${btnLabel}
+          </button>
+          ${!esListo ? `<button class="btn-merma-item" onclick="abrirMerma('${pid}','${item.id}','${item.productoId||''}','${(item.productoNombre||'').replace(/'/g,"\\'")}','${(item.diseno||'').replace(/'/g,"\\'")}')">⚠ Registrar merma</button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    const btnEmpaqueHtml = todosListos
+      ? `<button class="btn-empaque" onclick="pasarEmpaque('${pid}')">Pasar a empaque →</button>`
+      : '';
+
+    cards.push(`<div class="card${todosListos?' listo':''}" id="card-${pid}">
+      <div class="card-header">
+        <div>
+          <div class="card-nombre">${p.cliente_nombre||'—'}</div>
+          <div class="card-meta">${[p.distrito,p.provincia].filter(Boolean).join(' · ')} · Entrega: ${p.fechaEntrega||'—'}</div>
+        </div>
+        <span style="font-size:12px;color:var(--gris);">${listos}/${total} listos</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar" style="background:${barColor};width:${pct}%"></div>
+      </div>
+      ${itemsHtml}
+      <div class="clearfix">${btnEmpaqueHtml}</div>
+    </div>`);
   }
 
-  actualizarMetricas(pedidos);
-  lista.innerHTML = pedidos.map(p => renderCard(p)).join('');
+  document.getElementById('m-total').textContent = snap.size;
+  document.getElementById('m-pend').textContent = totalPend;
+  document.getElementById('m-prod').textContent = totalProd;
+  document.getElementById('m-listo').textContent = totalListo;
+  lista.innerHTML = cards.join('');
 });
 
-function actualizarMetricas(pedidos) {
-  let pend=0, prod=0, listo=0;
-  pedidos.forEach(p => p.items.forEach(i => {
-    if (i.estado==='pendiente') pend++;
-    else if (i.estado==='produccion') prod++;
-    else if (i.estado==='listo_empaque') listo++;
-  }));
-  document.getElementById('m-total').textContent = pedidos.length;
-  document.getElementById('m-pend').textContent  = pend;
-  document.getElementById('m-prod').textContent  = prod;
-  document.getElementById('m-listo').textContent = listo;
-}
-
-function renderCard(p) {
-  const total  = p.items.length;
-  const listos = p.items.filter(i => i.estado==='listo_empaque').length;
-  const todosListos = listos === total && total > 0;
-  const pct = total > 0 ? Math.round((listos/total)*100) : 0;
-  const barColor = todosListos ? 'var(--verde)' : pct > 0 ? 'var(--azul)' : 'var(--borde)';
-
-  const itemsHtml = p.items.map(i => {
-    const esPend  = i.estado === 'pendiente';
-    const esProd  = i.estado === 'produccion';
-    const esListo = i.estado === 'listo_empaque';
-    const btnClass = esPend ? 'item-btn-pend' : esProd ? 'item-btn-prod' : 'item-btn-listo';
-    const btnLabel = esPend ? 'Pendiente — iniciar' : esProd ? 'En producción — marcar listo' : '✓ Listo';
-    const btnClick = esListo ? '' : `onclick="avanzarItem('${p.id}','${i.id}','${i.estado}')"`;
-    return `<div class="item-row">
-      <div class="item-info">
-        <div class="item-nombre">${i.productoNombre||'—'}${i.variante?' · '+i.variante:''}</div>
-        <div class="item-diseno">${i.diseno||''}</div>
-      </div>
-      <button class="item-estado-btn ${btnClass}" ${btnClick}>${btnLabel}</button>
-    </div>`;
-  }).join('');
-
-  const btnEmpaqueHtml = todosListos
-    ? `<button class="btn-empaque" onclick="pasarEmpaque('${p.id}')">Pasar a empaque →</button>`
-    : '';
-
-  return `<div class="card${todosListos?' listo':''}" id="card-${p.id}">
-    <div class="card-header">
-      <div>
-        <div class="card-nombre">${p.cliente_nombre||'—'}</div>
-        <div class="card-meta">${[p.distrito,p.provincia].filter(Boolean).join(' · ')} · Entrega: ${p.fechaEntrega||'—'}</div>
-      </div>
-      <span class="card-progreso-label">${listos}/${total} listos</span>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-bar" style="background:${barColor};width:${pct}%"></div>
-    </div>
-    ${itemsHtml}
-    <div class="clearfix">${btnEmpaqueHtml}</div>
-  </div>`;
-}
-
-// Avanzar estado de ítem: pendiente → produccion → listo_empaque
-window.avanzarItem = async (pedidoId, itemId, estadoActual) => {
+// Avanzar estado ítem
+window.avanzarItem = async (pedidoId, itemId, estadoActual, btn) => {
+  if (btn) { btn.disabled=true; btn.textContent='...'; }
   const siguiente = estadoActual === 'pendiente' ? 'produccion' : 'listo_empaque';
-  await updateDoc(
-    doc(db,`empresas/${EMPRESA}/pedidos/${pedidoId}/items`,itemId),
-    { estado: siguiente }
-  );
+  try {
+    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pedidoId}/items`,itemId), { estado: siguiente });
+  } catch(e) {
+    console.error(e);
+    if (btn) { btn.disabled=false; }
+  }
 };
 
-// Pasar pedido completo a empaque
+// Pasar a empaque
 window.pasarEmpaque = async (pedidoId) => {
   await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pedidoId), {
-    estado: 'en_empaque',
-    pasadoEmpaqueEn: serverTimestamp(),
+    estado: 'en_empaque', pasadoEmpaqueEn: serverTimestamp()
   });
 };
 
-// ---- MODAL MERMA ----
-// Cargar productos para el selector
-async function cargarProductosMerma() {
-  const snap = await getDocs(collection(db,`empresas/${EMPRESA}/inventario_crudos`));
-  const sel = document.getElementById('m-producto');
-  sel.innerHTML = '<option value="">Seleccionar insumo</option>';
-  snap.forEach(d => {
-    const p = d.data();
-    const opt = document.createElement('option');
-    opt.value = d.id;
-    opt.textContent = `${p.nombre||'—'}${p.variante?' · '+p.variante:''}`;
-    opt.dataset.disponible = p.disponible || 0;
-    opt.dataset.total = p.total || 0;
-    sel.appendChild(opt);
-  });
-}
-
-document.getElementById('btnMerma').onclick = async () => {
-  await cargarProductosMerma();
+// ---- MERMA POR ÍTEM ----
+window.abrirMerma = async (pedidoId, itemId, productoId, productoNombre, diseno) => {
+  mermaActual = { pedidoId, itemId, productoId, productoNombre, diseno, disponible:0 };
   causaSeleccionada = '';
-  document.querySelectorAll('.causa-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('m-cantidad').value = 1;
-  document.getElementById('m-detalle').value = '';
-  document.getElementById('alertaMerma').style.display = 'none';
+  document.querySelectorAll('.causa-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mermaDetalle').value = '';
+  document.getElementById('mermaReasignar').checked = false;
+  document.getElementById('mermaItemNombre').textContent = productoNombre;
+  document.getElementById('mermaItemDiseno').textContent = diseno || 'Sin diseño especificado';
+
+  // Ver stock disponible del insumo
+  if (productoId) {
+    const invSnap = await getDoc(doc(db,`empresas/${EMPRESA}/inventario_crudos`,productoId));
+    if (invSnap.exists()) {
+      const inv = invSnap.data();
+      mermaActual.disponible = inv.disponible || 0;
+      document.getElementById('mermaStockInfo').textContent =
+        `${inv.disponible || 0} unidades disponibles después de descontar esta merma`;
+    }
+  }
+
   document.getElementById('modalMerma').classList.add('open');
 };
 
@@ -364,55 +344,73 @@ document.getElementById('btnCancelarMerma').onclick = () =>
 
 document.querySelectorAll('.causa-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.causa-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.causa-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     causaSeleccionada = btn.dataset.causa;
   });
 });
 
 document.getElementById('btnConfirmarMerma').onclick = async () => {
-  const prodId   = document.getElementById('m-producto').value;
-  const cantidad = parseInt(document.getElementById('m-cantidad').value) || 0;
-  const detalle  = document.getElementById('m-detalle').value.trim();
-
-  if (!prodId)            { alert('Selecciona el producto dañado.'); return; }
   if (!causaSeleccionada) { alert('Selecciona la causa de la merma.'); return; }
-  if (cantidad < 1)       { alert('La cantidad debe ser al menos 1.'); return; }
 
   const btn = document.getElementById('btnConfirmarMerma');
-  btn.disabled = true; btn.textContent = 'Procesando...';
+  btn.disabled=true; btn.textContent='Procesando...';
+
+  const reasignar = document.getElementById('mermaReasignar').checked;
 
   try {
-    const invRef  = doc(db,`empresas/${EMPRESA}/inventario_crudos`,prodId);
-    const invSnap = await getDoc(invRef);
-    if (!invSnap.exists()) throw new Error('Producto no encontrado');
-    const inv = invSnap.data();
+    // 1. Descontar del inventario (total y consumido)
+    if (mermaActual.productoId) {
+      const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,mermaActual.productoId);
+      const invSnap = await getDoc(invRef);
+      if (invSnap.exists()) {
+        const inv = invSnap.data();
+        const updateData = {
+          total: Math.max(0,(inv.total||0)-1),
+          consumido: (inv.consumido||0)+1,
+        };
+        // Si reasigna, descontar también del disponible para el nuevo ítem
+        if (reasignar) {
+          updateData.disponible = Math.max(0,(inv.disponible||0)-1);
+          updateData.reservado = (inv.reservado||0)+1;
+        }
+        await updateDoc(invRef, updateData);
+      }
+    }
 
-    await updateDoc(invRef, {
-      total:     Math.max(0, (inv.total||0) - cantidad),
-      consumido: (inv.consumido||0) + cantidad,
-    });
-
+    // 2. Registrar movimiento de merma
     await addDoc(collection(db,`empresas/${EMPRESA}/movimientos`), {
-      tipo:        'merma',
-      productoId:  prodId,
-      productoNombre: inv.nombre||'—',
-      cantidad,
-      causa:       causaSeleccionada,
-      detalle,
+      tipo: 'merma',
+      productoId: mermaActual.productoId,
+      productoNombre: mermaActual.productoNombre,
+      pedidoId: mermaActual.pedidoId,
+      itemId: mermaActual.itemId,
+      diseno: mermaActual.diseno,
+      causa: causaSeleccionada,
+      detalle: document.getElementById('mermaDetalle').value.trim(),
+      reasignado: reasignar,
       registradoPor: user.nombre||user.email,
-      fecha:       new Date().toISOString().split('T')[0],
-      creadoEn:    serverTimestamp(),
+      fecha: new Date().toISOString().split('T')[0],
+      creadoEn: serverTimestamp(),
     });
+
+    // 3. Marcar ítem como dañado o mantener en producción si reasigna
+    await updateDoc(
+      doc(db,`empresas/${EMPRESA}/pedidos/${mermaActual.pedidoId}/items`,mermaActual.itemId),
+      { estado: reasignar ? 'produccion' : 'dañado', merma: true, causaMerma: causaSeleccionada }
+    );
 
     document.getElementById('modalMerma').classList.remove('open');
-    alert('✓ Merma registrada. Inventario actualizado.');
+    alert(reasignar
+      ? '✓ Merma registrada. Nuevo insumo reservado — el ítem continúa en producción.'
+      : '✓ Merma registrada. El ítem fue marcado como dañado.');
+
   } catch(e) {
     console.error(e);
-    alert('Error al registrar. Intenta de nuevo.');
+    alert('Error al registrar merma.');
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Confirmar merma — descontar inventario';
+    btn.disabled=false;
+    btn.textContent='Confirmar merma';
   }
 };
 </script>
