@@ -318,7 +318,8 @@ function renderAll() {
   const lista = document.getElementById('listaPedidos');
   // Mostrar pedido si tiene ítems activos
   let activos = Object.values(pedidosMap).filter(p => {
-    if (['entregado','cancelado'].includes(p.estado)) return false;
+    // Excluir pedidos que ya pasaron de producción
+    if (['en_empaque','empaquetado','en_ruta','entregado','cancelado','observado'].includes(p.estado)) return false;
     return (p.items||[]).some(i => ['pendiente','produccion','listo_empaque'].includes(i.estado));
   });
 
