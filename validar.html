@@ -132,6 +132,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 
 <script type="module">
 import { initPage, db } from './nav.js';
+import { toast } from './toast.js';
 import {
   collection, query, where, onSnapshot,
   doc, getDoc, getDocs, updateDoc, serverTimestamp
@@ -328,7 +329,7 @@ window.aprobar = async (pid, esAdicional) => {
           }
         }
       }
-      alert('✓ Ítems adicionales aprobados. Ya aparecen en Producción.');
+      toast.success('Ítems aprobados','Los ítems adicionales ya aparecen en Producción. Débito confirmado en inventario.',5000);
     } else {
       // Aprobar pedido completo — inventario primero, estado después
       for (const iDoc of itemsSnap.docs) {
@@ -361,7 +362,7 @@ window.aprobar = async (pid, esAdicional) => {
       });
     }
   } catch(e) {
-    console.error(e); alert('Error al aprobar.');
+    console.error(e); toast.error('Error al aprobar','Intenta nuevamente.');
     if (btnA) { btnA.disabled=false; btnA.textContent='Enviar a producción →'; }
     if (btnR) btnR.disabled=false;
   }
@@ -400,11 +401,16 @@ window.confirmarRechazo = async (pid, esAdicional) => {
       }
     }
     if (!esAdicional) {
+      // Vuelve a estado pendiente pero con flag requiereAtencion para que asesora subsane
       await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid),{
-        estado:'cancelado', motivoRechazo:motivo, rechazadoPor:user.nombre||user.email, rechazadoEn:serverTimestamp()
+        estado:'cancelado',
+        requiereAtencion: true,
+        motivoRechazo: motivo,
+        rechazadoPor: user.nombre||user.email,
+        rechazadoEn: serverTimestamp()
       });
     }
-    alert('✓ Rechazado. Inventario liberado.');
+    toast.warn('Pago rechazado','Inventario liberado. El pedido aparece en la pestaña "Rechazados" para que la asesora lo subsane.',6000);
   } catch(e) { console.error(e); alert('Error.'); }
 };
 
@@ -418,6 +424,18 @@ document.querySelectorAll('.filtro-btn').forEach(btn => {
 });
 
 cargar();
+window.verVAd = async function(pid, itemId) {
+  try {
+    const snap = await getDoc(doc(db, `empresas/${EMPRESA}/pedidos/${pid}/items`, itemId));
+    if (!snap.exists()) { toast.error('Error','No se encontró el ítem.'); return; }
+    const data = snap.data();
+    const src = data.voucherAdicional || data.voucher || '';
+    if (!src) { toast.warn('Sin voucher','Este ítem no tiene voucher adjunto.'); return; }
+    const w = window.open('','_blank');
+    w.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;"><img src="${src}" style="max-width:100%;max-height:100vh;object-fit:contain;"/></body></html>`);
+    w.document.close();
+  } catch(e) { toast.error('Error al cargar voucher', e.message); }
+};
 </script>
 </body>
 </html>
