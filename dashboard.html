@@ -13,14 +13,14 @@
 #app-nav .nav-divider{width:1px;height:20px;background:#333;margin-right:8px;flex-shrink:0;}
 #app-nav .nav-items{display:flex;gap:2px;flex:1;overflow-x:auto;}
 #app-nav .nav-items::-webkit-scrollbar{display:none;}
-#app-nav a.nav-link{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#888;text-decoration:none;white-space:nowrap;transition:background .15s,color .15s;}
+#app-nav a.nav-link{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;color:#888;text-decoration:none;white-space:nowrap;}
 #app-nav a.nav-link:hover{background:#111;color:#f1e8df;}
 #app-nav a.nav-link.active{background:#e1c4c1;color:#000;font-weight:600;}
 #app-nav .nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
 #app-nav .nav-powered{font-size:10px;color:#444;letter-spacing:.04em;white-space:nowrap;}
 #app-nav .nav-powered strong{color:#cca99d;}
 #app-nav .nav-username{font-size:11px;color:#888;white-space:nowrap;}
-#app-nav .btn-salir{background:none;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:"Poppins",sans-serif;font-size:11px;white-space:nowrap;}
+#app-nav .btn-salir{background:none;border:1px solid #333;color:#888;padding:4px 10px;border-radius:6px;cursor:pointer;font-family:"Poppins",sans-serif;font-size:11px;}
 #app-nav .btn-salir:hover{border-color:#e1c4c1;color:#f1e8df;}
 .nav-user-wrap{position:relative;}
 #nav-menu-btn{display:flex;width:28px;height:28px;border-radius:50%;background:#e1c4c1;border:none;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0;flex-shrink:0;}
@@ -33,23 +33,30 @@
 body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-height:100vh;color:var(--black);}
 
 .page{max-width:1100px;margin:0 auto;padding:28px 24px;}
-.page-header{margin-bottom:24px;}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;}
 .page-title{font-size:20px;font-weight:800;}
 .page-sub{font-size:12px;color:var(--gris);margin-top:3px;}
+
+/* FILTRO FECHAS */
+.filtro-fechas{background:#fff;border:1.5px solid var(--borde);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.filtro-fechas label{font-size:11px;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.04em;}
+.filtro-fechas input[type=date]{border:1px solid var(--borde);border-radius:6px;padding:5px 8px;font-family:"Poppins",sans-serif;font-size:12px;color:var(--black);outline:none;background:var(--bg);}
+.filtro-fechas input[type=date]:focus{border-color:var(--black);}
+.btn-filtrar{background:var(--black);color:#fff;border:none;padding:6px 14px;border-radius:6px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
+.btn-hoy{background:#fff;border:1.5px solid var(--borde);color:var(--gris);padding:6px 12px;border-radius:6px;font-family:"Poppins",sans-serif;font-size:11px;cursor:pointer;}
+.btn-hoy:hover{border-color:var(--black);color:var(--black);}
 
 .bloque-title{font-size:13px;font-weight:700;color:var(--black);margin-bottom:12px;padding-left:10px;border-left:3px solid var(--black);}
 .bloque-title.manana{border-left-color:var(--borde);}
 
-/* MÉTRICAS */
 .metricas-5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;}
 .metricas-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.metricas-pago{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
 .metrica{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:14px 16px;}
-.metrica.cuello{border-color:var(--naranja);background:#fdfaf5;}
-.metrica.listo{border-color:var(--verde);background:#f8fff5;}
 .metrica .ml{font-size:10px;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;font-weight:500;margin-bottom:4px;}
-.metrica .mv{font-size:26px;font-weight:800;line-height:1;}
+.metrica .mv{font-size:22px;font-weight:800;line-height:1;}
+.metrica .msub{font-size:10px;color:var(--gris);margin-top:3px;}
 
-/* ALERTAS */
 .alerta{border-radius:8px;padding:10px 14px;font-size:12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:8px;}
 .alerta-warn{background:#faeeda;border:1px solid #e8c99a;color:var(--naranja);}
 .alerta-danger{background:#fcebeb;border:1px solid #f0c0c0;color:var(--rojo);}
@@ -62,7 +69,6 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 .block{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:18px;}
 .block-title{font-size:12px;font-weight:700;color:var(--black);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--borde);}
 
-/* DESPACHOS */
 .despacho-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f0e8e0;font-size:12px;}
 .despacho-row:last-child{border-bottom:none;}
 .despacho-nombre{font-weight:600;}
@@ -73,6 +79,14 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 
 .seccion{margin-bottom:28px;}
 .empty-msg{font-size:12px;color:var(--borde);text-align:center;padding:20px 0;}
+
+/* MÉTODOS DE PAGO */
+.pago-bar-wrap{margin-bottom:10px;}
+.pago-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
+.pago-label .nombre{font-weight:600;}
+.pago-label .monto{color:var(--verde);font-weight:700;}
+.pago-bar{height:6px;background:#f0e8e0;border-radius:10px;overflow:hidden;}
+.pago-bar-fill{height:6px;border-radius:10px;background:var(--black);transition:width .4s;}
 </style>
 </head>
 <body>
@@ -108,22 +122,44 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 
 <div class="page">
   <div class="page-header">
-    <div class="page-title">Dashboard</div>
-    <div class="page-sub" id="pageSub"></div>
+    <div>
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub" id="pageSub"></div>
+    </div>
+    <!-- FILTRO DE FECHAS -->
+    <div class="filtro-fechas">
+      <label>Desde</label>
+      <input type="date" id="fechaDesde"/>
+      <label>Hasta</label>
+      <input type="date" id="fechaHasta"/>
+      <button class="btn-filtrar" onclick="aplicarFiltro()">Filtrar</button>
+      <button class="btn-hoy" onclick="irHoy()">Hoy</button>
+      <button class="btn-hoy" onclick="irSemana()">Esta semana</button>
+      <button class="btn-hoy" onclick="irMes()">Este mes</button>
+    </div>
   </div>
 
-  <!-- BLOQUE 1: HOY -->
+  <!-- BLOQUE 1: OPERACIÓN -->
   <div class="seccion">
-    <div class="bloque-title" id="tituloHoy">Operación de hoy</div>
+    <div class="bloque-title" id="tituloHoy">Operación del período</div>
     <div class="metricas-5">
-      <div class="metrica"><div class="ml">Registrados</div><div class="mv" id="m-reg">0</div></div>
+      <div class="metrica"><div class="ml">Pedidos</div><div class="mv" id="m-reg">0</div></div>
       <div class="metrica"><div class="ml">Por validar</div><div class="mv" style="color:var(--naranja)" id="m-val">0</div></div>
-      <div class="metrica" id="m-prod-card"><div class="ml">Producción</div><div class="mv" style="color:var(--azul)" id="m-prod">0</div></div>
+      <div class="metrica"><div class="ml">Producción</div><div class="mv" style="color:var(--azul)" id="m-prod">0</div></div>
       <div class="metrica"><div class="ml">Empaque</div><div class="mv" style="color:var(--azul)" id="m-emp">0</div></div>
-      <div class="metrica listo"><div class="ml">Entregados</div><div class="mv" style="color:var(--verde)" id="m-ent">0</div></div>
+      <div class="metrica"><div class="ml">Entregados</div><div class="mv" style="color:var(--verde)" id="m-ent">0</div></div>
     </div>
-
     <div id="alertaCuello"></div>
+
+    <!-- INGRESOS POR MÉTODO DE PAGO -->
+    <div class="block" style="margin-bottom:16px;">
+      <div class="block-title">💳 Ingresos por método de pago</div>
+      <div id="ingresosPago"><div class="empty-msg">Cargando...</div></div>
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--borde);display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;color:var(--gris);">Total ingresado (pedidos entregados)</span>
+        <span style="font-size:18px;font-weight:800;color:var(--verde);" id="totalIngresado">S/ 0.00</span>
+      </div>
+    </div>
 
     <div class="grid-2">
       <div class="block">
@@ -131,7 +167,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
         <div id="alertasInv"><div class="empty-msg">Cargando...</div></div>
       </div>
       <div class="block">
-        <div class="block-title">🔴 Incidencias del día</div>
+        <div class="block-title">🔴 Incidencias del período</div>
         <div id="incidencias"><div class="empty-msg">Cargando...</div></div>
       </div>
     </div>
@@ -167,118 +203,177 @@ const hoyStr = hoy.toISOString().split('T')[0];
 const manana = new Date(hoy); manana.setDate(manana.getDate()+1);
 const mananaStr = manana.toISOString().split('T')[0];
 
+// Fechas por defecto = hoy
+document.getElementById('fechaDesde').value = hoyStr;
+document.getElementById('fechaHasta').value = hoyStr;
+
 document.getElementById('pageSub').textContent = hoy.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-document.getElementById('tituloHoy').textContent = `Operación de hoy — ${hoy.toLocaleDateString('es-PE',{day:'numeric',month:'short'})}`;
 document.getElementById('tituloManana').textContent = `Despachos de mañana — ${manana.toLocaleDateString('es-PE',{day:'numeric',month:'short'})}`;
 
 const col = collection(db,`empresas/${EMPRESA}/pedidos`);
 
-// Contadores por estado
-const estados = [
-  ['pendiente_validacion','m-val'],['en_produccion','m-prod'],
-  ['en_empaque','m-emp'],['entregado','m-ent'],
-];
-estados.forEach(([estado,id]) => {
-  onSnapshot(query(col,where('estado','==',estado)), snap => {
-    document.getElementById(id).textContent = snap.size;
-    // Cuello de botella
-    if (estado === 'en_produccion') actualizarCuello(snap.size);
+// Helpers de fecha
+window.irHoy = () => {
+  document.getElementById('fechaDesde').value = hoyStr;
+  document.getElementById('fechaHasta').value = hoyStr;
+  aplicarFiltro();
+};
+window.irSemana = () => {
+  const lunes = new Date(hoy); lunes.setDate(hoy.getDate()-hoy.getDay()+1);
+  document.getElementById('fechaDesde').value = lunes.toISOString().split('T')[0];
+  document.getElementById('fechaHasta').value = hoyStr;
+  aplicarFiltro();
+};
+window.irMes = () => {
+  const primero = new Date(hoy.getFullYear(),hoy.getMonth(),1);
+  document.getElementById('fechaDesde').value = primero.toISOString().split('T')[0];
+  document.getElementById('fechaHasta').value = hoyStr;
+  aplicarFiltro();
+};
+
+window.aplicarFiltro = async () => {
+  const desde = document.getElementById('fechaDesde').value;
+  const hasta = document.getElementById('fechaHasta').value;
+  if (!desde || !hasta) { alert('Selecciona un rango de fechas.'); return; }
+
+  const label = desde === hasta
+    ? hoy.toLocaleDateString('es-PE',{day:'numeric',month:'short'})
+    : `${desde} al ${hasta}`;
+  document.getElementById('tituloHoy').textContent = `Operación — ${label}`;
+
+  // Cargar todos los pedidos y filtrar por fechaEntrega o creadoEn
+  const snap = await getDocs(col);
+  const pedidos = [];
+  snap.forEach(d => {
+    const p = d.data();
+    const fecha = p.fechaEntrega || '';
+    if (fecha >= desde && fecha <= hasta) pedidos.push({id:d.id,...p});
   });
-});
 
-// Total registrados hoy
-onSnapshot(col, snap => {
-  document.getElementById('m-reg').textContent = snap.size;
-});
+  // Métricas por estado
+  const estados = {pendiente_validacion:0,en_produccion:0,en_empaque:0,entregado:0};
+  pedidos.forEach(p => { if (estados[p.estado] !== undefined) estados[p.estado]++; });
+  document.getElementById('m-reg').textContent = pedidos.length;
+  document.getElementById('m-val').textContent = estados.pendiente_validacion;
+  document.getElementById('m-prod').textContent = estados.en_produccion;
+  document.getElementById('m-emp').textContent = estados.en_empaque;
+  document.getElementById('m-ent').textContent = estados.entregado;
 
-let maxEstacion = {nombre:'', count:0};
-function actualizarCuello(prodCount) {
-  // Simple: si producción > 5 es cuello de botella
+  // Cuello de botella
+  const prodCount = estados.en_produccion;
   const alertaEl = document.getElementById('alertaCuello');
   if (prodCount > 5) {
-    alertaEl.innerHTML = `<div class="alerta alerta-warn"><span class="alerta-icon">⚠</span><div class="alerta-text"><strong>Cuello de botella: Producción</strong>${prodCount} pedidos en proceso. Considera reforzar el equipo.</div></div>`;
-  } else if (prodCount > 0) {
-    alertaEl.innerHTML = `<div class="alerta alerta-ok"><span class="alerta-icon">✓</span><div class="alerta-text">Flujo operativo normal · ${prodCount} pedidos en producción</div></div>`;
-  } else {
-    alertaEl.innerHTML = '';
-  }
-}
+    alertaEl.innerHTML = `<div class="alerta alerta-warn"><span class="alerta-icon">⚠</span><div class="alerta-text"><strong>Cuello de botella: Producción</strong>${prodCount} pedidos en proceso.</div></div>`;
+  } else { alertaEl.innerHTML = ''; }
 
-// Alertas de inventario
+  // Ingresos por método de pago — solo pedidos entregados
+  const entregados = pedidos.filter(p => p.estado === 'entregado');
+  const porPago = {};
+  let totalIngresado = 0;
+  entregados.forEach(p => {
+    const mp = p.medioPago || 'Sin especificar';
+    if (!porPago[mp]) porPago[mp] = 0;
+    porPago[mp] += (p.total||0);
+    totalIngresado += (p.total||0);
+  });
+
+  const el = document.getElementById('ingresosPago');
+  document.getElementById('totalIngresado').textContent = `S/ ${totalIngresado.toFixed(2)}`;
+
+  if (!Object.keys(porPago).length) {
+    el.innerHTML = '<div class="empty-msg">Sin ingresos en este período</div>';
+  } else {
+    const sorted = Object.entries(porPago).sort((a,b)=>b[1]-a[1]);
+    const max = sorted[0][1];
+    const COLORES = {Yape:'#6D28D9',Plin:'#0891B2',Transferencia:'#854F0B',MercadoPago:'#059669'};
+    el.innerHTML = sorted.map(([mp,monto]) => `
+      <div class="pago-bar-wrap">
+        <div class="pago-label">
+          <span class="nombre">${mp}</span>
+          <span class="monto">S/ ${monto.toFixed(2)}</span>
+        </div>
+        <div class="pago-bar">
+          <div class="pago-bar-fill" style="width:${Math.round((monto/max)*100)}%;background:${COLORES[mp]||'var(--black)'}"></div>
+        </div>
+      </div>`).join('');
+  }
+
+  // Incidencias
+  const incEl = document.getElementById('incidencias');
+  const mermasSnap = await getDocs(query(
+    collection(db,`empresas/${EMPRESA}/movimientos`),
+    where('tipo','==','merma')
+  ));
+  const mermas = [];
+  mermasSnap.forEach(d => {
+    const m = d.data();
+    if (m.fecha >= desde && m.fecha <= hasta) mermas.push(m);
+  });
+  const rechazados = pedidos.filter(p => p.estado === 'cancelado');
+  const incItems = [
+    ...mermas.map(m => ({tipo:'Merma',desc:`${m.productoNombre||'—'} · ${m.causa||'—'}`,quien:m.registradoPor||'—'})),
+    ...rechazados.map(p => ({tipo:'Rechazo',desc:`#${p.id.slice(-5).toUpperCase()} · ${p.motivoRechazo||'—'}`,quien:p.rechazadoPor||'—'})),
+  ];
+  if (!incItems.length) { incEl.innerHTML = '<div class="empty-msg">Sin incidencias en el período</div>'; }
+  else {
+    incEl.innerHTML = incItems.map(i => `
+      <div class="alerta ${i.tipo==='Merma'?'alerta-warn':'alerta-danger'}">
+        <span class="alerta-icon">${i.tipo==='Merma'?'⚠':'✕'}</span>
+        <div class="alerta-text"><strong>${i.tipo}</strong>${i.desc} · ${i.quien}</div>
+      </div>`).join('');
+  }
+};
+
+// Alertas de inventario (siempre tiempo real)
 getDocs(collection(db,`empresas/${EMPRESA}/inventario_crudos`)).then(snap => {
   const el = document.getElementById('alertasInv');
   const alertas = [];
   snap.forEach(d => {
     const p = d.data();
-    if ((p.disponible||0) === 0) alertas.push({...p, nivel:'danger'});
-    else if ((p.disponible||0) <= (p.stock_seguridad||0)) alertas.push({...p, nivel:'warn'});
+    if ((p.disponible||0) === 0) alertas.push({...p,nivel:'danger'});
+    else if ((p.disponible||0) <= (p.stock_seguridad||0)) alertas.push({...p,nivel:'warn'});
   });
   if (!alertas.length) {
     el.innerHTML = '<div class="alerta alerta-ok"><span class="alerta-icon">✓</span><div class="alerta-text">Todo el inventario sobre mínimo</div></div>';
     return;
   }
-  el.innerHTML = alertas.map(p => `
+  el.innerHTML = alertas.slice(0,5).map(p => `
     <div class="alerta ${p.nivel==='danger'?'alerta-danger':'alerta-warn'}">
       <span class="alerta-icon">${p.nivel==='danger'?'✕':'⚠'}</span>
       <div class="alerta-text">
         <strong>${p.nombre||'—'}</strong>
-        ${p.nivel==='danger'?'Sin stock disponible':`Solo ${p.disponible} unidades (mínimo: ${p.stock_seguridad})`}
+        ${p.nivel==='danger'?'Sin stock':'Solo '+p.disponible+' uds (mín: '+p.stock_seguridad+')'}
       </div>
-    </div>`).join('');
+    </div>`).join('') + (alertas.length>5?`<div class="empty-msg">+${alertas.length-5} más bajo mínimo</div>`:'');
 });
 
-// Incidencias del día (mermas + rechazos)
-onSnapshot(query(
-  collection(db,`empresas/${EMPRESA}/movimientos`),
-  where('tipo','==','merma'),
-  where('fecha','==',hoyStr)
-), snapMermas => {
-  onSnapshot(query(col,where('estado','==','cancelado')), snapRechazos => {
-    const el = document.getElementById('incidencias');
-    const items = [];
-    snapMermas.forEach(d => {
-      const m = d.data();
-      items.push({tipo:'Merma',desc:`${m.productoNombre||'—'} · ${m.causa||'—'}`,quien:m.registradoPor||'—'});
-    });
-    snapRechazos.forEach(d => {
-      const p = d.data();
-      items.push({tipo:'Rechazo',desc:`Pedido ${d.id.slice(-5).toUpperCase()} · ${p.motivoRechazo||'—'}`,quien:p.rechazadoPor||'—'});
-    });
-    if (!items.length) { el.innerHTML = '<div class="empty-msg">Sin incidencias hoy</div>'; return; }
-    el.innerHTML = items.map(i => `
-      <div class="alerta ${i.tipo==='Merma'?'alerta-warn':'alerta-danger'}">
-        <span class="alerta-icon">${i.tipo==='Merma'?'⚠':'✕'}</span>
-        <div class="alerta-text"><strong>${i.tipo}</strong>${i.desc} · ${i.quien}</div>
-      </div>`).join('');
-  });
-});
-
-// Despachos de mañana
-onSnapshot(query(col,where('estado','==','empaquetado'),where('fechaEntrega','==',mananaStr)), snap => {
-  const lima = snap.docs.filter(d => (d.data().provincia||'').toLowerCase().includes('lima')).length;
-  const olva = snap.size - lima;
-  const rutaArmada = snap.docs.some(d => d.data().conductor);
-
+// Despachos de mañana (tiempo real)
+onSnapshot(query(col,where('estado','==','en_ruta'),where('fechaEntrega','==',mananaStr)), snap => {
+  const lima = snap.docs.filter(d=>(d.data().provincia||'').toLowerCase().includes('lima')).length;
+  const olva = snap.size-lima;
+  const rutaArmada = snap.docs.some(d=>d.data().conductor);
   document.getElementById('m-desp').textContent = snap.size;
   document.getElementById('m-lima').textContent = lima;
   document.getElementById('m-olva').textContent = olva;
-  document.getElementById('m-ruta').textContent = rutaArmada ? '✓ Sí' : 'No';
-  document.getElementById('m-ruta').style.color = rutaArmada ? 'var(--verde)' : 'var(--rojo)';
-
+  document.getElementById('m-ruta').textContent = rutaArmada?'✓ Sí':'No';
+  document.getElementById('m-ruta').style.color = rutaArmada?'var(--verde)':'var(--rojo)';
   const el = document.getElementById('listaDespachos');
-  if (snap.empty) { el.innerHTML = '<div class="empty-msg">Sin despachos programados para mañana</div>'; return; }
+  if (snap.empty) { el.innerHTML = '<div class="empty-msg">Sin despachos para mañana</div>'; return; }
   el.innerHTML = snap.docs.map(d => {
     const p = d.data();
     const esOlva = !(p.provincia||'').toLowerCase().includes('lima');
     return `<div class="despacho-row">
       <div>
         <div class="despacho-nombre">${p.cliente_nombre||'—'}</div>
-        <div class="despacho-sub">${p.direccion||[p.distrito,p.provincia].filter(Boolean).join(', ')||'Sin dirección'} · ${p.conductor||'Sin conductor asignado'}</div>
+        <div class="despacho-sub">${p.direccion||[p.distrito,p.provincia].filter(Boolean).join(', ')||'Sin dirección'} · ${p.conductor||'Sin conductor'}</div>
       </div>
       <span class="badge ${esOlva?'badge-olva':'badge-lima'}">${esOlva?'Olva':'Lima'}</span>
     </div>`;
   }).join('');
 });
+
+// Cargar con filtro de hoy por defecto
+aplicarFiltro();
 </script>
 </body>
 </html>
