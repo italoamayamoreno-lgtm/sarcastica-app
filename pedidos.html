@@ -106,6 +106,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 .btn-reg{background:var(--black);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
 .btn-reg:hover{opacity:.85;}
 .btn-reg:disabled{opacity:.4;cursor:not-allowed;}
+.field-error{border-color:var(--rojo)!important;box-shadow:0 0 0 2px rgba(163,45,45,.15)!important;}
 </style>
 </head>
 <body>
@@ -241,6 +242,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 
 <script type="module">
 import { initPage, db } from './nav.js';
+import { toast } from './toast.js';
 import {
   collection, query, orderBy, where, onSnapshot,
   doc, getDoc, setDoc, addDoc, serverTimestamp, getDocs
@@ -426,7 +428,8 @@ document.getElementById('btnRegistrar').onclick=async()=>{
       medioPago,fechaEntrega,observacion:document.getElementById('observacion').value.trim(),
       estado:'pendiente_validacion',total,total_items:items.length,vendedor:user.nombre||user.email,creadoEn:serverTimestamp(),voucher:voucherBase64||'',voucherNombre:voucherNombre||'',
     });
-    for(const item of items){
+    toast.info('Artículos reservados','Se confirmará el débito del inventario luego de la validación de pago.',6000);
+  for(const item of items){
       await addDoc(collection(db,`empresas/${EMPRESA}/pedidos/${pedidoRef.id}/items`),item);
       const invRef=doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
       const invSnap=await getDoc(invRef);
