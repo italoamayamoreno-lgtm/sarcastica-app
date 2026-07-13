@@ -186,6 +186,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 
 <script type="module">
 import { initPage, db } from './nav.js';
+import { toast } from './toast.js';
 import {
   collection, onSnapshot,
   doc, getDoc, getDocs, updateDoc, addDoc, serverTimestamp
@@ -286,11 +287,12 @@ function scheduleRender() {
 
 function renderAll() {
   const lista = document.getElementById('listaPedidos');
-  const estadosExcluidos = ['en_empaque','empaquetado','en_ruta','entregado','cancelado'];
-  const activos = Object.values(pedidosMap).filter(p =>
-    !estadosExcluidos.includes(p.estado) &&
-    (p.items||[]).some(i => ['pendiente','produccion','listo_empaque'].includes(i.estado))
-  );
+  // Mostrar pedido si tiene ítems activos — sin importar el estado del pedido
+  // (cubre el caso de ítems adicionales en pedidos ya avanzados)
+  const activos = Object.values(pedidosMap).filter(p => {
+    if (['entregado','cancelado'].includes(p.estado)) return false;
+    return (p.items||[]).some(i => ['pendiente','produccion','listo_empaque'].includes(i.estado));
+  });
 
   if (activos.length === 0) {
     lista.innerHTML = '<div class="empty">No hay pedidos en producción</div>';
@@ -386,7 +388,7 @@ window.confirmarEmpaque = (pedidoId, clienteNombre) => {
       });
       // Marcar ítems listo_empaque → mantenemos como listo_empaque para que empaque los procese
     } catch(e) {
-      console.error(e); alert('Error al pasar a empaque.');
+      console.error(e); toast.error('Error','No se pudo pasar a empaque. Intenta nuevamente.');
     }
   };
 };
@@ -425,7 +427,7 @@ document.querySelectorAll('.causa-btn').forEach(btn => {
 });
 
 document.getElementById('btnConfirmarMerma').onclick = async () => {
-  if (!causaSeleccionada) { alert('Selecciona la causa.'); return; }
+  if (!causaSeleccionada) { toast.warn('Causa requerida','Por favor selecciona la causa de la merma.'); return; }
   const btn = document.getElementById('btnConfirmarMerma');
   btn.disabled = true; btn.textContent = 'Procesando...';
   const reasignar = document.getElementById('mermaReasignar').checked;
@@ -455,11 +457,9 @@ document.getElementById('btnConfirmarMerma').onclick = async () => {
       {estado: reasignar ? 'produccion' : 'dañado', merma:true, causaMerma:causaSeleccionada}
     );
     document.getElementById('modalMerma').classList.remove('open');
-    alert(reasignar
-      ? '✓ Merma registrada. Nuevo insumo reservado, el ítem continúa en producción.'
-      : '✓ Merma registrada. Ítem marcado como dañado.');
+    toast.success('Merma registrada', reasignar ? 'Nuevo insumo reservado. El ítem continúa en producción.' : 'Ítem marcado como dañado.');
   } catch(e) {
-    console.error(e); alert('Error al registrar merma.');
+    console.error(e); toast.error('Error','No se pudo registrar la merma.');
   } finally {
     btn.disabled = false; btn.textContent = 'Confirmar merma';
   }
