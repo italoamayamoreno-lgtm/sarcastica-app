@@ -160,9 +160,9 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
     <button class="filtro-btn" data-estado="en_ruta">En ruta <span id="cnt-er"></span></button>
     <button class="filtro-btn" data-estado="entregado">Entregados <span id="cnt-en"></span></button>
   
-    <button class="filtro-btn" data-estado="rechazados" id="btn-tab-rechazados" style="border-color:var(--rojo);color:var(--rojo);position:relative;">
-      ✕ Rechazados
-      <span id="badge-rech" style="display:none;background:var(--rojo);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:4px;"></span>
+    <button class="filtro-btn" data-estado="rechazados" id="btn-tab-rechazados" style="border-color:var(--naranja);color:var(--naranja);position:relative;">
+      Observados
+      <span id="badge-rech" style="display:none;background:var(--naranja);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:4px;"></span>
     </button>
   </div>
 
@@ -285,7 +285,8 @@ function cargarPedidos(){
       const fecha=p.fechaEntrega||'--';
       const urgente=fecha===hoyStr?' <span style="color:var(--rojo);font-size:10px;font-weight:600;">HOY</span>':'';
       const adicBadge = p.tieneAdicionales ? '<span style="background:#fff3cd;color:#856404;font-size:10px;font-weight:600;padding:1px 5px;border-radius:8px;margin-left:4px;">+ítem</span>' : '';
-      return `<div class="tabla-row"><span class="pedido-num">#${d.id.slice(-5).toUpperCase()}</span><div><div class="cliente-nombre">${p.cliente_nombre||'--'}${adicBadge}</div><div class="cliente-sub">${[p.distrito,p.provincia,p.cliente_dni].filter(Boolean).join(' · ')}</div></div><span class="badge ${cc}">${cl}</span><span style="font-size:12px;color:var(--gris);">${fecha}${urgente}</span><span class="monto">S/ ${(p.total||0).toFixed(2)}</span><span class="badge ${bc}">${bl}</span><a class="ver-link" href="pedido-detalle.html?id=${d.id}">Ver →</a></div>`;
+      return `<div class="tabla-row"><span class="pedido-num">#${d.id.slice(-5).toUpperCase()}</span><div><div class="cliente-nombre">${p.cliente_nombre||'--'}${adicBadge}</div><div class="cliente-sub">${[p.distrito,p.provincia,p.cliente_dni].filter(Boolean).join(' · ')}</div></div><span class="badge ${cc}">${cl}</span><span style="font-size:12px;color:var(--gris);">${fecha}${urgente}</span><span class="monto">S/ ${(p.total||0).toFixed(2)}</span><span class="badge ${bc}">${bl}</span><a class="ver-link" href="pedido-detalle.html?id=${d.id}">Ver →</a>
+          <button onclick="eliminarPedido('${d.id}','${(p.cliente_nombre||'').replace(/'/g,\"\\'\")}',event)" title="Eliminar pedido" style="background:none;border:none;cursor:pointer;color:var(--borde);font-size:16px;padding:2px 4px;line-height:1;flex-shrink:0;" onmouseover="this.style.color='var(--rojo)'" onmouseout="this.style.color='var(--borde)'">🗑</button></div>`;
     }).join('');
   });
 }
@@ -462,6 +463,58 @@ document.getElementById('btnRegistrar').onclick=async()=>{
   finally{btn.disabled=false;btn.textContent='Registrar y enviar a validación →';}
 };
 document.getElementById('btnBorrador').onclick=()=>alert('Función de borrador disponible próximamente.');
+
+// ── ELIMINAR PEDIDO ──────────────────────────────────────────
+window.eliminarPedido = (pid, nombre, e) => {
+  e.preventDefault(); e.stopPropagation();
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;';
+  div.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px;max-width:400px;width:90%;font-family:'Poppins',sans-serif;text-align:center;">
+    <div style="font-size:28px;margin-bottom:10px;">🗑</div>
+    <div style="font-size:15px;font-weight:700;margin-bottom:8px;color:#000;">¿Eliminar este pedido?</div>
+    <div style="font-size:13px;color:#50504f;margin-bottom:20px;">Pedido de <strong>${nombre}</strong><br>Se eliminará permanentemente junto con todos sus ítems. Esta acción no se puede deshacer.</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button id="bNo" style="background:#fff;border:1.5px solid #cca99d;color:#50504f;padding:9px 20px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
+      <button id="bSi" style="background:#A32D2D;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Sí, eliminar</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+  div.querySelector('#bNo').onclick = () => div.remove();
+  div.querySelector('#bSi').onclick = async () => {
+    div.querySelector('#bSi').textContent = 'Eliminando...';
+    div.querySelector('#bSi').disabled = true;
+    try {
+      // 1. Liberar inventario reservado
+      const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+      for (const iDoc of itemsSnap.docs) {
+        const item = iDoc.data();
+        if (item.productoId && ['pendiente','pendiente_validacion_adicional'].includes(item.estado)) {
+          const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
+          const invSnap = await getDoc(invRef);
+          if (invSnap.exists()) {
+            const inv = invSnap.data();
+            await updateDoc(invRef,{
+              reservado: Math.max(0,(inv.reservado||0)-1),
+              disponible: (inv.disponible||0)+1
+            });
+          }
+        }
+        // 2. Eliminar ítem
+        await deleteDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id));
+      }
+      // 3. Eliminar pedido
+      await deleteDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid));
+      div.remove();
+      if (typeof toast !== 'undefined') {
+        toast.success('Pedido eliminado',`El pedido de ${nombre} fue eliminado correctamente.`);
+      }
+    } catch(e) {
+      console.error(e);
+      alert('Error al eliminar. Intenta nuevamente.');
+      div.remove();
+    }
+  };
+};
 </script>
 </body>
 </html>
