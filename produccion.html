@@ -143,7 +143,10 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 </nav>
 
 <div class="page">
-  <div class="page-title">Producción</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+    <div class="page-title">Producción</div>
+    <button onclick="cargar()" id="btnRecargar" style="background:#fff;border:1.5px solid var(--borde);color:var(--gris);padding:6px 14px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;cursor:pointer;">↺ Actualizar</button>
+  </div>
   <div class="page-sub" id="pageSub"></div>
 
   <div class="metricas">
@@ -209,8 +212,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 import { initPage, db } from './nav.js';
 import { toast } from './toast.js';
 import {
-  collection, onSnapshot,
-  doc, getDoc, getDocs, updateDoc, addDoc, serverTimestamp
+  collection, getDocs, doc, getDoc, updateDoc, addDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const EMPRESA = 'sarcastica';
@@ -219,49 +221,106 @@ const user = await initPage(['directora','operaciones','produccion']);
 document.getElementById('pageSub').textContent =
   new Date().toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'});
 
-// Merma state
+const ESTADO_TEXTO = {
+  empaquetado:'Empaquetado 📦', en_ruta:'En ruta 🚚', entregado:'Entregado ✓',
+  pendiente_validacion_adicional:'⏳ Pendiente validación', dañado:'⚠ Dañado',
+};
+
+let catActual = 'Todos';
+let todosLosPedidos = []; // cache local
 let mermaActual = {};
 let causaSeleccionada = '';
 
-// ---- RENDER ----
+// ── FILTROS ──────────────────────────────────────────────────
+window.setCat = (cat, btn) => {
+  catActual = cat;
+  document.querySelectorAll('.fcat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLista(todosLosPedidos);
+};
+
+// ── CARGA ────────────────────────────────────────────────────
+async function cargar() {
+  const lista = document.getElementById('listaPedidos');
+  lista.innerHTML = '<div class="empty">Cargando...</div>';
+  try {
+    const pedSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos`));
+    const activos = pedSnap.docs
+      .map(d => ({id:d.id,...d.data()}))
+      .filter(p => !['en_empaque','empaquetado','en_ruta','entregado','cancelado','observado'].includes(p.estado));
+
+    const conItems = await Promise.all(activos.map(async p => {
+      const s = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${p.id}/items`));
+      return {...p, items: s.docs.map(i => ({id:i.id,...i.data()}))};
+    }));
+
+    todosLosPedidos = conItems.filter(p =>
+      p.items.some(i => ['pendiente','produccion','listo_empaque'].includes(i.estado))
+    );
+    renderLista(todosLosPedidos);
+  } catch(e) {
+    console.error(e);
+    lista.innerHTML = '<div class="empty" style="color:var(--rojo)">Error al cargar. <button onclick="cargar()" style="text-decoration:underline;background:none;border:none;cursor:pointer;color:var(--rojo)">Reintentar</button></div>';
+  }
+}
+
+// ── RENDER ───────────────────────────────────────────────────
+function renderLista(pedidos) {
+  const lista = document.getElementById('listaPedidos');
+
+  // Filtrar por categoría si no es Todos
+  const filtrados = catActual === 'Todos'
+    ? pedidos
+    : pedidos.filter(p => p.items.some(i =>
+        ['pendiente','produccion','listo_empaque'].includes(i.estado) &&
+        (i.categoria||'') === catActual
+      ));
+
+  // Métricas
+  let totalPend=0,totalProd=0,totalListo=0;
+  filtrados.forEach(p => p.items.forEach(i => {
+    const ok = catActual==='Todos' || (i.categoria||'')===catActual;
+    if (!ok) return;
+    if (i.estado==='pendiente') totalPend++;
+    else if (i.estado==='produccion') totalProd++;
+    else if (i.estado==='listo_empaque') totalListo++;
+  }));
+  document.getElementById('m-total').textContent = filtrados.length;
+  document.getElementById('m-pend').textContent = totalPend;
+  document.getElementById('m-prod').textContent = totalProd;
+  document.getElementById('m-listo').textContent = totalListo;
+
+  if (!filtrados.length) {
+    lista.innerHTML = '<div class="empty">No hay pedidos en producción</div>';
+    return;
+  }
+  lista.innerHTML = filtrados.map(p => renderCard(p)).join('');
+}
+
 function renderCard(p) {
   const pid = p.id;
   const items = p.items || [];
 
-  const activos = items.filter(i => ['pendiente','produccion','listo_empaque'].includes(i.estado));
-  const listos  = items.filter(i => i.estado === 'listo_empaque').length;
-  // Progress bar counts only items matching current category filter
-  const activosCat = catActual === 'Todos'
-    ? activos
-    : activos.filter(i => (i.categoria||'') === catActual);
-  const listosCat = catActual === 'Todos'
-    ? listos
-    : items.filter(i => i.estado === 'listo_empaque' && (i.categoria||'') === catActual).length;
+  const activosTodos = items.filter(i => ['pendiente','produccion','listo_empaque'].includes(i.estado));
+  const listosTodos  = items.filter(i => i.estado==='listo_empaque').length;
+
+  const activosCat = catActual==='Todos' ? activosTodos : activosTodos.filter(i=>(i.categoria||'')===catActual);
+  const listosCat  = catActual==='Todos' ? listosTodos  : items.filter(i=>i.estado==='listo_empaque'&&(i.categoria||'')===catActual).length;
+
   const pct = activosCat.length > 0 ? Math.round((listosCat/activosCat.length)*100) : 0;
-  // todosListos = ALL items of ALL categories done (for empaque button)
-  const todosListos = items.every(i =>
-    ['listo_empaque','empaquetado','en_ruta','entregado'].includes(i.estado)
-  );
-  const barColor = todosListos ? 'var(--verde)' : pct > 0 ? 'var(--azul)' : 'var(--borde)';
+  const todosListos = items.every(i => ['listo_empaque','empaquetado','en_ruta','entregado'].includes(i.estado));
+  const barColor = pct===100 ? 'var(--verde)' : pct>0 ? 'var(--azul)' : 'var(--borde)';
 
   const itemsHtml = items.map(item => {
     const esActivo = ['pendiente','produccion','listo_empaque'].includes(item.estado);
-    const esPend   = item.estado === 'pendiente';
-    const esProd   = item.estado === 'produccion';
-    const esListo  = item.estado === 'listo_empaque';
-    const catMatch = catActual === 'Todos' || (item.categoria||'') === catActual;
+    const catMatch = catActual==='Todos' || (item.categoria||'')===catActual;
 
-    const ESTADO_TEXTO = {
-      empaquetado:'Empaquetado 📦', en_ruta:'En ruta 🚚', entregado:'Entregado ✓',
-      pendiente_validacion_adicional:'⏳ Pendiente validación', dañado:'⚠ Dañado',
-    };
-
-    // Si no coincide con el filtro de categoría — ocultar completamente
+    // Ocultar si no coincide con categoría
     if (!catMatch) return '';
 
-    // Ítem ya terminado (bloqueado) — mostrar solo en vista Todos
+    // Bloqueado (ya pasó de producción)
     if (!esActivo) {
-      if (catActual !== 'Todos') return ''; // en filtro de categoría, no mostrar bloqueados
+      if (catActual !== 'Todos') return '';
       return `<div class="item-row bloqueado">
         <div class="item-info">
           <div class="item-nombre">${item.productoNombre||'—'}</div>
@@ -271,17 +330,19 @@ function renderCard(p) {
       </div>`;
     }
 
-    const selClass = esPend ? 'pendiente' : esProd ? 'produccion' : 'listo';
+    const esPend  = item.estado==='pendiente';
+    const esProd  = item.estado==='produccion';
+    const esListo = item.estado==='listo_empaque';
+    const selClass = esPend?'pendiente':esProd?'produccion':'listo';
     const adicBadge = item.esAdicional
-      ? `<div class="item-adicional-badge"><span>⚡ Ítem adicional — ${item.agregadoPor||'ventas'}</span></div>`
-      : '';
+      ? `<div class="item-adicional-badge"><span>⚡ Ítem adicional — ${item.agregadoPor||'ventas'}</span></div>`:'';
 
     return `<div class="item-row" id="itemrow-${pid}-${item.id}">
       <div class="item-info">
         ${adicBadge}
         <div class="item-nombre">${item.productoNombre||'—'}</div>
         <div class="item-diseno">${item.diseno||''}</div>
-        <button class="btn-merma" onclick="abrirMerma('${pid}','${item.id}','${item.productoId||''}','${(item.productoNombre||'').replace(/'/g,"\\'")}','${(item.diseno||'').replace(/'/g,"\\'")}')">⚠ Registrar merma</button>
+        <button class="btn-merma" onclick="abrirMerma('${pid}','${item.id}','${item.productoId||''}','${(item.productoNombre||'').replace(/'/g,"\'")}','${(item.diseno||'').replace(/'/g,"\'")}')">⚠ Registrar merma</button>
       </div>
       <select class="estado-select ${selClass}" onchange="cambiarEstado('${pid}','${item.id}',this)">
         <option value="pendiente"     ${esPend ?'selected':''}>Pendiente</option>
@@ -292,23 +353,20 @@ function renderCard(p) {
   }).join('');
 
   let btnEmpaque = '';
-  if (todosListos) {
-    if (catActual === 'Todos') {
-      const safeName = (p.cliente_nombre||'').replace(/"/g,'&quot;');
-      btnEmpaque = `<button class="btn-empaque" data-pid="${pid}" data-nombre="${safeName}" onclick="confirmarEmpaqueBtn(this)">📦 Pasar a empaque →</button>`;
-    } else {
-      btnEmpaque = `<div style="font-size:11px;color:var(--verde);text-align:right;padding:6px 0;font-weight:600;">✓ Todos los ítems de ${catActual} listos — ve a "Todos" para confirmar empaque</div>`;
-    }
+  if (todosListos && catActual==='Todos') {
+    const safeName = (p.cliente_nombre||'').replace(/"/g,'&quot;');
+    btnEmpaque = `<button class="btn-empaque" data-pid="${pid}" data-nombre="${safeName}" onclick="confirmarEmpaqueBtn(this)">📦 Pasar a empaque →</button>`;
+  } else if (todosListos) {
+    btnEmpaque = `<div style="font-size:11px;color:var(--verde);text-align:right;padding:6px 0;font-weight:600;">✓ Listos — ve a "Todos" para pasar a empaque</div>`;
   }
 
-  
   return `<div class="card${todosListos?' listo':''}" id="card-${pid}">
     <div class="card-header">
       <div>
         <div class="card-nombre">${p.cliente_nombre||'—'}</div>
         <div class="card-meta">${[p.distrito,p.provincia].filter(Boolean).join(' · ')} · Entrega: ${p.fechaEntrega||'—'}</div>
       </div>
-      <span style="font-size:12px;color:var(--gris);">${catActual==='Todos'?listos+'/'+activos.length+' listos':listosCat+'/'+activosCat.length+' '+catActual+' listos'}</span>
+      <span style="font-size:12px;color:var(--gris);">${listosCat}/${activosCat.length} ${catActual==='Todos'?'listos':catActual+' listos'}</span>
     </div>
     <div class="progress-wrap"><div class="progress-bar" style="background:${barColor};width:${pct}%"></div></div>
     ${itemsHtml}
@@ -316,183 +374,36 @@ function renderCard(p) {
   </div>`;
 }
 
-// ---- FIRESTORE ----
-// Carga optimizada: escuchar pedidos, cargar items solo una vez al inicio
-// luego re-cargar solo cuando el pedido cambia
-const pedidosMap = {};
-let renderTimeout = null;
-
-function scheduleRender() {
-  clearTimeout(renderTimeout);
-  renderTimeout = setTimeout(cargarProduccion, 400);
-}
-
-let catActual = 'Todos';
-window.setCat = (cat, btn) => {
-  catActual = cat;
-  document.querySelectorAll('.fcat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderAll();
-};
-
-function renderAll() {
-  const lista = document.getElementById('listaPedidos');
-  // Mostrar pedido si tiene ítems activos
-  let activos = Object.values(pedidosMap).filter(p => {
-    // Excluir pedidos que ya pasaron a empaque o más allá
-    if (['en_empaque','empaquetado','en_ruta','entregado','cancelado','observado'].includes(p.estado)) return false;
-    // Incluir si tiene ítems activos O si todos están listos pero aún no se confirmó empaque
-    const itemsActivos = (p.items||[]).filter(i =>
-      ['pendiente','produccion','listo_empaque'].includes(i.estado)
-    );
-    return itemsActivos.length > 0;
-  });
-
-  // Filtro de categoría
-  if (catActual !== 'Todos') {
-    activos = activos.filter(p =>
-      (p.items||[]).some(i =>
-        ['pendiente','produccion','listo_empaque'].includes(i.estado) &&
-        (i.categoria||'') === catActual
-      )
-    );
-  }
-
-  if (activos.length === 0) {
-    lista.innerHTML = '<div class="empty">No hay pedidos en producción</div>';
-    document.getElementById('m-total').textContent = 0;
-    document.getElementById('m-pend').textContent = 0;
-    document.getElementById('m-prod').textContent = 0;
-    document.getElementById('m-listo').textContent = 0;
-    return;
-  }
-
-  let totalPend=0, totalProd=0, totalListo=0;
-  activos.forEach(p => (p.items||[]).forEach(i => {
-    const catOk = catActual==='Todos' || (i.categoria||'')=== catActual;
-    if (!catOk) return;
-    if (i.estado==='pendiente') totalPend++;
-    else if (i.estado==='produccion') totalProd++;
-    else if (i.estado==='listo_empaque') totalListo++;
-  }));
-
-  document.getElementById('m-total').textContent = activos.length;
-  document.getElementById('m-pend').textContent = totalPend;
-  document.getElementById('m-prod').textContent = totalProd;
-  document.getElementById('m-listo').textContent = totalListo;
-  lista.innerHTML = activos.map(p => renderCard(p)).join('');
-}
-
-// Escuchar pedidos
-// Carga simple y robusta — sin docChanges, sin cascada
-async function cargarProduccion() {
-  const lista = document.getElementById('listaPedidos');
-  lista.innerHTML = '<div class="empty">Cargando pedidos...</div>';
-
-  try {
-    // 1. Cargar todos los pedidos
-    const pedSnap = await getDocs(collection(db, `empresas/${EMPRESA}/pedidos`));
-    const pedidosActivos = pedSnap.docs
-      .map(d => ({id:d.id,...d.data()}))
-      .filter(p => !['en_empaque','empaquetado','en_ruta','entregado','cancelado','observado'].includes(p.estado));
-
-    if (!pedidosActivos.length) {
-      lista.innerHTML = '<div class="empty">No hay pedidos en producción</div>';
-      actualizarMetricas([]);
-      return;
-    }
-
-    // 2. Cargar items de pedidos activos en paralelo
-    const pedidosConItems = await Promise.all(
-      pedidosActivos.map(async p => {
-        const itemsSnap = await getDocs(
-          collection(db, `empresas/${EMPRESA}/pedidos/${p.id}/items`)
-        );
-        const items = itemsSnap.docs.map(i => ({id:i.id,...i.data()}));
-        return {...p, items};
-      })
-    );
-
-    // 3. Filtrar los que tienen ítems activos
-    const pedidos = pedidosConItems.filter(p =>
-      p.items.some(i => ['pendiente','produccion','listo_empaque'].includes(i.estado))
-    );
-
-    actualizarMetricas(pedidos);
-    lista.innerHTML = pedidos.length
-      ? pedidos.map(p => renderCard(p)).join('')
-      : '<div class="empty">No hay pedidos en producción</div>';
-
-  } catch(e) {
-    console.error('Error cargando producción:', e);
-    lista.innerHTML = '<div class="empty" style="color:var(--rojo);">Error al cargar. Recarga la página.</div>';
-  }
-}
-
-function actualizarMetricas(pedidos) {
-  let totalPend=0, totalProd=0, totalListo=0;
-  pedidos.forEach(p => (p.items||[]).forEach(i => {
-    const catOk = catActual==='Todos' || (i.categoria||'')=== catActual;
-    if (!catOk) return;
-    if (i.estado==='pendiente') totalPend++;
-    else if (i.estado==='produccion') totalProd++;
-    else if (i.estado==='listo_empaque') totalListo++;
-  }));
-  document.getElementById('m-total').textContent = pedidos.length;
-  document.getElementById('m-pend').textContent = totalPend;
-  document.getElementById('m-prod').textContent = totalProd;
-  document.getElementById('m-listo').textContent = totalListo;
-}
-
-// Escuchar cambios en tiempo real — recarga al detectar cambio
-let unsubProd = null;
-function iniciarEscucha() {
-  if (unsubProd) unsubProd();
-  unsubProd = onSnapshot(
-    collection(db, `empresas/${EMPRESA}/pedidos`),
-    () => cargarProduccion()
-  );
-}
-iniciarEscucha();
-
-
-// ---- ACCIONES ----
+// ── CAMBIAR ESTADO ÍTEM ───────────────────────────────────────
 window.cambiarEstado = async (pedidoId, itemId, sel) => {
   const nuevoEstado = sel.value;
-  const claseAnterior = sel.className;
   sel.disabled = true;
-  // Actualizar clase visual inmediatamente
-  sel.className = `estado-select ${nuevoEstado === 'pendiente' ? 'pendiente' : nuevoEstado === 'produccion' ? 'produccion' : 'listo'}`;
+  sel.className = `estado-select ${nuevoEstado==='pendiente'?'pendiente':nuevoEstado==='produccion'?'produccion':'listo'}`;
   try {
     await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pedidoId}/items`,itemId), {estado:nuevoEstado});
     // Actualizar cache local
-    if (pedidosMap[pedidoId]) {
-      const item = (pedidosMap[pedidoId].items||[]).find(i => i.id === itemId);
-      if (item) { item.estado = nuevoEstado; scheduleRender(); }
+    const ped = todosLosPedidos.find(p=>p.id===pedidoId);
+    if (ped) {
+      const item = ped.items.find(i=>i.id===itemId);
+      if (item) { item.estado = nuevoEstado; renderLista(todosLosPedidos); }
     }
   } catch(e) {
-    console.error(e);
-    sel.className = claseAnterior;
-    alert('Error al actualizar estado.');
-  } finally {
+    console.error(e); toast.error('Error','No se pudo actualizar el estado.');
     sel.disabled = false;
-  }
+  } finally { sel.disabled = false; }
 };
 
-window.confirmarEmpaqueBtn = (btn) => {
-  const pid = btn.dataset.pid;
-  const nombre = btn.dataset.nombre || '—';
-  confirmarEmpaque(pid, nombre);
-};
+// ── PASAR A EMPAQUE ───────────────────────────────────────────
+window.confirmarEmpaqueBtn = (btn) => confirmarEmpaque(btn.dataset.pid, btn.dataset.nombre);
 
 window.confirmarEmpaque = (pedidoId, clienteNombre) => {
   const div = document.createElement('div');
   div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:600;display:flex;align-items:center;justify-content:center;';
-  div.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px;max-width:380px;width:90%;text-align:center;">
+  div.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px;max-width:380px;width:90%;text-align:center;font-family:'Poppins',sans-serif;">
     <div style="font-size:32px;margin-bottom:10px;">📦</div>
     <div style="font-size:15px;font-weight:700;margin-bottom:8px;">¿Pasar a empaque?</div>
-    <div style="font-size:13px;color:var(--gris);margin-bottom:20px;">Pedido de <strong>${clienteNombre}</strong><br>¿Confirmas que <strong>todos los ítems están listos</strong>?</div>
-    <div style="display:flex;gap:8px;justify-content:center;">
+    <div style="font-size:13px;color:var(--gris);margin-bottom:20px;">Pedido de <strong>${clienteNombre}</strong><br>¿Confirmas que todos los ítems están listos?</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
       <button id="bNo" style="background:#fff;border:1.5px solid var(--borde);color:var(--gris);padding:9px 18px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
       <button id="bSi" style="background:var(--black);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Sí, pasar a empaque →</button>
     </div>
@@ -502,88 +413,81 @@ window.confirmarEmpaque = (pedidoId, clienteNombre) => {
   div.querySelector('#bSi').onclick = async () => {
     div.remove();
     try {
-      // Siempre actualizar a en_empaque independientemente del estado actual
       await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pedidoId), {
         estado:'en_empaque', pasadoEmpaqueEn:serverTimestamp()
       });
-      // Marcar ítems listo_empaque → mantenemos como listo_empaque para que empaque los procese
-    } catch(e) {
-      console.error(e); toast.error('Error','No se pudo pasar a empaque. Intenta nuevamente.');
-    }
+      toast.success('📦 Pasado a empaque', `El pedido de ${clienteNombre} ya está en Empaque.`);
+      // Remover del cache y re-render
+      todosLosPedidos = todosLosPedidos.filter(p=>p.id!==pedidoId);
+      renderLista(todosLosPedidos);
+    } catch(e) { toast.error('Error','No se pudo pasar a empaque.'); }
   };
 };
 
-// ---- MERMA ----
-window.abrirMerma = async (pedidoId, itemId, productoId, nombre, diseno) => {
-  mermaActual = {pedidoId, itemId, productoId, nombre, diseno, disponible:0};
-  causaSeleccionada = '';
-  document.querySelectorAll('.causa-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('mermaDetalle').value = '';
-  document.getElementById('mermaReasignar').checked = false;
-  document.getElementById('mermaItemNombre').textContent = nombre;
-  document.getElementById('mermaItemDiseno').textContent = diseno || 'Sin diseño';
-  if (productoId) {
-    const snap = await getDoc(doc(db,`empresas/${EMPRESA}/inventario_crudos`,productoId));
-    if (snap.exists()) {
-      mermaActual.disponible = snap.data().disponible || 0;
-      document.getElementById('mermaStockInfo').textContent =
-        `${mermaActual.disponible} unidades disponibles`;
-    }
+// ── MERMA ─────────────────────────────────────────────────────
+window.abrirMerma = async (pedidoId,itemId,productoId,nombre,diseno) => {
+  mermaActual={pedidoId,itemId,productoId,nombre,diseno,disponible:0};
+  causaSeleccionada='';
+  document.querySelectorAll('.causa-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mermaDetalle').value='';
+  document.getElementById('mermaReasignar').checked=false;
+  document.getElementById('mermaItemNombre').textContent=nombre;
+  document.getElementById('mermaItemDiseno').textContent=diseno||'Sin diseño';
+  if(productoId){
+    const s=await getDoc(doc(db,`empresas/${EMPRESA}/inventario_crudos`,productoId));
+    if(s.exists()){mermaActual.disponible=s.data().disponible||0;document.getElementById('mermaStockInfo').textContent=`${mermaActual.disponible} unidades disponibles`;}
   }
   document.getElementById('modalMerma').classList.add('open');
 };
 
-['btnCerrarMerma','btnCancelarMerma'].forEach(id => {
-  document.getElementById(id).onclick = () =>
-    document.getElementById('modalMerma').classList.remove('open');
+['btnCerrarMerma','btnCancelarMerma'].forEach(id=>{
+  document.getElementById(id).onclick=()=>document.getElementById('modalMerma').classList.remove('open');
 });
 
-document.querySelectorAll('.causa-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.causa-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    causaSeleccionada = btn.dataset.causa;
+document.querySelectorAll('.causa-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.causa-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); causaSeleccionada=btn.dataset.causa;
   });
 });
 
 document.getElementById('btnConfirmarMerma').onclick = async () => {
-  if (!causaSeleccionada) { toast.warn('Causa requerida','Por favor selecciona la causa de la merma.'); return; }
-  const btn = document.getElementById('btnConfirmarMerma');
-  btn.disabled = true; btn.textContent = 'Procesando...';
-  const reasignar = document.getElementById('mermaReasignar').checked;
-  try {
-    if (mermaActual.productoId) {
-      const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,mermaActual.productoId);
-      const invSnap = await getDoc(invRef);
-      if (invSnap.exists()) {
-        const inv = invSnap.data();
-        const upd = {total:Math.max(0,(inv.total||0)-1), consumido:(inv.consumido||0)+1};
-        if (reasignar) {
-          upd.disponible = Math.max(0,(inv.disponible||0)-1);
-          upd.reservado  = (inv.reservado||0)+1;
-        }
-        await updateDoc(invRef, upd);
+  if(!causaSeleccionada){toast.warn('Causa requerida','Selecciona la causa de la merma.');return;}
+  const btn=document.getElementById('btnConfirmarMerma');
+  btn.disabled=true;btn.textContent='Procesando...';
+  const reasignar=document.getElementById('mermaReasignar').checked;
+  try{
+    if(mermaActual.productoId){
+      const invRef=doc(db,`empresas/${EMPRESA}/inventario_crudos`,mermaActual.productoId);
+      const s=await getDoc(invRef);
+      if(s.exists()){
+        const inv=s.data();
+        const upd={total:Math.max(0,(inv.total||0)-1),consumido:(inv.consumido||0)+1};
+        if(reasignar){upd.disponible=Math.max(0,(inv.disponible||0)-1);upd.reservado=(inv.reservado||0)+1;}
+        await updateDoc(invRef,upd);
       }
     }
     await addDoc(collection(db,`empresas/${EMPRESA}/movimientos`),{
-      tipo:'merma', productoId:mermaActual.productoId, productoNombre:mermaActual.nombre,
-      pedidoId:mermaActual.pedidoId, itemId:mermaActual.itemId, diseno:mermaActual.diseno,
-      causa:causaSeleccionada, detalle:document.getElementById('mermaDetalle').value.trim(),
-      reasignado:reasignar, registradoPor:user.nombre||user.email,
-      fecha:new Date().toISOString().split('T')[0], creadoEn:serverTimestamp()
+      tipo:'merma',productoId:mermaActual.productoId,productoNombre:mermaActual.nombre,
+      pedidoId:mermaActual.pedidoId,itemId:mermaActual.itemId,diseno:mermaActual.diseno,
+      causa:causaSeleccionada,detalle:document.getElementById('mermaDetalle').value.trim(),
+      reasignado:reasignar,registradoPor:user.nombre||user.email,
+      fecha:new Date().toISOString().split('T')[0],creadoEn:serverTimestamp()
     });
-    await updateDoc(
-      doc(db,`empresas/${EMPRESA}/pedidos/${mermaActual.pedidoId}/items`,mermaActual.itemId),
-      {estado: reasignar ? 'produccion' : 'dañado', merma:true, causaMerma:causaSeleccionada}
-    );
+    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${mermaActual.pedidoId}/items`,mermaActual.itemId),
+      {estado:reasignar?'produccion':'dañado',merma:true,causaMerma:causaSeleccionada});
     document.getElementById('modalMerma').classList.remove('open');
-    toast.success('Merma registrada', reasignar ? 'Nuevo insumo reservado. El ítem continúa en producción.' : 'Ítem marcado como dañado.');
-  } catch(e) {
-    console.error(e); toast.error('Error','No se pudo registrar la merma.');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Confirmar merma';
-  }
+    toast.success('Merma registrada',reasignar?'Nuevo insumo reservado.':'Ítem marcado como dañado.');
+    cargar(); // Recargar
+  }catch(e){toast.error('Error','No se pudo registrar la merma.');}
+  finally{btn.disabled=false;btn.textContent='Confirmar merma';}
 };
+
+// Botón recarga manual
+document.getElementById('btnRecargar')?.addEventListener('click', cargar);
+
+// Carga inicial
+cargar();
 </script>
 </body>
 </html>
