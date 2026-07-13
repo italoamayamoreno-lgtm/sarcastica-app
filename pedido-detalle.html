@@ -48,6 +48,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 .badge-ruta{background:#e8f5e0;color:var(--verde);}
 .badge-ok{background:#e8f5e0;color:var(--verde);}
 .badge-cancel{background:#fcebeb;color:var(--rojo);}
+.badge-obs{background:#faeeda;color:var(--naranja);border:1.5px solid #e8c99a;}
 
 /* BLOQUES */
 .block{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:20px;margin-bottom:16px;}
@@ -176,6 +177,7 @@ const ESTADO_LABEL = {
   en_ruta:              ['badge-ruta','En ruta'],
   entregado:            ['badge-ok','Entregado'],
   cancelado:            ['badge-cancel','Cancelado'],
+  observado:            ['badge-obs','Observado'],
 };
 const ITEM_ESTADO = {
   pendiente:                      ['estado-pendiente','Pendiente'],
@@ -206,8 +208,34 @@ async function cargar() {
 }
 
 function render() {
+  const esObservado = pedido.estado === 'observado';
   const [badgeClass, badgeLabel] = ESTADO_LABEL[pedido.estado] || ['','—'];
   const total = items.reduce((s,i) => s+(i.precio||0), 0);
+
+  // Banner de subsanación para pedidos observados
+  const bannerObservado = esObservado ? `
+    <div style="background:#faeeda;border:1.5px solid #e8c99a;border-radius:10px;padding:16px 18px;margin-bottom:16px;">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <span style="font-size:20px;">⚠</span>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:var(--naranja);margin-bottom:4px;">Pago observado — requiere subsanación</div>
+          <div style="font-size:12px;color:var(--naranja);margin-bottom:10px;"><b>Motivo:</b> ${pedido.motivoRechazo||'Sin motivo especificado'}</div>
+          <div style="font-size:11px;color:var(--gris);">Rechazado por ${pedido.rechazadoPor||'—'} · Corrige los datos o sube un nuevo voucher y re-envía a validación.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;border-top:1px solid #e8c99a;padding-top:14px;">
+        <div style="font-size:11px;font-weight:600;color:var(--naranja);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">Nuevo voucher de pago *</div>
+        <div id="nuevoVoucherBox" onclick="document.getElementById('nuevoVoucherInput').click()"
+          style="background:#fff;border:1.5px dashed #e8c99a;border-radius:8px;padding:10px 14px;font-size:12px;color:var(--borde);cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          📎 <span id="nuevoVoucherLabel">Adjuntar comprobante de pago</span>
+        </div>
+        <input type="file" id="nuevoVoucherInput" accept="image/*,application/pdf" style="display:none" onchange="onNuevoVoucher(this)"/>
+        <button onclick="reenviarValidacion()" style="background:var(--black);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;width:100%;margin-top:4px;">
+          ↑ Re-enviar a validación
+        </button>
+      </div>
+    </div>` : '';
 
   // Items html
   const itemsHtml = items.map(item => {
@@ -305,6 +333,7 @@ const addFormHtml = canAddItems(pedido.estado) ? `
     ? `<div class="obs-box">📝 Observación: <strong>${pedido.observacion}</strong></div>` : '';
 
   document.getElementById('contenido').innerHTML = `
+    ${bannerObservado}
     <div class="page-header">
       <div>
         <div class="pedido-id">#${pedidoId.slice(-5).toUpperCase()}</div>
@@ -581,6 +610,77 @@ window.verVoucherItem = async function(pedidoId, itemId) {
     w.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;"><img src="${src}" style="max-width:100%;max-height:100vh;object-fit:contain;"/></body></html>`);
     w.document.close();
   } catch(e) { toast.error('Error','No se pudo cargar el voucher.'); }
+};
+
+// Nuevo voucher para subsanación
+let nuevoVoucherData = '';
+window.onNuevoVoucher = function(input) {
+  const f = input.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX = 1200; let w = img.width, h = img.height;
+      if (w > MAX) { h = Math.round(h*MAX/w); w = MAX; }
+      if (h > MAX) { w = Math.round(w*MAX/h); h = MAX; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      nuevoVoucherData = canvas.toDataURL('image/jpeg', 0.8);
+      document.getElementById('nuevoVoucherLabel').textContent = '✓ ' + f.name;
+      document.getElementById('nuevoVoucherBox').style.borderColor = 'var(--verde)';
+      document.getElementById('nuevoVoucherBox').style.color = 'var(--verde)';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(f);
+};
+
+window.reenviarValidacion = async () => {
+  const pid = new URLSearchParams(location.search).get('id');
+  if (!pid) return;
+  if (!nuevoVoucherData) {
+    toast.warn('Voucher requerido','Adjunta el nuevo comprobante de pago antes de re-enviar.');
+    return;
+  }
+  try {
+    // Restaurar ítems a pendiente_validacion (reservar inventario nuevamente)
+    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+    for (const iDoc of itemsSnap.docs) {
+      const item = iDoc.data();
+      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {
+        estado: 'pendiente'
+      });
+      // Re-reservar inventario
+      if (item.productoId) {
+        const invRef = doc(db,`empresas/${EMPRESA}/inventario_crudos`,item.productoId);
+        const invSnap = await getDoc(invRef);
+        if (invSnap.exists()) {
+          const inv = invSnap.data();
+          await updateDoc(invRef, {
+            disponible: Math.max(0,(inv.disponible||0)-1),
+            reservado: (inv.reservado||0)+1
+          });
+        }
+      }
+    }
+    // Volver a pendiente_validacion con nuevo voucher y timestamp nuevo (al final de la cola)
+    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
+      estado: 'pendiente_validacion',
+      voucher: nuevoVoucherData,
+      voucherNombre: 'Voucher re-enviado',
+      requiereAtencion: false,
+      motivoRechazo: '',
+      reenviado: true,
+      reenviado_en: serverTimestamp(),
+      creadoEn: serverTimestamp(), // al final de la cola
+    });
+    toast.success('Re-enviado a validación','El pedido vuelve a la cola de validación de pagos.',5000);
+    setTimeout(() => window.location.reload(), 2000);
+  } catch(e) {
+    console.error(e);
+    toast.error('Error','No se pudo re-enviar. Intenta nuevamente.');
+  }
 };
 </script>
 </body>
