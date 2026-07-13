@@ -230,7 +230,15 @@ function renderCard(p) {
 
   const activos = items.filter(i => ['pendiente','produccion','listo_empaque'].includes(i.estado));
   const listos  = items.filter(i => i.estado === 'listo_empaque').length;
-  const pct     = activos.length > 0 ? Math.round((listos/activos.length)*100) : 0;
+  // Progress bar counts only items matching current category filter
+  const activosCat = catActual === 'Todos'
+    ? activos
+    : activos.filter(i => (i.categoria||'') === catActual);
+  const listosCat = catActual === 'Todos'
+    ? listos
+    : items.filter(i => i.estado === 'listo_empaque' && (i.categoria||'') === catActual).length;
+  const pct = activosCat.length > 0 ? Math.round((listosCat/activosCat.length)*100) : 0;
+  // todosListos = ALL items of ALL categories done (for empaque button)
   const todosListos = items.every(i =>
     ['listo_empaque','empaquetado','en_ruta','entregado'].includes(i.estado)
   );
@@ -277,17 +285,24 @@ function renderCard(p) {
     </div>`;
   }).join('');
 
-  const btnEmpaque = todosListos
-    ? `<button class="btn-empaque" onclick="confirmarEmpaque('${pid}','${(p.cliente_nombre||'').replace(/'/g,"\\'")}')">Pasar a empaque →</button>`
-    : '';
+  const btnEmpaque = '';
+  if (todosListos) {
+    if (catActual === 'Todos') {
+      const safeName = (p.cliente_nombre||'').replace(/"/g,'&quot;');
+      btnEmpaque = `<button class="btn-empaque" data-pid="${pid}" data-nombre="${safeName}" onclick="confirmarEmpaqueBtn(this)">Pasar a empaque →</button>`;
+    } else {
+      btnEmpaque = '<div style="font-size:11px;color:var(--verde);text-align:right;padding:6px 0;font-weight:600;">✓ Listos — ve a "Todos" para pasar a empaque</div>';
+    }
+  }
 
+  
   return `<div class="card${todosListos?' listo':''}" id="card-${pid}">
     <div class="card-header">
       <div>
         <div class="card-nombre">${p.cliente_nombre||'—'}</div>
         <div class="card-meta">${[p.distrito,p.provincia].filter(Boolean).join(' · ')} · Entrega: ${p.fechaEntrega||'—'}</div>
       </div>
-      <span style="font-size:12px;color:var(--gris);">${listos}/${activos.length} listos</span>
+      <span style="font-size:12px;color:var(--gris);">${catActual==='Todos'?listos+'/'+activos.length+' listos':listosCat+'/'+activosCat.length+' '+catActual+' listos'}</span>
     </div>
     <div class="progress-wrap"><div class="progress-bar" style="background:${barColor};width:${pct}%"></div></div>
     ${itemsHtml}
@@ -374,15 +389,7 @@ onSnapshot(collection(db,`empresas/${EMPRESA}/pedidos`), snap => {
 
       // Activo pero de otra categoría — mostrar dimmed
       const catMatch = catActual === 'Todos' || (item.categoria||'') === catActual;
-      if (!catMatch) {
-        return `<div class="item-row" style="opacity:.3;pointer-events:none;">
-          <div class="item-info">
-            <div class="item-nombre">${item.productoNombre||'—'}</div>
-            <div class="item-diseno">${item.diseno||''}</div>
-            <div class="item-estado-label">Otra categoría</div>
-          </div>
-        </div>`;
-      };
+      if (!catMatch) return ''; // Ocultar completamente ítems de otra categoría;
       // Cargar items de este pedido
       getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`)).then(snap => {
         const items = [];
@@ -416,6 +423,12 @@ window.cambiarEstado = async (pedidoId, itemId, sel) => {
   } finally {
     sel.disabled = false;
   }
+};
+
+window.confirmarEmpaqueBtn = (btn) => {
+  const pid = btn.dataset.pid;
+  const nombre = btn.dataset.nombre || '—';
+  confirmarEmpaque(pid, nombre);
 };
 
 window.confirmarEmpaque = (pedidoId, clienteNombre) => {
