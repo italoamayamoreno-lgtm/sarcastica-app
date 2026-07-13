@@ -108,6 +108,9 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 
 .empty-wrap{background:#fff;border:1.5px solid var(--borde);border-radius:12px;padding:60px;text-align:center;color:var(--borde);}
 .empty-wrap p{font-size:13px;}
+
+.entregado-row{opacity:.7;background:#f8fff5 !important;}
+.entregado-num{background:var(--verde) !important;color:#fff !important;}
 </style>
 </head>
 <body>
@@ -211,6 +214,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
 import { initPage, db } from './nav.js';
+import { toast } from './toast.js';
 import {
   collection, query, where, onSnapshot,
   doc, getDocs, updateDoc, serverTimestamp
@@ -253,6 +257,19 @@ async function cargarRepartidores() {
 }
 
 // Cargar pedidos en_ruta en tiempo real — solo si TODOS los ítems están empaquetados
+// Entregados hoy
+onSnapshot(query(col, where('estado','==','entregado')), snap => {
+  const hoyStr = new Date().toISOString().split('T')[0];
+  const hoy = snap.docs.filter(d => {
+    const e = d.data().entregadoEn;
+    if (!e) return false;
+    const fecha = e.toDate ? e.toDate().toISOString().split('T')[0] : '';
+    return fecha === hoyStr;
+  }).length;
+  const el = document.getElementById('m-ent');
+  if (el) el.textContent = hoy;
+});
+
 onSnapshot(query(col, where('estado','==','en_ruta')), async snap => {
   pedidos = [];
   for (const d of snap.docs) {
@@ -318,18 +335,21 @@ function renderMain() {
         }).join('')}
       </div>` : '';
 
-    return `<div class="parada-row" id="parada-${p.id}" data-idx="${i}">
-      <div class="parada-num${esOlva?' olva':''}">${i+1}</div>
+    const yaEntregado = p.estado === 'entregado';
+    return `<div class="parada-row${yaEntregado?' entregado-row':''}" id="parada-${p.id}" data-idx="${i}">
+      <div class="parada-num${esOlva?' olva':''}${yaEntregado?' entregado-num':''}">${yaEntregado?'✓':i+1}</div>
       <div class="parada-info">
-        <div class="parada-nombre">${p.cliente_nombre||'—'} ${olvaBadge}</div>
+        <div class="parada-nombre">${p.cliente_nombre||'—'} ${olvaBadge}${yaEntregado?'<span style="background:#e8f5e0;color:var(--verde);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;margin-left:6px;">✓ Entregado</span>':''}</div>
         <div class="parada-dir">${p.direccion||[p.distrito,p.provincia].filter(Boolean).join(', ')||'Sin dirección'}</div>
         ${obsHtml}
         ${itemsHtml}
       </div>
       <div class="parada-actions">
-        <button class="btn-orden" onclick="moverParada('${p.id}','up')" title="Subir">↑</button>
-        <button class="btn-orden" onclick="moverParada('${p.id}','down')" title="Bajar">↓</button>
-        <button class="btn-orden" style="color:var(--verde);border-color:var(--verde);" onclick="confirmarEntrega('${p.id}')" title="Marcar entregado">✓</button>
+        ${yaEntregado ? '' : `
+          <button class="btn-orden" onclick="moverParada('${p.id}','up')" title="Subir">↑</button>
+          <button class="btn-orden" onclick="moverParada('${p.id}','down')" title="Bajar">↓</button>
+        `}
+        <button class="btn-orden" style="background:${yaEntregado?'var(--verde)':'#fff'};color:${yaEntregado?'#fff':'var(--verde)'};border-color:var(--verde);font-weight:700;" onclick="${yaEntregado?'':'confirmarEntrega(\''+p.id+'\')'}" ${yaEntregado?'disabled':''} title="${yaEntregado?'Ya entregado':'Marcar como entregado'}">${yaEntregado?'✓ Listo':'Entregado ✓'}</button>
       </div>
     </div>`;
   }).join('');
@@ -419,19 +439,49 @@ window.moverParada = (pid, dir) => {
 };
 
 window.confirmarEntrega = async (pid) => {
-  if (!confirm('¿Marcar este pedido como entregado?')) return;
-  try {
-    await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
-      estado: 'entregado',
-      entregadoEn: serverTimestamp(),
-      entregadoPor: user.nombre||user.email,
-    });
-    // Sincronizar ítems a entregado
-    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
-    for (const iDoc of itemsSnap.docs) {
-      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {estado:'entregado'});
+  // Buscar nombre del cliente en pedidos
+  const pedido = pedidos.find(p => p.id === pid);
+  const nombre = pedido?.cliente_nombre || '—';
+
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;display:flex;align-items:center;justify-content:center;';
+  div.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px;max-width:380px;width:90%;font-family:'Poppins',sans-serif;text-align:center;">
+    <div style="font-size:32px;margin-bottom:10px;">✓</div>
+    <div style="font-size:15px;font-weight:700;margin-bottom:8px;color:#000;">¿Confirmar entrega?</div>
+    <div style="font-size:13px;color:#50504f;margin-bottom:6px;">Pedido de <strong>${nombre}</strong></div>
+    <div style="font-size:11px;color:#50504f;margin-bottom:20px;">Esta acción registrará la entrega y contabilizará el ingreso en el dashboard.</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button id="bNo" style="background:#fff;border:1.5px solid #cca99d;color:#50504f;padding:9px 20px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
+      <button id="bSi" style="background:#3B6D11;color:#fff;border:none;padding:9px 20px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">✓ Sí, entregado</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+  div.querySelector('#bNo').onclick = () => div.remove();
+  div.querySelector('#bSi').onclick = async () => {
+    div.querySelector('#bSi').textContent = 'Registrando...';
+    div.querySelector('#bSi').disabled = true;
+    try {
+      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
+        estado: 'entregado',
+        entregadoEn: serverTimestamp(),
+        entregadoPor: user.nombre||user.email,
+      });
+      // Sincronizar ítems a entregado
+      const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+      for (const iDoc of itemsSnap.docs) {
+        await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {estado:'entregado'});
+      }
+      div.remove();
+      toast.success('✓ Entrega confirmada', `Pedido de ${nombre} registrado como entregado. Ya aparece en el dashboard.`, 5000);
+      // Update local pedidos array state
+      const idx = pedidos.findIndex(p => p.id === pid);
+      if (idx >= 0) { pedidos[idx].estado = 'entregado'; renderMain(); }
+    } catch(e) {
+      console.error(e);
+      toast.error('Error','No se pudo registrar la entrega. Intenta nuevamente.');
+      div.remove();
     }
-  } catch(e) { console.error(e); alert('Error al actualizar.'); }
+  };
 };
 
 window.confirmarSalida = async () => {
