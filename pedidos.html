@@ -273,7 +273,7 @@ function cargarPedidos(){
   const q=estadoActual==='todos'
     ? query(col,orderBy('creadoEn','desc'))
     : estadoActual==='rechazados'
-    ? query(col,where('estado','==','cancelado'),where('requiereAtencion','==',true),orderBy('creadoEn','desc'))
+    ? query(col,where('estado','==','observado'),orderBy('creadoEn','desc'))
     : query(col,where('estado','==',estadoActual),orderBy('creadoEn','desc'));
   unsub=onSnapshot(q,snap=>{
     const lista=document.getElementById('listaPedidos');
@@ -297,7 +297,7 @@ function cargarPedidos(){
 
 document.querySelectorAll('.filtro-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');estadoActual=btn.dataset.estado;// Badge rechazados en tiempo real
-onSnapshot(query(collection(db,`empresas/${EMPRESA}/pedidos`),where('estado','==','cancelado'),where('requiereAtencion','==',true)), snap=>{
+onSnapshot(query(collection(db,`empresas/${EMPRESA}/pedidos`),where('estado','==','observado')), snap=>{
   const b=document.getElementById('badge-rech');
   if(b){ b.style.display=snap.size>0?'inline':'none'; b.textContent=snap.size; }
   // También resaltar tab si hay rechazados
