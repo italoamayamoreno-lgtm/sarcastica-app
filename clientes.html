@@ -188,8 +188,10 @@ async function cargarClientes() {
     const dni = p.cliente_dni;
     if (!dni) return;
     if (!pedidosPorCliente[dni]) pedidosPorCliente[dni] = {count:0, total:0, ultimoCanal:'', ultimaFecha:null};
-    pedidosPorCliente[dni].count++;
-    pedidosPorCliente[dni].total += (p.total||0);
+    if (p.estado !== 'cancelado') {
+      pedidosPorCliente[dni].count++;
+      pedidosPorCliente[dni].total += (p.total||0);
+    }
     if (!pedidosPorCliente[dni].ultimoCanal) pedidosPorCliente[dni].ultimoCanal = p.canal||'';
     if (!pedidosPorCliente[dni].ultimaFecha || (p.creadoEn?.seconds||0) > (pedidosPorCliente[dni].ultimaFecha?.seconds||0)) {
       pedidosPorCliente[dni].ultimaFecha = p.creadoEn;
@@ -323,7 +325,7 @@ window.seleccionarCliente = async (dni) => {
   ));
   const hist = document.getElementById('historialPedidos');
   if (snap.empty) { hist.innerHTML = '<div style="font-size:12px;color:var(--borde);">Sin pedidos registrados</div>'; return; }
-  const pedidos = snap.docs.map(d=>({id:d.id,...d.data()}));
+  const pedidos = snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.estado!=='cancelado');
   pedidos.sort((a,b) => (b.creadoEn?.seconds||0) - (a.creadoEn?.seconds||0));
   hist.innerHTML = pedidos.map(p => `
     <div class="pedido-hist">
