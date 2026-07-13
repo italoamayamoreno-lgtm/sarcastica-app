@@ -120,12 +120,12 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
   <div class="metricas">
     <div class="metrica"><div class="ml">Pendientes</div><div class="mv" style="color:var(--naranja)" id="m-pend">0</div></div>
     <div class="metrica"><div class="ml">A producción</div><div class="mv" style="color:var(--verde)" id="m-apro">0</div></div>
-    <div class="metrica"><div class="ml">Rechazados</div><div class="mv" style="color:var(--rojo)" id="m-rech">0</div></div>
+    <div class="metrica"><div class="ml">Observados</div><div class="mv" style="color:var(--rojo)" id="m-rech">0</div></div>
   </div>
   <div class="filtros" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
     <button class="filtro-btn active" data-filtro="pendiente">Pendientes</button>
     <button class="filtro-btn" data-filtro="aprobado">A producción</button>
-    <button class="filtro-btn" data-filtro="rechazado">Rechazados</button>
+    <button class="filtro-btn" data-filtro="rechazado">Observados</button>
     <span style="color:var(--borde);margin:0 4px;">|</span>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
       <span style="font-size:11px;font-weight:600;color:var(--gris);">Filtrar por:</span>
@@ -160,7 +160,7 @@ const col = collection(db,`empresas/${EMPRESA}/pedidos`);
 // Contadores
 onSnapshot(query(col,where('estado','==','pendiente_validacion')), s => document.getElementById('m-pend').textContent = s.size);
 onSnapshot(query(col,where('estado','==','en_produccion')), s => document.getElementById('m-apro').textContent = s.size);
-onSnapshot(query(col,where('estado','==','cancelado')), s => document.getElementById('m-rech').textContent = s.size);
+onSnapshot(query(col,where('estado','==','observado')), s => document.getElementById('m-rech').textContent = s.size);
 
 let filtroActual = 'pendiente';
 let unsubLista = null;
@@ -268,9 +268,9 @@ function cargar() {
           </div>
         </div>
         <div class="card-actions">
-          <button class="btn-rechazar" id="btnR-${pid}" onclick="iniciarRechazo('${pid}')">Rechazar</button>
+          <button class="btn-rechazar" id="btnR-${pid}" onclick="iniciarRechazo('${pid}')">Observar</button>
           <button class="btn-aprobar" id="btnA-${pid}" onclick="aprobar('${pid}',${esAdicional})">${esAdicional ? '✓ Aprobar ítems adicionales → Producción' : 'Enviar a producción →'}</button>
-        </div>` : `<div class="estado-label">${filtroActual==='aprobado'?'✓ Aprobado y enviado a producción':'✗ Rechazado'}</div>`;
+        </div>` : `<div class="estado-label">${filtroActual==='aprobado'?'✓ Aprobado y enviado a producción':'Observado'}</div>`;
 
       return `<div class="card" id="card-${pid}" data-voucher="${p.voucher||''}">
         <div class="card-header">
