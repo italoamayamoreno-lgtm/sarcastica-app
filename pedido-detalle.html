@@ -145,6 +145,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 
 <script type="module">
 import { initPage, db } from './nav.js';
+import { toast } from './toast.js';
 import {
   doc, getDoc, getDocs, updateDoc, addDoc, deleteDoc,
   collection, serverTimestamp
@@ -158,6 +159,10 @@ const pedidoId = params.get('id');
 if (!pedidoId) { document.getElementById('contenido').innerHTML = '<p>Pedido no encontrado.</p>'; throw new Error('no id'); }
 
 const canEdit = ['directora','operaciones','ventas'].includes(user.rol);
+// canEditItems: solo si el pedido NO está en_ruta, entregado o cancelado
+function canAddItems(estadoPedido) {
+  return canEdit && !['en_ruta','entregado','cancelado'].includes(estadoPedido);
+}
 
 let pedido = null;
 let items  = [];
@@ -228,7 +233,7 @@ function render() {
 const estadosAvanzados = ['en_produccion','en_empaque','empaquetado','en_ruta','entregado'];
 const esEscenarioB = estadosAvanzados.includes(pedido.estado);
 
-const addFormHtml = canEdit ? `
+const addFormHtml = canAddItems(pedido.estado) ? `
     <button class="add-item-toggle" id="btnToggleAdd" onclick="toggleAddForm()">+ Agregar ítem al pedido</button>
     <div class="add-item-form" id="addItemForm">
 
@@ -566,6 +571,17 @@ await cargarProductos();
 let nuevoVoucherBase64 = '';
 let nuevoVoucherNombre = '';
 await cargar();
+window.verVoucherItem = async function(pedidoId, itemId) {
+  try {
+    const snap = await getDoc(doc(db, `empresas/${EMPRESA}/pedidos/${pedidoId}/items`, itemId));
+    if (!snap.exists()) { toast.error('Error','No se encontró el ítem.'); return; }
+    const src = snap.data().voucherAdicional || snap.data().voucher || '';
+    if (!src) { toast.warn('Sin voucher','Este ítem no tiene voucher adjunto.'); return; }
+    const w = window.open('','_blank');
+    w.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;"><img src="${src}" style="max-width:100%;max-height:100vh;object-fit:contain;"/></body></html>`);
+    w.document.close();
+  } catch(e) { toast.error('Error','No se pudo cargar el voucher.'); }
+};
 </script>
 </body>
 </html>
