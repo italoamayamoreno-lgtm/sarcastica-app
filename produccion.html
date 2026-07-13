@@ -249,13 +249,19 @@ function renderCard(p) {
     const esPend   = item.estado === 'pendiente';
     const esProd   = item.estado === 'produccion';
     const esListo  = item.estado === 'listo_empaque';
+    const catMatch = catActual === 'Todos' || (item.categoria||'') === catActual;
 
     const ESTADO_TEXTO = {
       empaquetado:'Empaquetado 📦', en_ruta:'En ruta 🚚', entregado:'Entregado ✓',
-      pendiente_validacion_adicional:'⏳ Pendiente validación',dañado:'⚠ Dañado',
+      pendiente_validacion_adicional:'⏳ Pendiente validación', dañado:'⚠ Dañado',
     };
 
+    // Si no coincide con el filtro de categoría — ocultar completamente
+    if (!catMatch) return '';
+
+    // Ítem ya terminado (bloqueado) — mostrar solo en vista Todos
     if (!esActivo) {
+      if (catActual !== 'Todos') return ''; // en filtro de categoría, no mostrar bloqueados
       return `<div class="item-row bloqueado">
         <div class="item-info">
           <div class="item-nombre">${item.productoNombre||'—'}</div>
