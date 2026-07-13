@@ -316,13 +316,18 @@ window.confirmarEmpaqueItems = async (pid, clienteNombre) => {
       allSnap.forEach(i => {
         if (!['empaquetado','en_ruta','entregado'].includes(i.data().estado)) todos = false;
       });
-      // Si todos empaquetados → pasar a en_ruta para que aparezca en Ruta
+      // Si todos empaquetados → pasar a en_ruta + actualizar ítems a en_ruta
       if (todos) {
         await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos`,pid), {
           estado:'en_ruta',
           empaquetadoEn: serverTimestamp(),
           empaquetadoPor: user.nombre||user.email
         });
+        // Sincronizar estado de ítems con el pedido
+        const itemsFinal = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+        for (const iDoc of itemsFinal.docs) {
+          await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {estado:'en_ruta'});
+        }
       }
     } catch(e) {
       console.error(e); alert('Error al confirmar empaque.');
