@@ -271,14 +271,20 @@ function cargarPedidos(){
   if(unsub)unsub();
   const col=collection(db,`empresas/${EMPRESA}/pedidos`);
   const q=estadoActual==='todos'
-    ? query(col,orderBy('creadoEn','desc'))
+    ? query(col)
     : estadoActual==='rechazados'
-    ? query(col,where('estado','==','observado'),orderBy('creadoEn','desc'))
-    : query(col,where('estado','==',estadoActual),orderBy('creadoEn','desc'));
+    ? query(col,where('estado','==','observado'))
+    : query(col,where('estado','==',estadoActual));
   unsub=onSnapshot(q,snap=>{
     const lista=document.getElementById('listaPedidos');
     if(snap.empty){lista.innerHTML='<div class="tabla-empty">No hay pedidos en este estado</div>';return;}
-    lista.innerHTML=snap.docs.map(d=>{
+    // Ordenar por fecha de creación descendente (cliente-side, sin índice)
+    const docs=[...snap.docs].sort((a,b)=>{
+      const ta=a.data().creadoEn?.seconds||0;
+      const tb=b.data().creadoEn?.seconds||0;
+      return tb-ta;
+    });
+    lista.innerHTML=docs.map(d=>{
       const p=d.data();
       const[bc,bl]=BADGE[p.estado]||['','--'];
       const[cc,cl]=CANAL_B[p.canal]||['badge-web',p.canal||'--'];
@@ -286,7 +292,7 @@ function cargarPedidos(){
       const urgente=fecha===hoyStr?' <span style="color:var(--rojo);font-size:10px;font-weight:600;">HOY</span>':'';
       const adicBadge = p.tieneAdicionales ? '<span style="background:#fff3cd;color:#856404;font-size:10px;font-weight:600;padding:1px 5px;border-radius:8px;margin-left:4px;">+ítem</span>' : '';
       return `<div class="tabla-row"><span class="pedido-num">#${d.id.slice(-5).toUpperCase()}</span><div><div class="cliente-nombre">${p.cliente_nombre||'--'}${adicBadge}</div><div class="cliente-sub">${[p.distrito,p.provincia,p.cliente_dni].filter(Boolean).join(' · ')}</div></div><span class="badge ${cc}">${cl}</span><span style="font-size:12px;color:var(--gris);">${fecha}${urgente}</span><span class="monto">S/ ${(p.total||0).toFixed(2)}</span><span class="badge ${bc}">${bl}</span><a class="ver-link" href="pedido-detalle.html?id=${d.id}">Ver →</a>
-          <button onclick="eliminarPedido('${d.id}','${(p.cliente_nombre||'').replace(/'/g,\"\\'\")}',event)" title="Eliminar pedido" style="background:none;border:none;cursor:pointer;color:var(--borde);font-size:16px;padding:2px 4px;line-height:1;flex-shrink:0;" onmouseover="this.style.color='var(--rojo)'" onmouseout="this.style.color='var(--borde)'">🗑</button></div>`;
+          <button data-pid="${d.id}" data-nombre="${(p.cliente_nombre||'').replace(/"/g,'&quot;')}" onclick="eliminarPedidoBtn(this,event)" title="Eliminar pedido" style="background:none;border:none;cursor:pointer;color:var(--borde);font-size:16px;padding:2px 4px;line-height:1;flex-shrink:0;" onmouseover="this.style.color='var(--rojo)'" onmouseout="this.style.color='var(--borde)'">🗑</button></div>`;
     }).join('');
   });
 }
@@ -311,7 +317,7 @@ cargarPedidos();});
 cargarPedidos();
 
 let productos=[], itemCount=0;
-async function cargarProductos(){
+async async function cargarProductos(){
   const snap=await getDocs(collection(db,`empresas/${EMPRESA}/inventario_crudos`));
   productos=[];snap.forEach(d=>productos.push({id:d.id,...d.data()}));
 }
@@ -410,7 +416,8 @@ window.verVoucher = function() {
 };
 
 document.getElementById('btnNuevo').onclick=async()=>{
-  await cargarProductos();itemCount=0;document.getElementById('itemsContainer').innerHTML='';
+  try { await cargarProductos(); } catch(e) { console.warn('cargarProductos error:',e); }
+  itemCount=0;document.getElementById('itemsContainer').innerHTML='';
   ['dni','telefono','nombre','correo','distrito','provincia','direccion','observacion'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('canal').value='';document.getElementById('medioPago').value='';document.getElementById('fechaEntrega').value=hoyStr;
   document.getElementById('clienteAlert').className='cliente-alert';document.getElementById('clienteAlert').textContent='';
@@ -465,6 +472,13 @@ document.getElementById('btnRegistrar').onclick=async()=>{
 document.getElementById('btnBorrador').onclick=()=>alert('Función de borrador disponible próximamente.');
 
 // ── ELIMINAR PEDIDO ──────────────────────────────────────────
+// Wrapper that reads data attributes to avoid template literal escaping issues
+window.eliminarPedidoBtn = (btn, e) => {
+  const pid = btn.dataset.pid;
+  const nombre = btn.dataset.nombre || '—';
+  eliminarPedido(pid, nombre, e);
+};
+
 window.eliminarPedido = (pid, nombre, e) => {
   e.preventDefault(); e.stopPropagation();
   const div = document.createElement('div');
