@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>CRM Clientes · Sarcástica OS</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -123,6 +124,9 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
       <div class="page-title">CRM Clientes</div>
       <div class="page-sub"><span id="totalClientes">0</span> clientas registradas</div>
     </div>
+    <button onclick="exportarExcel()" style="background:var(--verde);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+      📊 Exportar Excel
+    </button>
   </div>
 
   <div class="filtros-row">
@@ -345,6 +349,60 @@ window.guardarNota = async (dni) => {
 // Escuchar cambios en tiempo real
 onSnapshot(collection(db,`empresas/${EMPRESA}/clientes`), () => cargarClientes());
 cargarClientes();
+
+window.exportarExcel = async () => {
+  const pedidosSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos`));
+  const pedidosPorCliente = {};
+  pedidosSnap.forEach(d => {
+    const p = d.data();
+    if (!p.cliente_dni) return;
+    if (!pedidosPorCliente[p.cliente_dni]) pedidosPorCliente[p.cliente_dni] = {count:0,total:0,primerCanal:'',pedidos:[]};
+    pedidosPorCliente[p.cliente_dni].count++;
+    pedidosPorCliente[p.cliente_dni].total += (p.total||0);
+    if (!pedidosPorCliente[p.cliente_dni].primerCanal) pedidosPorCliente[p.cliente_dni].primerCanal = p.canal||'';
+    pedidosPorCliente[p.cliente_dni].pedidos.push(d.id);
+  });
+
+  const snap = await getDocs(collection(db,`empresas/${EMPRESA}/clientes`));
+  const rows = [['DNI','Nombre','Teléfono','Correo','Dirección','Distrito','Provincia','Canal preferido','Fecha de nacimiento','Total pedidos','Total gastado (S/)','Notas']];
+  snap.forEach(d => {
+    const c = d.data();
+    const stats = pedidosPorCliente[d.id] || {count:0,total:0,primerCanal:''};
+    rows.push([
+      d.id,
+      c.nombre||'',
+      c.telefono||'',
+      c.correo||'',
+      c.direccion||'',
+      c.distrito||'',
+      c.provincia||'',
+      c.canalPreferido || stats.primerCanal || '',
+      c.fechaNacimiento||'',
+      stats.count,
+      stats.total.toFixed(2),
+      c.notas||''
+    ]);
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // Column widths
+  ws['!cols'] = [
+    {wch:12},{wch:28},{wch:14},{wch:28},{wch:30},
+    {wch:14},{wch:14},{wch:14},{wch:16},{wch:12},{wch:16},{wch:30}
+  ];
+
+  // Header style
+  const headerStyle = {font:{bold:true},fill:{fgColor:{rgb:'000000'}},font:{bold:true,color:{rgb:'FFFFFF'}}};
+  ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1'].forEach(cell => {
+    if (ws[cell]) ws[cell].s = {font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'1A1A1A'}}};
+  });
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
+  const fecha = new Date().toISOString().split('T')[0];
+  XLSX.writeFile(wb, `Clientes_Sarcastica_${fecha}.xlsx`);
+};
 </script>
 </body>
 </html>
