@@ -159,6 +159,11 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
     <button class="filtro-btn" data-estado="en_empaque">Empaque <span id="cnt-ee"></span></button>
     <button class="filtro-btn" data-estado="en_ruta">En ruta <span id="cnt-er"></span></button>
     <button class="filtro-btn" data-estado="entregado">Entregados <span id="cnt-en"></span></button>
+  
+    <button class="filtro-btn" data-estado="rechazados" id="btn-tab-rechazados" style="border-color:var(--rojo);color:var(--rojo);position:relative;">
+      ✕ Rechazados
+      <span id="badge-rech" style="display:none;background:var(--rojo);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:4px;"></span>
+    </button>
   </div>
 
   <div class="tabla-wrap">
@@ -265,7 +270,11 @@ let estadoActual='todos', unsub=null;
 function cargarPedidos(){
   if(unsub)unsub();
   const col=collection(db,`empresas/${EMPRESA}/pedidos`);
-  const q=estadoActual==='todos'?query(col,orderBy('creadoEn','desc')):query(col,where('estado','==',estadoActual),orderBy('creadoEn','desc'));
+  const q=estadoActual==='todos'
+    ? query(col,orderBy('creadoEn','desc'))
+    : estadoActual==='rechazados'
+    ? query(col,where('estado','==','cancelado'),where('requiereAtencion','==',true),orderBy('creadoEn','desc'))
+    : query(col,where('estado','==',estadoActual),orderBy('creadoEn','desc'));
   unsub=onSnapshot(q,snap=>{
     const lista=document.getElementById('listaPedidos');
     if(snap.empty){lista.innerHTML='<div class="tabla-empty">No hay pedidos en este estado</div>';return;}
@@ -287,7 +296,16 @@ function cargarPedidos(){
 });
 
 document.querySelectorAll('.filtro-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');estadoActual=btn.dataset.estado;cargarPedidos();});
+  btn.addEventListener('click',()=>{document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');estadoActual=btn.dataset.estado;// Badge rechazados en tiempo real
+onSnapshot(query(collection(db,`empresas/${EMPRESA}/pedidos`),where('estado','==','cancelado'),where('requiereAtencion','==',true)), snap=>{
+  const b=document.getElementById('badge-rech');
+  if(b){ b.style.display=snap.size>0?'inline':'none'; b.textContent=snap.size; }
+  // También resaltar tab si hay rechazados
+  const tab=document.getElementById('btn-tab-rechazados');
+  if(tab){ tab.style.background=snap.size>0?'#fcebeb':''; }
+});
+
+cargarPedidos();});
 });
 cargarPedidos();
 
