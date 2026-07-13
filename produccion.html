@@ -291,13 +291,13 @@ function renderCard(p) {
     </div>`;
   }).join('');
 
-  const btnEmpaque = '';
+  let btnEmpaque = '';
   if (todosListos) {
     if (catActual === 'Todos') {
       const safeName = (p.cliente_nombre||'').replace(/"/g,'&quot;');
-      btnEmpaque = `<button class="btn-empaque" data-pid="${pid}" data-nombre="${safeName}" onclick="confirmarEmpaqueBtn(this)">Pasar a empaque →</button>`;
+      btnEmpaque = `<button class="btn-empaque" data-pid="${pid}" data-nombre="${safeName}" onclick="confirmarEmpaqueBtn(this)">📦 Pasar a empaque →</button>`;
     } else {
-      btnEmpaque = '<div style="font-size:11px;color:var(--verde);text-align:right;padding:6px 0;font-weight:600;">✓ Listos — ve a "Todos" para pasar a empaque</div>';
+      btnEmpaque = `<div style="font-size:11px;color:var(--verde);text-align:right;padding:6px 0;font-weight:600;">✓ Todos los ítems de ${catActual} listos — ve a "Todos" para confirmar empaque</div>`;
     }
   }
 
@@ -324,7 +324,7 @@ let renderTimeout = null;
 
 function scheduleRender() {
   clearTimeout(renderTimeout);
-  renderTimeout = setTimeout(renderAll, 400);
+  renderTimeout = setTimeout(cargarProduccion, 400);
 }
 
 let catActual = 'Todos';
@@ -339,9 +339,13 @@ function renderAll() {
   const lista = document.getElementById('listaPedidos');
   // Mostrar pedido si tiene ítems activos
   let activos = Object.values(pedidosMap).filter(p => {
-    // Excluir pedidos que ya pasaron de producción
+    // Excluir pedidos que ya pasaron a empaque o más allá
     if (['en_empaque','empaquetado','en_ruta','entregado','cancelado','observado'].includes(p.estado)) return false;
-    return (p.items||[]).some(i => ['pendiente','produccion','listo_empaque'].includes(i.estado));
+    // Incluir si tiene ítems activos O si todos están listos pero aún no se confirmó empaque
+    const itemsActivos = (p.items||[]).filter(i =>
+      ['pendiente','produccion','listo_empaque'].includes(i.estado)
+    );
+    return itemsActivos.length > 0;
   });
 
   // Filtro de categoría
@@ -380,33 +384,77 @@ function renderAll() {
 }
 
 // Escuchar pedidos
-onSnapshot(collection(db,`empresas/${EMPRESA}/pedidos`), snap => {
-  snap.docChanges().forEach(change => {
-    const pid = change.doc.id;
-    if (change.type === 'removed') {
-      delete pedidosMap[pid];
-    } else {
-      // Merge data, preservar items si ya los tenemos
-      pedidosMap[pid] = {
-        ...(pedidosMap[pid]||{}),
-        ...change.doc.data(),
-        id: pid,
-      }
+// Carga simple y robusta — sin docChanges, sin cascada
+async function cargarProduccion() {
+  const lista = document.getElementById('listaPedidos');
+  lista.innerHTML = '<div class="empty">Cargando pedidos...</div>';
 
-      // Activo pero de otra categoría — mostrar dimmed
-      const catMatch = catActual === 'Todos' || (item.categoria||'') === catActual;
-      if (!catMatch) return ''; // Ocultar completamente ítems de otra categoría;
-      // Cargar items de este pedido
-      getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`)).then(snap => {
-        const items = [];
-        snap.forEach(i => items.push({id:i.id,...i.data()}));
-        pedidosMap[pid].items = items;
-        scheduleRender();
-      });
+  try {
+    // 1. Cargar todos los pedidos
+    const pedSnap = await getDocs(collection(db, `empresas/${EMPRESA}/pedidos`));
+    const pedidosActivos = pedSnap.docs
+      .map(d => ({id:d.id,...d.data()}))
+      .filter(p => !['en_empaque','empaquetado','en_ruta','entregado','cancelado','observado'].includes(p.estado));
+
+    if (!pedidosActivos.length) {
+      lista.innerHTML = '<div class="empty">No hay pedidos en producción</div>';
+      actualizarMetricas([]);
+      return;
     }
-  });
-  scheduleRender();
-});
+
+    // 2. Cargar items de pedidos activos en paralelo
+    const pedidosConItems = await Promise.all(
+      pedidosActivos.map(async p => {
+        const itemsSnap = await getDocs(
+          collection(db, `empresas/${EMPRESA}/pedidos/${p.id}/items`)
+        );
+        const items = itemsSnap.docs.map(i => ({id:i.id,...i.data()}));
+        return {...p, items};
+      })
+    );
+
+    // 3. Filtrar los que tienen ítems activos
+    const pedidos = pedidosConItems.filter(p =>
+      p.items.some(i => ['pendiente','produccion','listo_empaque'].includes(i.estado))
+    );
+
+    actualizarMetricas(pedidos);
+    lista.innerHTML = pedidos.length
+      ? pedidos.map(p => renderCard(p)).join('')
+      : '<div class="empty">No hay pedidos en producción</div>';
+
+  } catch(e) {
+    console.error('Error cargando producción:', e);
+    lista.innerHTML = '<div class="empty" style="color:var(--rojo);">Error al cargar. Recarga la página.</div>';
+  }
+}
+
+function actualizarMetricas(pedidos) {
+  let totalPend=0, totalProd=0, totalListo=0;
+  pedidos.forEach(p => (p.items||[]).forEach(i => {
+    const catOk = catActual==='Todos' || (i.categoria||'')=== catActual;
+    if (!catOk) return;
+    if (i.estado==='pendiente') totalPend++;
+    else if (i.estado==='produccion') totalProd++;
+    else if (i.estado==='listo_empaque') totalListo++;
+  }));
+  document.getElementById('m-total').textContent = pedidos.length;
+  document.getElementById('m-pend').textContent = totalPend;
+  document.getElementById('m-prod').textContent = totalProd;
+  document.getElementById('m-listo').textContent = totalListo;
+}
+
+// Escuchar cambios en tiempo real — recarga al detectar cambio
+let unsubProd = null;
+function iniciarEscucha() {
+  if (unsubProd) unsubProd();
+  unsubProd = onSnapshot(
+    collection(db, `empresas/${EMPRESA}/pedidos`),
+    () => cargarProduccion()
+  );
+}
+iniciarEscucha();
+
 
 // ---- ACCIONES ----
 window.cambiarEstado = async (pedidoId, itemId, sel) => {
