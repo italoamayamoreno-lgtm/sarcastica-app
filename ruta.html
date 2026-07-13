@@ -426,6 +426,11 @@ window.confirmarEntrega = async (pid) => {
       entregadoEn: serverTimestamp(),
       entregadoPor: user.nombre||user.email,
     });
+    // Sincronizar ítems a entregado
+    const itemsSnap = await getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`));
+    for (const iDoc of itemsSnap.docs) {
+      await updateDoc(doc(db,`empresas/${EMPRESA}/pedidos/${pid}/items`,iDoc.id), {estado:'entregado'});
+    }
   } catch(e) { console.error(e); alert('Error al actualizar.'); }
 };
 
