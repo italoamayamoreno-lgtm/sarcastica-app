@@ -555,33 +555,9 @@ window.filtrarInsumos=()=>{
 };
 
 onSnapshot(collection(db,`empresas/${EMPRESA}/inventario_crudos`), snap => {
-  todosInsumos=snap.docs.map(d=>({id:d.id,...d.data()}));
+  todosInsumos = snap.docs.map(d=>({id:d.id,...d.data()}));
   todosInsumos.sort((a,b)=>(a.categoria||'').localeCompare(b.categoria||'')||(a.id||'').localeCompare(b.id||''));
-  const CAT_COLOR = {'Prendas':'background:#FBEAF0;color:#993556;','Para beber':'background:#E6F1FB;color:#0C447C;','Librería':'background:#EAF3DE;color:#27500A;'};
-  el.innerHTML = docs.map(p => {
-    const bajo = (p.disponible||0) <= (p.stock_seguridad||0);
-    return `<div class="item-row">
-      <div class="item-info">
-        <div class="item-nombre" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <span style="font-family:monospace;font-size:12px;font-weight:700;background:var(--bg);padding:2px 8px;border-radius:5px;border:1px solid var(--borde);">${p.id}</span>
-          <span style="font-size:13px;">${p.nombre||'—'}</span>
-          <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;${CAT_COLOR[p.categoria]||''}">${p.categoria||'—'}</span>
-        </div>
-        <div class="item-sub" style="margin-top:4px;">
-          Disp: <span class="stock-pill${bajo?' bajo':''}"><b>${p.disponible||0}</b></span>
-          · Reservado: ${p.reservado||0}
-          · Mínimo: <b>${p.stock_seguridad||0}</b>
-          ${p.proveedor?' · '+p.proveedor:''}
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <input type="number" value="${p.stock_seguridad||0}" min="0"
-          style="width:56px;border:1px solid var(--borde);border-radius:5px;padding:4px 6px;font-size:11px;font-family:Poppins,sans-serif;"
-          onchange="actualizarSeguridad('${p.id}',this.value)" title="Mínimo"/>
-        <button class="btn-eliminar" onclick="eliminarInsumo('${p.id}')">✕</button>
-      </div>
-    </div>`;
-  }).join('');
+  filtrarInsumos();
 });
 
 window.guardarInsumo = async () => {
