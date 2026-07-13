@@ -133,6 +133,17 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
         </div>
         <div class="field"><label>Teléfono</label><input type="text" id="r-telefono" placeholder="+51 9xx xxx xxx"/></div>
       </div>
+      <div class="form-grid g3">
+        <div class="field"><label>Placa del vehículo</label><input type="text" id="r-placa" placeholder="Ej: ABC-123" style="text-transform:uppercase;"/></div>
+        <div class="field"><label>DNI Anverso</label>
+          <div onclick="document.getElementById('r-dni-front').click()" style="background:var(--bg);border:1.5px dashed var(--borde);border-radius:6px;padding:8px 10px;font-size:11px;color:var(--borde);cursor:pointer;text-align:center;" id="r-dni-front-box">📷 Adjuntar anverso</div>
+          <input type="file" id="r-dni-front" accept="image/*" style="display:none" onchange="onDniChange(this,'r-dni-front-box','front')"/>
+        </div>
+        <div class="field"><label>DNI Reverso</label>
+          <div onclick="document.getElementById('r-dni-back').click()" style="background:var(--bg);border:1.5px dashed var(--borde);border-radius:6px;padding:8px 10px;font-size:11px;color:var(--borde);cursor:pointer;text-align:center;" id="r-dni-back-box">📷 Adjuntar reverso</div>
+          <input type="file" id="r-dni-back" accept="image/*" style="display:none" onchange="onDniChange(this,'r-dni-back-box','back')"/>
+        </div>
+      </div>
       <div class="form-actions">
         <button class="btn-guardar" id="btnGuardarRep" onclick="guardarRepartidor()">+ Agregar repartidor</button>
       </div>
@@ -221,6 +232,7 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
       <div class="block-header">
         <div class="block-title">Insumos registrados</div>
       </div>
+      <input type="text" id="buscarInsumo" placeholder="Buscar por código o nombre (ej: POF_BL_S)..." oninput="filtrarInsumos()" style="width:100%;border:1.5px solid var(--borde);border-radius:8px;padding:8px 12px;font-family:'Poppins',sans-serif;font-size:12px;outline:none;margin-bottom:10px;display:block;"/>
       <div id="listaInsumos"><div class="empty-msg">Cargando...</div></div>
     </div>
   </div>
@@ -232,30 +244,29 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
       <div id="listaUsuarios"><div class="empty-msg">Cargando...</div></div>
     </div>
     <div class="block">
-      <div class="block-header"><div class="block-title">Agregar usuario</div></div>
-      <div class="form-grid g3">
-        <div class="field"><label>Nombre</label><input type="text" id="u-nombre" placeholder="Nombre completo"/></div>
-        <div class="field"><label>Correo (Firebase Auth)</label><input type="email" id="u-email" placeholder="correo@sarcastica.com"/></div>
+      <div class="block-header"><div class="block-title">Solicitar nuevo usuario</div></div>
+      <div style="background:#e0eaf8;border:1px solid #a0c0e8;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--azul);margin-bottom:14px;">
+        ℹ Completa los datos y envía la solicitud. Etrazia creará el acceso y te notificará en 24 horas hábiles.
+      </div>
+      <div class="form-grid g3" style="margin-bottom:10px;">
+        <div class="field"><label>Nombre completo</label><input type="text" id="u-nombre" placeholder="Nombre del usuario"/></div>
+        <div class="field"><label>Correo electrónico</label><input type="email" id="u-email" placeholder="correo@ejemplo.com"/></div>
         <div class="field"><label>Rol</label>
           <select id="u-rol">
-            <option value="ventas">Ventas</option>
-            <option value="produccion">Producción</option>
-            <option value="operaciones">Operaciones</option>
-            <option value="directora">Dirección</option>
+            <option value="ventas">Ventas — Pedidos y clientes</option>
+            <option value="produccion">Producción — Ítems y mermas</option>
+            <option value="operaciones">Operaciones — Todo excepto config</option>
+            <option value="directora">Dirección — Acceso total</option>
           </select>
         </div>
       </div>
-      <div style="background:#faeeda;border-radius:8px;padding:10px 14px;font-size:12px;color:var(--naranja);margin-bottom:14px;">
-        ⚠ Para agregar un usuario debes primero crearlo en Firebase Authentication y copiar su UID aquí.
-      </div>
-      <div class="form-grid" style="grid-template-columns:1fr;">
-        <div class="field"><label>UID de Firebase Auth</label><input type="text" id="u-uid" placeholder="Pega aquí el UID del usuario creado en Firebase"/></div>
+      <div class="form-grid" style="grid-template-columns:1fr;margin-bottom:10px;">
+        <div class="field"><label>Notas (opcional)</label><input type="text" id="u-notas" placeholder="Ej: Nueva vendedora de temporada"/></div>
       </div>
       <div class="form-actions">
-        <button class="btn-guardar" onclick="guardarUsuario()">+ Agregar usuario</button>
+        <button class="btn-guardar" onclick="solicitarUsuario()">📧 Enviar solicitud a Etrazia</button>
       </div>
     </div>
-  </div>
 </div>
 
 <script type="module">
@@ -291,19 +302,44 @@ onSnapshot(collection(db,`empresas/${EMPRESA}/repartidores`), snap => {
   }).join('');
 });
 
+let dniPhotos={front:'',back:''};
+window.onDniChange=function(input,boxId,key){
+  const f=input.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=function(){
+      const canvas=document.createElement('canvas');
+      const MAX=600;let w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}if(h>MAX){w=Math.round(w*MAX/h);h=MAX;}
+      canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h);
+      dniPhotos[key]=canvas.toDataURL('image/jpeg',0.7);
+      const box=document.getElementById(boxId);
+      box.textContent='✓ '+f.name;box.style.color='var(--verde)';box.style.borderColor='var(--verde)';
+    };img.src=e.target.result;
+  };reader.readAsDataURL(f);
+};
+
 window.guardarRepartidor = async () => {
   const nombre = document.getElementById('r-nombre').value.trim();
   const vehiculo = document.getElementById('r-vehiculo').value;
   const telefono = document.getElementById('r-telefono').value.trim();
+  const placa = document.getElementById('r-placa').value.trim().toUpperCase();
   if (!nombre) { alert('El nombre es obligatorio.'); return; }
   const btn = document.getElementById('btnGuardarRep');
   btn.disabled=true; btn.textContent='Guardando...';
   try {
     await addDoc(collection(db,`empresas/${EMPRESA}/repartidores`),{
-      nombre,vehiculo,telefono,activo:true,creadoEn:serverTimestamp()
+      nombre,vehiculo,telefono,placa,
+      dniAnverso:dniPhotos.front,dniReverso:dniPhotos.back,
+      activo:true,creadoEn:serverTimestamp()
     });
     document.getElementById('r-nombre').value='';
     document.getElementById('r-telefono').value='';
+    document.getElementById('r-placa').value='';
+    document.getElementById('r-dni-front-box').textContent='📷 Adjuntar anverso';
+    document.getElementById('r-dni-back-box').textContent='📷 Adjuntar reverso';
+    dniPhotos={front:'',back:''};
   } catch(e){ console.error(e); alert('Error.'); }
   finally{ btn.disabled=false; btn.textContent='+ Agregar repartidor'; }
 };
@@ -492,11 +528,35 @@ window.generarCodigo = async () => {
   }
 };
 
+let todosInsumos=[];
+function renderInsumos(docs){
+  const el=document.getElementById('listaInsumos');
+  if(!docs.length){el.innerHTML='<div class="empty-msg">Sin insumos</div>';return;}
+  const CC={'Prendas':'background:#FBEAF0;color:#993556;','Para beber':'background:#E6F1FB;color:#0C447C;','Librería':'background:#EAF3DE;color:#27500A;','Bebés':'background:#faeeda;color:#854F0B;','Accesorios':'background:#f0e8ff;color:#6B21A8;','Hogar':'background:#F1EFE8;color:#5F5E5A;'};
+  el.innerHTML=docs.map(p=>{const bajo=(p.disponible||0)<=(p.stock_seguridad||0);return `<div class="item-row">
+    <div class="item-info">
+      <div class="item-nombre" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-family:monospace;font-size:12px;font-weight:700;background:var(--bg);padding:2px 8px;border-radius:5px;border:1px solid var(--borde);">${p.id}</span>
+        <span style="font-size:13px;">${p.nombre||'—'}</span>
+        <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;${CC[p.categoria]||''}">${p.categoria||'—'}</span>
+      </div>
+      <div class="item-sub" style="margin-top:4px;">Disp: <span class="stock-pill${bajo?' bajo':''}"><b>${p.disponible||0}</b></span> · Reservado: ${p.reservado||0} · Mínimo: <b>${p.stock_seguridad||0}</b>${p.proveedor?' · '+p.proveedor:''}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <input type="number" value="${p.stock_seguridad||0}" min="0" style="width:56px;border:1px solid var(--borde);border-radius:5px;padding:4px 6px;font-size:11px;font-family:Poppins,sans-serif;" onchange="actualizarSeguridad('${p.id}',this.value)" title="Mínimo"/>
+      <button class="btn-eliminar" onclick="eliminarInsumo('${p.id}')">✕</button>
+    </div>
+  </div>`;}).join('');
+}
+window.filtrarInsumos=()=>{
+  const busq=(document.getElementById('buscarInsumo')?.value||'').toLowerCase();
+  const f=busq?todosInsumos.filter(p=>p.id.toLowerCase().includes(busq)||(p.nombre||'').toLowerCase().includes(busq)):todosInsumos;
+  renderInsumos(f);
+};
+
 onSnapshot(collection(db,`empresas/${EMPRESA}/inventario_crudos`), snap => {
-  const el = document.getElementById('listaInsumos');
-  if (snap.empty) { el.innerHTML = '<div class="empty-msg">Sin insumos registrados</div>'; return; }
-  const docs = snap.docs.map(d=>({id:d.id,...d.data()}));
-  docs.sort((a,b)=>(a.categoria||'').localeCompare(b.categoria||'')||(a.id||'').localeCompare(b.id||''));
+  todosInsumos=snap.docs.map(d=>({id:d.id,...d.data()}));
+  todosInsumos.sort((a,b)=>(a.categoria||'').localeCompare(b.categoria||'')||(a.id||'').localeCompare(b.id||''));
   const CAT_COLOR = {'Prendas':'background:#FBEAF0;color:#993556;','Para beber':'background:#E6F1FB;color:#0C447C;','Librería':'background:#EAF3DE;color:#27500A;'};
   el.innerHTML = docs.map(p => {
     const bajo = (p.disponible||0) <= (p.stock_seguridad||0);
@@ -588,6 +648,19 @@ onSnapshot(collection(db,'usuarios'), snap => {
     </div>`;
   }).join('');
 });
+
+window.solicitarUsuario=()=>{
+  const nombre=document.getElementById('u-nombre').value.trim();
+  const email=document.getElementById('u-email').value.trim();
+  const rol=document.getElementById('u-rol').value;
+  const notas=document.getElementById('u-notas')?.value.trim()||'';
+  if(!nombre||!email){alert('Nombre y correo son obligatorios.');return;}
+  const ROLES={ventas:'Ventas',produccion:'Producción',operaciones:'Operaciones',directora:'Dirección'};
+  const subject=encodeURIComponent(`[Sarcástica OS] Nuevo usuario: ${nombre}`);
+  const body=encodeURIComponent(`Solicitud de nuevo usuario para Sarcástica OS\n\nNombre: ${nombre}\nCorreo: ${email}\nRol: ${ROLES[rol]||rol}\nNotas: ${notas||'—'}\n\nEnviado desde Sarcástica OS`);
+  window.open(`mailto:contacto@etrazia.com?subject=${subject}&body=${body}`);
+  alert('✓ Se abrirá tu cliente de correo. Envía el mensaje a contacto@etrazia.com');
+};
 
 window.guardarUsuario = async () => {
   const uid = document.getElementById('u-uid').value.trim();
