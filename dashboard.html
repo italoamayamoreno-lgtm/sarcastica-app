@@ -374,7 +374,7 @@ window.cargarTodo = async () => {
 
 // 1. VENTAS
 function renderVentas(peds) {
-  const entregados = peds.filter(p=>p.estado==='entregado');
+  const entregados = peds.filter(p=>['en_ruta','entregado'].includes(p.estado));
   const ingresos = entregados.reduce((s,p)=>s+(p.total||0),0);
   const ticket = entregados.length?ingresos/entregados.length:0;
   const tasa = peds.length?Math.round((entregados.length/peds.length)*100):0;
@@ -414,7 +414,7 @@ function renderVentas(peds) {
 
 // 2. PAGOS
 function renderPagos(peds) {
-  const entregados=peds.filter(p=>p.estado==='entregado');
+  const entregados=peds.filter(p=>['en_ruta','entregado'].includes(p.estado));
   const porPago={};let total=0;
   entregados.forEach(p=>{const mp=p.medioPago||'Sin especificar';porPago[mp]=(porPago[mp]||0)+(p.total||0);total+=(p.total||0);});
   document.getElementById('totalIngresado').textContent=`S/ ${total.toFixed(2)}`;
