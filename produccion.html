@@ -94,6 +94,18 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
 .btn-sec{background:#fff;border:1.5px solid var(--borde);color:var(--gris);padding:9px 16px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
 .btn-danger{background:var(--rojo);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:"Poppins",sans-serif;font-size:12px;font-weight:600;cursor:pointer;}
 .btn-danger:disabled{opacity:.4;cursor:not-allowed;}
+
+/* FILTROS CATEGORÍA */
+.filtros-cat{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.fcat-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--borde);background:#fff;font-family:"Poppins",sans-serif;font-size:11px;font-weight:500;color:var(--gris);cursor:pointer;transition:all .15s;}
+.fcat-btn:hover{border-color:var(--black);color:var(--black);}
+.fcat-btn.active{background:var(--black);color:#fff;border-color:var(--black);}
+.fcat-btn.Prendas.active{background:#993556;border-color:#993556;}
+.fcat-btn.Bebés.active{background:#854F0B;border-color:#854F0B;}
+.fcat-btn.Accesorios.active{background:#6B21A8;border-color:#6B21A8;}
+.fcat-btn[data-cat="Para beber"].active{background:#0C447C;border-color:#0C447C;}
+.fcat-btn.Librería.active{background:#27500A;border-color:#27500A;}
+.fcat-btn.Hogar.active{background:#5F5E5A;border-color:#5F5E5A;}
 </style>
 </head>
 <body>
@@ -141,6 +153,15 @@ body{padding-top:52px;font-family:"Poppins",sans-serif;background:var(--bg);min-
     <div class="metrica"><div class="ml">Listos</div><div class="mv" style="color:var(--verde)" id="m-listo">0</div></div>
   </div>
 
+  <div class="filtros-cat" id="filtrosCat">
+    <button class="fcat-btn active" data-cat="Todos" onclick="setCat('Todos',this)">Todos</button>
+    <button class="fcat-btn Prendas" data-cat="Prendas" onclick="setCat('Prendas',this)">Prendas</button>
+    <button class="fcat-btn Bebés" data-cat="Bebés" onclick="setCat('Bebés',this)">Bebés</button>
+    <button class="fcat-btn Accesorios" data-cat="Accesorios" onclick="setCat('Accesorios',this)">Accesorios</button>
+    <button class="fcat-btn" data-cat="Para beber" onclick="setCat('Para beber',this)">Para beber</button>
+    <button class="fcat-btn Librería" data-cat="Librería" onclick="setCat('Librería',this)">Librería</button>
+    <button class="fcat-btn Hogar" data-cat="Hogar" onclick="setCat('Hogar',this)">Hogar</button>
+  </div>
   <div id="listaPedidos"><div class="empty">Cargando pedidos...</div></div>
 </div>
 
@@ -285,14 +306,31 @@ function scheduleRender() {
   renderTimeout = setTimeout(renderAll, 400);
 }
 
+let catActual = 'Todos';
+window.setCat = (cat, btn) => {
+  catActual = cat;
+  document.querySelectorAll('.fcat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAll();
+};
+
 function renderAll() {
   const lista = document.getElementById('listaPedidos');
-  // Mostrar pedido si tiene ítems activos — sin importar el estado del pedido
-  // (cubre el caso de ítems adicionales en pedidos ya avanzados)
-  const activos = Object.values(pedidosMap).filter(p => {
+  // Mostrar pedido si tiene ítems activos
+  let activos = Object.values(pedidosMap).filter(p => {
     if (['entregado','cancelado'].includes(p.estado)) return false;
     return (p.items||[]).some(i => ['pendiente','produccion','listo_empaque'].includes(i.estado));
   });
+
+  // Filtro de categoría
+  if (catActual !== 'Todos') {
+    activos = activos.filter(p =>
+      (p.items||[]).some(i =>
+        ['pendiente','produccion','listo_empaque'].includes(i.estado) &&
+        (i.categoria||'') === catActual
+      )
+    );
+  }
 
   if (activos.length === 0) {
     lista.innerHTML = '<div class="empty">No hay pedidos en producción</div>';
@@ -305,6 +343,8 @@ function renderAll() {
 
   let totalPend=0, totalProd=0, totalListo=0;
   activos.forEach(p => (p.items||[]).forEach(i => {
+    const catOk = catActual==='Todos' || (i.categoria||'')=== catActual;
+    if (!catOk) return;
     if (i.estado==='pendiente') totalPend++;
     else if (i.estado==='produccion') totalProd++;
     else if (i.estado==='listo_empaque') totalListo++;
@@ -329,6 +369,18 @@ onSnapshot(collection(db,`empresas/${EMPRESA}/pedidos`), snap => {
         ...(pedidosMap[pid]||{}),
         ...change.doc.data(),
         id: pid,
+      }
+
+      // Activo pero de otra categoría — mostrar dimmed
+      const catMatch = catActual === 'Todos' || (item.categoria||'') === catActual;
+      if (!catMatch) {
+        return `<div class="item-row" style="opacity:.3;pointer-events:none;">
+          <div class="item-info">
+            <div class="item-nombre">${item.productoNombre||'—'}</div>
+            <div class="item-diseno">${item.diseno||''}</div>
+            <div class="item-estado-label">Otra categoría</div>
+          </div>
+        </div>`;
       };
       // Cargar items de este pedido
       getDocs(collection(db,`empresas/${EMPRESA}/pedidos/${pid}/items`)).then(snap => {
