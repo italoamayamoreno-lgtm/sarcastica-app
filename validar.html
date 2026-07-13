@@ -237,7 +237,7 @@ function cargar() {
         const bloqueado = esAdicional ? i.estado !== 'pendiente_validacion_adicional' : false;
         const adicBadge = i.esAdicional ? `<span class="item-adic-badge">+ Adicional</span>` : '';
         const estadoLabel = bloqueado ? `<span class="item-estado">${ESTADO_ITEM[i.estado]||i.estado}</span>` : '';
-        const voucherLink = i.voucherAdicional ? `<span class="voucher-link" onclick="verVoucher('${i.voucherAdicional.substring(0,10)}','${pid}','${i.id}')">📎 Ver voucher</span>` : '';
+        const voucherLink = i.voucherAdicional ? `<span class="voucher-link" onclick="verVAd('${pid}','${i.id}')">📎 Ver voucher</span>` : '';
 
         return `<div class="item-row${bloqueado?' bloqueado':''}">
           <div>
@@ -298,12 +298,16 @@ function cargar() {
 }
 
 // Ver voucher principal
-window.verVoucherPrincipal = function(pid) {
-  const card = document.getElementById(`card-${pid}`);
-  if (!card) return;
-  const src = card.dataset.voucher;
-  if (!src) return;
-  const w = window.open(); w.document.write(`<img src="${src}" style="max-width:100%;"/>`);
+window.verVoucherPrincipal = async function(pid) {
+  try {
+    const snap = await getDoc(doc(db, `empresas/${EMPRESA}/pedidos`, pid));
+    if (!snap.exists()) { toast.error('Error','No se encontró el pedido.'); return; }
+    const src = snap.data().voucher || '';
+    if (!src) { toast.warn('Sin voucher','Este pedido no tiene voucher adjunto.'); return; }
+    const w = window.open('','_blank');
+    w.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;"><img src="${src}" style="max-width:100%;max-height:100vh;object-fit:contain;"/></body></html>`);
+    w.document.close();
+  } catch(e) { toast.error('Error al cargar voucher', e.message); }
 };
 
 // Ver voucher ítem adicional
